@@ -4,9 +4,9 @@ import { Menu, X, ShoppingCart } from 'lucide-react'
 import clsx from 'clsx'
 
 const NAV_LINKS = [
+  { label: 'About',    href: '/about' },
   { label: 'Services', href: '/services' },
   { label: 'Products', href: '/products' },
-  { label: 'About',    href: '/about' },
   { label: 'Contact',  href: '/contact' },
 ]
 

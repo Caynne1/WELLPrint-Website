@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
-import { Layers, Printer, Maximize, Package, BookOpen, CreditCard, ArrowRight } from 'lucide-react'
+import { Layers, Printer, Maximize, Package, BookOpen, CreditCard, ArrowRight, MonitorPlay, PenTool } from 'lucide-react'
 
 const SERVICES = [
   {
@@ -50,6 +50,22 @@ const SERVICES = [
     tag:      'Custom Sizes',
     href:     '/products?cat=booklets',
     accent:   '#C8341A',
+  },
+  {
+    Icon:     MonitorPlay,
+    title:    'Signage',
+    desc:     'Indoor and outdoor signage solutions — from retail displays to wayfinding systems built to last.',
+    tag:      'Indoor & Outdoor',
+    href:     '/products?cat=signage',
+    accent:   '#D4810A',
+  },
+  {
+    Icon:     PenTool,
+    title:    'Professional Layout Design',
+    desc:     'Expert design services to craft print-ready artwork, layouts, and brand-consistent collateral.',
+    tag:      'Design Service',
+    href:     '/services#layout-design',
+    accent:   'var(--wp-green)',
   },
 ]
 

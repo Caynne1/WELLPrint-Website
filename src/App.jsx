@@ -1,6 +1,7 @@
 import { Routes, Route } from 'react-router-dom'
 import Layout          from './components/layout/Layout'
 import HomePage        from './pages/HomePage'
+import ServicesPage    from './pages/ServicesPage'
 import PlaceholderPage from './pages/PlaceholderPage'
 
 export default function App() {
@@ -21,7 +22,7 @@ export default function App() {
         />
         <Route
           path="/services"
-          element={<PlaceholderPage title="Services" phase="Phase 2" />}
+          element={<ServicesPage />}
         />
 
         {/* ── Phase 3 (Cart & Checkout) ── */}
