@@ -1,0 +1,161 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── CSS Design Tokens ─── */
+:root {
+  --ink-950:     #0A0A0A;
+  --ink-900:     #111111;
+  --ink-800:     #1A1A1A;
+  --ink-700:     #242424;
+  --ivory-50:    #FFFFFF;
+  --ivory-100:   #F9F9F9;
+  --ivory-200:   #F0F0F0;
+  --ivory-300:   #D8D8D8;
+
+  /* WellPrint brand — from logo */
+  --wp-green:    #2DB04B;
+  --wp-green-dk: #1E8A38;
+  --wp-green-lt: #3FCF5E;
+  --wp-cyan:     #29ABE2;
+  --wp-magenta:  #EC008C;
+  --wp-yellow:   #FBB03B;
+  --wp-black:    #231F20;
+
+  --transition-fast:   150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow:   500ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  background-color: #111111;
+  color: #F0F0F0;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--ink-900); }
+::-webkit-scrollbar-thumb { background: var(--wp-green); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--wp-green-lt); }
+
+.font-display { font-family: 'Playfair Display', Georgia, serif; }
+.font-heading { font-family: 'DM Serif Display', Georgia, serif; }
+.font-body    { font-family: 'DM Sans', sans-serif; }
+.font-mono    { font-family: 'DM Mono', monospace; }
+
+.section-rule {
+  border: none;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(240,240,240,0.1), transparent);
+}
+
+/* ── Buttons ── */
+.btn-press {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  padding: 0.75rem 1.75rem;
+  background: var(--wp-green); color: #fff;
+  font-family: 'DM Sans', sans-serif; font-weight: 700;
+  font-size: 0.875rem; letter-spacing: 0.04em; text-transform: uppercase;
+  border: 2px solid var(--wp-green-dk);
+  box-shadow: 4px 4px 0 var(--wp-green-dk);
+  cursor: pointer; text-decoration: none; border-radius: 2px;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
+}
+.btn-press:hover { transform: translate(-2px,-2px); box-shadow: 6px 6px 0 var(--wp-green-dk); background: var(--wp-green-lt); }
+.btn-press:active { transform: translate(2px,2px); box-shadow: 2px 2px 0 var(--wp-green-dk); }
+
+.btn-press-ghost {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  padding: 0.75rem 1.75rem;
+  background: transparent; color: #F0F0F0;
+  font-family: 'DM Sans', sans-serif; font-weight: 600;
+  font-size: 0.875rem; letter-spacing: 0.04em; text-transform: uppercase;
+  border: 2px solid rgba(240,240,240,0.2);
+  cursor: pointer; text-decoration: none; border-radius: 2px;
+  transition: all var(--transition-fast);
+}
+.btn-press-ghost:hover { border-color: var(--wp-green); color: var(--wp-green); background: rgba(45,176,75,0.07); }
+
+.btn-press-outline {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  padding: 0.75rem 1.75rem;
+  background: transparent; color: var(--wp-green);
+  font-family: 'DM Sans', sans-serif; font-weight: 700;
+  font-size: 0.875rem; letter-spacing: 0.04em; text-transform: uppercase;
+  border: 2px solid var(--wp-green);
+  cursor: pointer; text-decoration: none; border-radius: 2px;
+  transition: all var(--transition-fast);
+}
+.btn-press-outline:hover { background: var(--wp-green); color: #fff; }
+
+/* ── Badges ── */
+.badge {
+  display: inline-block; padding: 0.2rem 0.65rem;
+  font-size: 0.68rem; font-weight: 600; letter-spacing: 0.09em;
+  text-transform: uppercase; font-family: 'DM Mono', monospace; border-radius: 2px;
+}
+.badge-green   { background: rgba(45,176,75,0.12);  color: #3FCF5E; border: 1px solid rgba(45,176,75,0.3); }
+.badge-cyan    { background: rgba(41,171,226,0.12); color: #5CC8F0; border: 1px solid rgba(41,171,226,0.3); }
+.badge-yellow  { background: rgba(251,176,59,0.12); color: #FBB03B; border: 1px solid rgba(251,176,59,0.3); }
+.badge-magenta { background: rgba(236,0,140,0.10);  color: #F050AA; border: 1px solid rgba(236,0,140,0.25); }
+.badge-ivory   { background: rgba(240,240,240,0.07); color: #D8D8D8; border: 1px solid rgba(240,240,240,0.14); }
+
+/* ── Cards ── */
+.card-press {
+  background: var(--ink-800);
+  border: 1px solid rgba(240,240,240,0.07);
+  border-radius: 4px;
+  transition: transform var(--transition-normal), border-color var(--transition-normal), box-shadow var(--transition-normal);
+}
+.card-press:hover {
+  transform: translateY(-4px);
+  border-color: rgba(45,176,75,0.28);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.45), 0 0 0 1px rgba(45,176,75,0.08);
+}
+
+/* ── Underline hover ── */
+.green-underline { position: relative; display: inline-block; }
+.green-underline::after {
+  content: ''; position: absolute; left: 0; bottom: -3px;
+  width: 100%; height: 2px; background: var(--wp-green);
+  transform: scaleX(0); transform-origin: left;
+  transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+}
+.green-underline:hover::after { transform: scaleX(1); }
+
+/* ── Scroll-triggered reveal ── */
+.animate-on-scroll {
+  opacity: 0; transform: translateY(20px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.animate-on-scroll.visible { opacity: 1; transform: translateY(0); }
+
+/* ── Marquee ── */
+.marquee-track { display: flex; width: max-content; animation: marquee 35s linear infinite; }
+@keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+/* ── Keyframes ── */
+@keyframes fadeUp   { 0% { opacity:0; transform:translateY(24px); } 100% { opacity:1; transform:translateY(0); } }
+@keyframes fadeIn   { 0% { opacity:0; } 100% { opacity:1; } }
+@keyframes slideLeft{ 0% { opacity:0; transform:translateX(40px); } 100% { opacity:1; transform:translateX(0); } }
+@keyframes lineDraw { 0% { stroke-dashoffset:600; } 100% { stroke-dashoffset:0; } }
+
+/* ── CMYK color strip ── */
+.cmyk-bar {
+  display: flex; height: 3px;
+  background: linear-gradient(90deg, #29ABE2 25%, #EC008C 25% 50%, #FBB03B 50% 75%, #231F20 75%);
+}
+
+*:focus-visible { outline: 2px solid var(--wp-green); outline-offset: 3px; }
