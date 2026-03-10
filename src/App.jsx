@@ -2,7 +2,9 @@ import { Routes, Route } from 'react-router-dom'
 import Layout          from './components/layout/Layout'
 import HomePage        from './pages/HomePage'
 import ServicesPage    from './pages/ServicesPage'
-import AboutPage       from './pages/Aboutpage'
+import AboutPage       from './pages/AboutPage'
+import ContactPage     from './pages/ContactPage'
+import ProductsPage    from './pages/ProductsPage'
 import PlaceholderPage from './pages/PlaceholderPage'
 
 export default function App() {
@@ -15,7 +17,7 @@ export default function App() {
         {/* ── Phase 2 (Product Catalog) ── */}
         <Route
           path="/products"
-          element={<PlaceholderPage title="Product Catalog" phase="Phase 2" />}
+          element={<ProductsPage />}
         />
         <Route
           path="/products/:slug"
@@ -57,7 +59,7 @@ export default function App() {
         />
         <Route
           path="/contact"
-          element={<PlaceholderPage title="Contact Us" phase="Phase 5" />}
+          element={<ContactPage />}
         />
         <Route
           path="/faq"
