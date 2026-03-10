@@ -5,6 +5,7 @@ import ServicesPage    from './pages/ServicesPage'
 import AboutPage       from './pages/AboutPage'
 import ContactPage     from './pages/ContactPage'
 import ProductsPage    from './pages/ProductsPage'
+import ProductDetailPage from './pages/ProductDetailPage'
 import PlaceholderPage from './pages/PlaceholderPage'
 
 export default function App() {
@@ -21,7 +22,7 @@ export default function App() {
         />
         <Route
           path="/products/:slug"
-          element={<PlaceholderPage title="Product Detail" phase="Phase 2" />}
+          element={<ProductDetailPage />}
         />
         <Route
           path="/services"
