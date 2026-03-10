@@ -38,7 +38,7 @@ export default function Navbar() {
           {/* Logo */}
           <Link to="/" className="flex items-center group" aria-label="WellPrint Home">
             <img
-              src="/logo.png"
+              src="/logo.svg"
               alt="WellPrint"
               className="h-10 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
             />

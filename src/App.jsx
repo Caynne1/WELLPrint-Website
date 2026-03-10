@@ -2,6 +2,7 @@ import { Routes, Route } from 'react-router-dom'
 import Layout          from './components/layout/Layout'
 import HomePage        from './pages/HomePage'
 import ServicesPage    from './pages/ServicesPage'
+import AboutPage       from './pages/Aboutpage'
 import PlaceholderPage from './pages/PlaceholderPage'
 
 export default function App() {
@@ -52,7 +53,7 @@ export default function App() {
         {/* ── Misc pages ── */}
         <Route
           path="/about"
-          element={<PlaceholderPage title="About WELLPrint" phase="Phase 5" />}
+          element={<AboutPage />}
         />
         <Route
           path="/contact"
