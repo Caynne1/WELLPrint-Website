@@ -3,15 +3,16 @@ import { Link, useParams } from 'react-router-dom'
 import {
   ArrowLeft, Star, ChevronRight, ChevronLeft, Minus, Plus,
   MessageSquare, CheckCircle, ImagePlus, Share2,
-  Heart, FileText, ArrowRight,
+  Heart, FileText, ArrowRight, ShoppingCart,
 } from 'lucide-react'
+import { useCart } from '../context/CartContext'
 
 /* ── Product Data ── */
 const PRODUCTS = {
   'business-cards-standard': {
     name: 'Standard Business Cards',
     cat: 'Business Cards', catSlug: 'business-cards',
-    price: 350, priceNote: 'per 100 pcs',
+    price: 350, priceNote: 'per 100 pcs', minQty: 100,
     tag: 'Most Popular', accent: 'var(--wp-green)',
     rating: 4.9, reviews: 128, sold: '2.4K',
     desc: 'Make every first impression count. Printed on premium 350gsm stock with your choice of matte or gloss laminate. Sharp CMYK color reproduction ensures your branding looks exactly as intended.',
@@ -38,7 +39,7 @@ const PRODUCTS = {
   'business-cards-spot-uv': {
     name: 'Spot UV Business Cards',
     cat: 'Business Cards', catSlug: 'business-cards',
-    price: 650, priceNote: 'per 100 pcs',
+    price: 650, priceNote: 'per 100 pcs', minQty: 100,
     tag: 'Premium', accent: 'var(--wp-yellow)',
     rating: 4.8, reviews: 64, sold: '980',
     desc: 'Stand out with tactile spot UV highlights over matte laminate. UV coating applied over select design areas creates a striking contrast between the matte surface and the glossy raised highlights.',
@@ -63,7 +64,7 @@ const PRODUCTS = {
   'flyers-a5': {
     name: 'A5 Flyers',
     cat: 'Flyers & Digital', catSlug: 'digital',
-    price: 180, priceNote: 'per 50 pcs',
+    price: 180, priceNote: 'per 50 pcs', minQty: 50,
     tag: '48hr Ready', accent: 'var(--wp-cyan)',
     rating: 4.7, reviews: 95, sold: '5.1K',
     desc: 'Fast, vibrant, and affordable. Printed on 130gsm coated stock with full-bleed CMYK color. Perfect for events, promotions, restaurant menus, and announcements.',
@@ -89,7 +90,7 @@ const PRODUCTS = {
   'flyers-a4': {
     name: 'A4 Flyers',
     cat: 'Flyers & Digital', catSlug: 'digital',
-    price: 280, priceNote: 'per 50 pcs',
+    price: 280, priceNote: 'per 50 pcs', minQty: 50,
     tag: null, accent: 'var(--wp-cyan)',
     rating: 4.6, reviews: 72, sold: '3.2K',
     desc: 'Full-size promotional flyers with sharp print quality and fast delivery. Ideal for menus, event programs, and marketing collateral.',
@@ -114,7 +115,7 @@ const PRODUCTS = {
   'tarpaulin-banner': {
     name: 'Tarpaulin Banner',
     cat: 'Large Format', catSlug: 'large-format',
-    price: 45, priceNote: 'per sq ft',
+    price: 45, priceNote: 'per sq ft', minQty: 1,
     tag: 'Outdoor', accent: 'var(--wp-yellow)',
     rating: 4.8, reviews: 210, sold: '8.2K',
     desc: 'Weather-resistant tarpaulin prints for outdoor events, storefronts, construction sites, and campaign signage. Printed at 720dpi on 440gsm vinyl with hemmed edges and grommets.',
@@ -139,7 +140,7 @@ const PRODUCTS = {
   'pull-up-banner': {
     name: 'Pull-Up / Roll-Up Banner',
     cat: 'Large Format', catSlug: 'large-format',
-    price: 1200, priceNote: 'incl. stand',
+    price: 1200, priceNote: 'incl. stand', minQty: 1,
     tag: 'Best Seller', accent: 'var(--wp-green)',
     rating: 4.9, reviews: 143, sold: '3.7K',
     desc: 'The go-to display solution for trade shows, corporate events, retail, and seminars. Retractable aluminum stand with a durable print cassette. Sets up in seconds, packs into the included carry bag.',
@@ -164,7 +165,7 @@ const PRODUCTS = {
   'product-box-custom': {
     name: 'Custom Product Box',
     cat: 'Packaging', catSlug: 'packaging',
-    price: 0, priceNote: 'min. order applies',
+    price: 0, priceNote: 'min. order applies', minQty: 50,
     tag: 'Custom', accent: 'var(--wp-magenta)',
     rating: 4.7, reviews: 38, sold: '620',
     desc: 'Fully customized product packaging with your branding. Available in E-flute or B-flute corrugated board with full color exterior printing. Minimum order quantities apply.',
@@ -189,7 +190,7 @@ const PRODUCTS = {
   'mailer-box': {
     name: 'Mailer Box',
     cat: 'Packaging', catSlug: 'packaging',
-    price: 85, priceNote: 'per piece (min 50)',
+    price: 85, priceNote: 'per piece (min 50)', minQty: 1,
     tag: 'E-Commerce Ready', accent: 'var(--wp-magenta)',
     rating: 4.6, reviews: 55, sold: '1.2K',
     desc: 'Self-locking corrugated mailer boxes with full exterior and optional interior printing. Ideal for e-commerce orders, subscription kits, gift sets, and product launches. No tape needed.',
@@ -215,7 +216,7 @@ const PRODUCTS = {
   'saddle-stitch-booklet': {
     name: 'Saddle-Stitched Booklet',
     cat: 'Booklets', catSlug: 'booklets',
-    price: 420, priceNote: 'per 10 pcs',
+    price: 420, priceNote: 'per 10 pcs', minQty: 10,
     tag: null, accent: 'var(--wp-cyan)',
     rating: 4.5, reviews: 29, sold: '540',
     desc: 'Staple-bound booklets for catalogs, programs, and lookbooks. Clean finish, quick turnaround. Available in A4 or A5 with your choice of cover stock and page count.',
@@ -240,7 +241,7 @@ const PRODUCTS = {
   'perfect-bound-catalog': {
     name: 'Perfect-Bound Catalog',
     cat: 'Booklets', catSlug: 'booklets',
-    price: 980, priceNote: 'per 5 pcs',
+    price: 980, priceNote: 'per 5 pcs', minQty: 5,
     tag: 'Premium', accent: 'var(--wp-yellow)',
     rating: 4.8, reviews: 21, sold: '310',
     desc: 'High-end glued-spine catalogs and annual reports. Professional square-spine finish for a polished, book-like appearance. Ideal for lookbooks, product catalogs, and corporate reports.',
@@ -265,7 +266,7 @@ const PRODUCTS = {
   'foam-board': {
     name: 'Foam Board Print',
     cat: 'Signage', catSlug: 'signage',
-    price: 320, priceNote: 'per piece',
+    price: 320, priceNote: 'per piece', minQty: 1,
     tag: 'Indoor', accent: 'var(--wp-green)',
     rating: 4.6, reviews: 47, sold: '890',
     desc: 'Lightweight rigid foam boards for indoor displays, presentations, and POS signage. Easy to mount, carry, and reuse. Printed in full color at high resolution for sharp, vibrant results.',
@@ -289,7 +290,7 @@ const PRODUCTS = {
   'acrylic-signage': {
     name: 'Acrylic Signage',
     cat: 'Signage', catSlug: 'signage',
-    price: 0, priceNote: 'custom sizing',
+    price: 0, priceNote: 'custom sizing', minQty: 1,
     tag: 'Premium', accent: 'var(--wp-yellow)',
     rating: 4.9, reviews: 33, sold: '420',
     desc: 'Sleek laser-cut acrylic panels for lobby signage, nameplates, and branded installations. Available in clear, frosted, or colored acrylic with standoff or flush-mount hardware.',
@@ -390,17 +391,35 @@ function Gallery({ count, accent }) {
 
 /* ── Option Group ── */
 function OptionGroup({ label, choices, selected, onSelect, accent }) {
+  const isQuantity = label === 'Quantity'
+  const [customMode, setCustomMode] = useState(false)
+  const [customInput, setCustomInput] = useState('')
+
+  // If parent resets selection back to a preset, exit custom mode
+  useEffect(() => {
+    if (!choices.includes(selected) && selected !== 'Custom') {
+      // selected is a custom value like "350 pcs" — stay in custom mode
+    } else if (choices.includes(selected)) {
+      setCustomMode(false)
+      setCustomInput('')
+    }
+  }, [selected])
+
+  const displaySelected = customMode
+    ? (customInput ? `${customInput} pcs` : 'Custom')
+    : selected
+
   return (
     <div>
       <div className="flex items-baseline gap-2 mb-2.5">
         <span className="font-mono text-[10px] tracking-widest uppercase text-ivory-300/40">{label}:</span>
-        <span className="text-white text-xs font-semibold">{selected}</span>
+        <span className="text-white text-xs font-semibold">{displaySelected}</span>
       </div>
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2 items-center">
         {choices.map(c => {
-          const isActive = c === selected
+          const isActive = !customMode && c === selected
           return (
-            <button key={c} onClick={() => onSelect(c)}
+            <button key={c} onClick={() => { onSelect(c); setCustomMode(false); setCustomInput('') }}
               className="px-3 py-2 text-xs rounded-sm border transition-all font-mono"
               style={isActive
                 ? { borderColor: accent, color: accent, background: `${accent}12`, boxShadow: `0 0 0 1px ${accent}` }
@@ -410,7 +429,51 @@ function OptionGroup({ label, choices, selected, onSelect, accent }) {
             </button>
           )
         })}
+
+        {/* Custom option pill — only for Quantity */}
+        {isQuantity && (
+          <button
+            onClick={() => { setCustomMode(true); setCustomInput(''); onSelect('Custom') }}
+            className="px-3 py-2 text-xs rounded-sm border transition-all font-mono"
+            style={customMode
+              ? { borderColor: accent, color: accent, background: `${accent}12`, boxShadow: `0 0 0 1px ${accent}` }
+              : { borderColor: 'rgba(255,255,255,0.10)', color: 'rgba(216,216,216,0.45)', background: 'transparent' }
+            }>
+            Custom
+          </button>
+        )}
       </div>
+
+      {/* Custom quantity input — stays visible as long as customMode is true */}
+      {isQuantity && customMode && (
+        <div className="mt-3 flex items-center gap-2">
+          <input
+            autoFocus
+            type="number"
+            min="1"
+            placeholder="e.g. 350"
+            value={customInput}
+            onChange={e => {
+              const raw = e.target.value
+              setCustomInput(raw)
+              const v = parseInt(raw)
+              if (!isNaN(v) && v > 0) {
+                onSelect(`${v} pcs`)
+              } else {
+                onSelect('Custom')
+              }
+            }}
+            className="w-36 h-10 px-3 text-sm font-mono border rounded-sm focus:outline-none transition-all"
+            style={{
+              background: 'rgba(255,255,255,0.04)',
+              borderColor: customInput ? accent : 'rgba(255,255,255,0.12)',
+              color: 'white',
+              boxShadow: customInput ? `0 0 0 1px ${accent}40` : 'none',
+            }}
+          />
+          <span className="text-ivory-300/35 text-xs font-mono">pcs</span>
+        </div>
+      )}
     </div>
   )
 }
@@ -456,24 +519,49 @@ function RelatedCard({ slug, product }) {
 export default function ProductDetailPage() {
   const { slug } = useParams()
   const product = PRODUCTS[slug] || PRODUCTS['business-cards-standard']
-  const { name, cat, catSlug, price, priceNote, tag, accent, rating, reviews, sold, desc, specs, options, turnaround, images, faqs } = product
+  const { name, cat, catSlug, price, priceNote, minQty, tag, accent, rating, reviews, sold, desc, specs, options, turnaround, images, faqs } = product
 
   const [selections, setSelections] = useState(() =>
     Object.fromEntries(Object.entries(options).map(([k, v]) => [k, v[0]]))
   )
-  const [qty, setQty]           = useState(1)
-  const [hearted, setHearted]   = useState(false)
-  const [inquired, setInquired] = useState(false)
+  const [hearted, setHearted]       = useState(false)
+  const [inquired, setInquired]     = useState(false)
+  const [addedToCart, setAddedToCart] = useState(false)
+  const { addToCart }               = useCart()
+
+  // Parse the numeric quantity out of selections.Quantity (e.g. "350 pcs" → 350, "Custom" → 1)
+  function getQty() {
+    const raw = selections['Quantity'] || ''
+    const n = parseInt(raw.replace(/,/g, ''))
+    return (!isNaN(n) && n > 0) ? n : 1
+  }
 
   useEffect(() => {
     setSelections(Object.fromEntries(Object.entries(options).map(([k, v]) => [k, v[0]])))
-    setQty(1); setInquired(false)
+    setInquired(false); setAddedToCart(false)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }, [slug])
 
   function handleInquire() {
     setInquired(true)
     setTimeout(() => setInquired(false), 2500)
+  }
+
+  function handleAddToCart() {
+    const qty = getQty()
+    // unitPrice stored as per-piece so CartPage subtotal (unitPrice × qty) is correct
+    const unitPrice = price > 0 && minQty > 1 ? price / minQty : price
+    addToCart({
+      slug,
+      name,
+      unitPrice,
+      priceNote: '/ pc',
+      selections: { ...selections },
+      qty,
+      accent,
+    })
+    setAddedToCart(true)
+    setTimeout(() => setAddedToCart(false), 2500)
   }
 
   const related = Object.entries(PRODUCTS)
@@ -485,6 +573,7 @@ export default function ProductDetailPage() {
   const relRef   = useScrollReveal()
 
   const displayPrice = price > 0 ? `\u20B1${price.toLocaleString()}` : 'Get Quote'
+  const pricePerPc   = price > 0 && minQty > 1 ? (price / minQty) : null
 
   return (
     <div className="min-h-screen bg-ink-900 pt-24 pb-20">
@@ -533,16 +622,34 @@ export default function ProductDetailPage() {
 
             {/* Price */}
             <div className="bg-ink-800 border border-white/[0.07] rounded-sm px-5 py-4">
-              <div className="text-ivory-300/40 text-[10px] font-mono tracking-widest uppercase mb-1">
-                {price > 0 ? 'Starting at' : 'Pricing'}
-              </div>
-              <div className="flex items-baseline gap-2">
-                <span className="text-white font-black"
-                  style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(1.6rem, 3vw, 2.2rem)' }}>
-                  {displayPrice}
-                </span>
-                <span className="text-ivory-300/35 text-xs font-mono">{priceNote}</span>
-              </div>
+              {pricePerPc ? (
+                <>
+                  <div className="text-ivory-300/40 text-[10px] font-mono tracking-widest uppercase mb-1">Price per piece</div>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-white font-black"
+                      style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(1.6rem, 3vw, 2.2rem)' }}>
+                      ₱{pricePerPc % 1 === 0 ? pricePerPc.toLocaleString() : pricePerPc.toFixed(2)}
+                    </span>
+                    <span className="text-ivory-300/35 text-xs font-mono">/ pc</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 mt-1.5">
+                    <span className="text-ivory-300/25 text-[10px] font-mono">{displayPrice} {priceNote}</span>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="text-ivory-300/40 text-[10px] font-mono tracking-widest uppercase mb-1">
+                    {price > 0 ? 'Price' : 'Pricing'}
+                  </div>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-white font-black"
+                      style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(1.6rem, 3vw, 2.2rem)' }}>
+                      {displayPrice}
+                    </span>
+                    <span className="text-ivory-300/35 text-xs font-mono">{priceNote}</span>
+                  </div>
+                </>
+              )}
               <p className="text-ivory-300/30 text-[10px] font-mono mt-1.5">
                 Final price confirmed via inquiry · Bulk discounts available
               </p>
@@ -558,27 +665,6 @@ export default function ProductDetailPage() {
               ))}
             </div>
 
-            {/* Quantity */}
-            <div>
-              <div className="font-mono text-[10px] tracking-widest uppercase text-ivory-300/40 mb-2.5">Quantity</div>
-              <div className="flex items-center">
-                <button onClick={() => setQty(q => Math.max(1, q - 1))}
-                  className="w-10 h-10 border border-white/[0.10] rounded-l-sm bg-ink-800 flex items-center justify-center
-                    text-ivory-300/50 hover:text-white hover:bg-ink-700 transition-all">
-                  <Minus size={13} />
-                </button>
-                <div className="w-14 h-10 border-t border-b border-white/[0.10] bg-ink-700 flex items-center justify-center
-                  text-white text-sm font-mono font-bold">
-                  {qty}
-                </div>
-                <button onClick={() => setQty(q => q + 1)}
-                  className="w-10 h-10 border border-white/[0.10] rounded-r-sm bg-ink-800 flex items-center justify-center
-                    text-ivory-300/50 hover:text-white hover:bg-ink-700 transition-all">
-                  <Plus size={13} />
-                </button>
-              </div>
-            </div>
-
             {/* Turnaround */}
             <div className="flex items-center gap-2.5 text-sm">
               <CheckCircle size={15} style={{ color: 'var(--wp-green)', flexShrink: 0 }} />
@@ -588,26 +674,48 @@ export default function ProductDetailPage() {
             </div>
 
             {/* CTAs */}
-            <div className="flex gap-3 pt-1">
-              <button onClick={handleInquire}
-                className="flex-1 flex items-center justify-center gap-2 text-sm py-3 rounded-sm border-2 font-bold uppercase tracking-wide transition-all"
-                style={{
-                  color: accent, borderColor: accent,
-                  background: inquired ? `${accent}18` : 'transparent',
-                }}>
-                {inquired
-                  ? <><CheckCircle size={15} /> Noted!</>
-                  : <><MessageSquare size={15} /> Inquire</>
+            <div className="flex flex-col gap-3 pt-1">
+              {/* Add to Cart — primary action */}
+              <button
+                onClick={handleAddToCart}
+                disabled={price === 0}
+                className="w-full flex items-center justify-center gap-2.5 text-sm py-3.5 rounded-sm font-bold uppercase tracking-widest transition-all btn-press"
+                style={addedToCart
+                  ? { background: 'var(--wp-green)', color: '#0a0a0a' }
+                  : price === 0
+                    ? { background: 'rgba(255,255,255,0.05)', color: 'rgba(216,216,216,0.25)', cursor: 'not-allowed', border: '1px solid rgba(255,255,255,0.08)' }
+                    : {}
+                }>
+                {addedToCart
+                  ? <><CheckCircle size={16} /> Added to Cart!</>
+                  : price === 0
+                    ? <><ShoppingCart size={16} /> Quote Required</>
+                    : <><ShoppingCart size={16} /> Add to Cart</>
                 }
               </button>
-              <Link to="/contact" className="flex-1 btn-press flex items-center justify-center gap-2 text-sm py-3">
-                Request Quote <ArrowRight size={14} />
-              </Link>
-              <button onClick={() => setHearted(v => !v)}
-                className="w-12 h-12 border border-white/[0.10] rounded-sm bg-ink-800 flex items-center justify-center transition-all hover:border-wp-magenta/40"
-                style={{ color: hearted ? 'var(--wp-magenta)' : 'rgba(216,216,216,0.25)' }}>
-                <Heart size={16} fill={hearted ? 'var(--wp-magenta)' : 'transparent'} />
-              </button>
+
+              {/* Secondary row */}
+              <div className="flex gap-3">
+                <button onClick={handleInquire}
+                  className="flex-1 flex items-center justify-center gap-2 text-sm py-3 rounded-sm border-2 font-bold uppercase tracking-wide transition-all"
+                  style={{
+                    color: accent, borderColor: accent,
+                    background: inquired ? `${accent}18` : 'transparent',
+                  }}>
+                  {inquired
+                    ? <><CheckCircle size={15} /> Noted!</>
+                    : <><MessageSquare size={15} /> Inquire</>
+                  }
+                </button>
+                <Link to="/contact" className="flex-1 btn-press flex items-center justify-center gap-2 text-sm py-3">
+                  Request Quote <ArrowRight size={14} />
+                </Link>
+                <button onClick={() => setHearted(v => !v)}
+                  className="w-12 h-12 border border-white/[0.10] rounded-sm bg-ink-800 flex items-center justify-center transition-all hover:border-wp-magenta/40"
+                  style={{ color: hearted ? 'var(--wp-magenta)' : 'rgba(216,216,216,0.25)' }}>
+                  <Heart size={16} fill={hearted ? 'var(--wp-magenta)' : 'transparent'} />
+                </button>
+              </div>
             </div>
 
             {/* Share */}

@@ -8,17 +8,17 @@ export default {
     extend: {
       colors: {
         ink: {
-          950: '#0A0A0A',
-          900: '#111111',
-          800: '#1A1A1A',
-          700: '#242424',
+          950: 'var(--ink-950)',
+          900: 'var(--ink-900)',
+          800: 'var(--ink-800)',
+          700: 'var(--ink-700)',
           600: '#2E2E2E',
         },
         ivory: {
-          50:  '#FFFFFF',
-          100: '#F9F9F9',
-          200: '#F0F0F0',
-          300: '#D8D8D8',
+          50:  'var(--ivory-50)',
+          100: 'var(--ivory-100)',
+          200: 'var(--ivory-200)',
+          300: 'var(--ivory-300)',
           400: '#AAAAAA',
         },
         // WellPrint brand colors — extracted from logo

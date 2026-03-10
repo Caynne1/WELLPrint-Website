@@ -30,7 +30,7 @@ export default function Footer() {
     <footer className="bg-ink-950 border-t border-white/[0.07] pt-20 pb-10 relative overflow-hidden">
       {/* Decorative faded logo watermark */}
       <div className="absolute bottom-0 right-0 opacity-[0.03] pointer-events-none select-none" aria-hidden="true">
-        <img src="/logo.png" alt="" className="w-80 h-80 object-contain" />
+        <img src="/logo.svg" alt="" className="w-80 h-80 object-contain" />
       </div>
 
       <div className="max-w-7xl mx-auto px-6 relative z-10">
@@ -39,7 +39,7 @@ export default function Footer() {
           {/* Brand */}
           <div className="lg:col-span-2">
             <Link to="/" className="block mb-6 w-fit">
-              <img src="/logo.png" alt="WellPrint" className="h-14 w-auto object-contain" />
+              <img src="/logo.svg" alt="WellPrint" className="h-14 w-auto object-contain" />
             </Link>
 
             <p className="text-ivory-300/55 text-sm leading-relaxed mb-6 max-w-xs">

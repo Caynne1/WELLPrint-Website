@@ -25,7 +25,7 @@ const PRODUCTS = [
     slug: 'business-cards-standard',
     name: 'Standard Business Cards',
     cat: 'business-cards',
-    price: '₱350',
+    price: 350, minQty: 100,
     priceNote: 'per 100 pcs',
     tag: 'Most Popular',
     tagColor: 'var(--wp-green)',
@@ -42,7 +42,7 @@ const PRODUCTS = [
     slug: 'business-cards-spot-uv',
     name: 'Spot UV Business Cards',
     cat: 'business-cards',
-    price: '₱650',
+    price: 650, minQty: 100,
     priceNote: 'per 100 pcs',
     tag: 'Premium',
     tagColor: 'var(--wp-yellow)',
@@ -59,7 +59,7 @@ const PRODUCTS = [
     slug: 'flyers-a5',
     name: 'A5 Flyers',
     cat: 'digital',
-    price: '₱180',
+    price: 180, minQty: 50,
     priceNote: 'per 50 pcs',
     tag: '48hr Ready',
     tagColor: 'var(--wp-cyan)',
@@ -76,7 +76,7 @@ const PRODUCTS = [
     slug: 'flyers-a4',
     name: 'A4 Flyers',
     cat: 'digital',
-    price: '₱280',
+    price: 280, minQty: 50,
     priceNote: 'per 50 pcs',
     tag: null,
     tagColor: null,
@@ -93,7 +93,7 @@ const PRODUCTS = [
     slug: 'tarpaulin-banner',
     name: 'Tarpaulin Banner',
     cat: 'large-format',
-    price: '₱45',
+    price: 45, minQty: 1,
     priceNote: 'per sq ft',
     tag: 'Outdoor',
     tagColor: 'var(--wp-yellow)',
@@ -110,7 +110,7 @@ const PRODUCTS = [
     slug: 'pull-up-banner',
     name: 'Pull-Up / Roll-Up Banner',
     cat: 'large-format',
-    price: '₱1,200',
+    price: 1200, minQty: 1,
     priceNote: 'incl. stand',
     tag: 'Best Seller',
     tagColor: 'var(--wp-green)',
@@ -127,7 +127,7 @@ const PRODUCTS = [
     slug: 'product-box-custom',
     name: 'Custom Product Box',
     cat: 'packaging',
-    price: 'Get Quote',
+    price: 0, minQty: 50,
     priceNote: 'min. order applies',
     tag: 'Custom',
     tagColor: 'var(--wp-magenta)',
@@ -144,7 +144,7 @@ const PRODUCTS = [
     slug: 'mailer-box',
     name: 'Mailer Box',
     cat: 'packaging',
-    price: '₱85',
+    price: 85, minQty: 1,
     priceNote: 'per piece (min 50)',
     tag: 'E-Commerce Ready',
     tagColor: 'var(--wp-magenta)',
@@ -161,7 +161,7 @@ const PRODUCTS = [
     slug: 'saddle-stitch-booklet',
     name: 'Saddle-Stitched Booklet',
     cat: 'booklets',
-    price: '₱420',
+    price: 420, minQty: 10,
     priceNote: 'per 10 pcs',
     tag: null,
     tagColor: null,
@@ -178,7 +178,7 @@ const PRODUCTS = [
     slug: 'perfect-bound-catalog',
     name: 'Perfect-Bound Catalog',
     cat: 'booklets',
-    price: '₱980',
+    price: 980, minQty: 5,
     priceNote: 'per 5 pcs',
     tag: 'Premium',
     tagColor: 'var(--wp-yellow)',
@@ -195,7 +195,7 @@ const PRODUCTS = [
     slug: 'foam-board',
     name: 'Foam Board Print',
     cat: 'signage',
-    price: '₱320',
+    price: 320, minQty: 1,
     priceNote: 'per piece',
     tag: 'Indoor',
     tagColor: 'var(--wp-green)',
@@ -212,7 +212,7 @@ const PRODUCTS = [
     slug: 'acrylic-signage',
     name: 'Acrylic Signage',
     cat: 'signage',
-    price: 'Get Quote',
+    price: 0, minQty: 1,
     priceNote: 'custom sizing',
     tag: 'Premium',
     tagColor: 'var(--wp-yellow)',
@@ -264,7 +264,20 @@ function Stars({ rating }) {
 ───────────────────────────────────────────── */
 function ProductCard({ product, view }) {
   const ref = useScrollReveal()
-  const { name, price, priceNote, tag, tagColor, accent, rating, reviews, specs, desc, turnaround, inStock, slug } = product
+  const { name, price, minQty, priceNote, tag, tagColor, accent, rating, reviews, specs, desc, turnaround, inStock, slug } = product
+
+  const isQuote     = price === 0
+  const pricePerPc  = !isQuote && minQty > 1 ? price / minQty : null
+  const displayMain = isQuote
+    ? 'Get Quote'
+    : pricePerPc
+      ? `₱${pricePerPc % 1 === 0 ? pricePerPc.toLocaleString() : pricePerPc.toFixed(2)}`
+      : `₱${price.toLocaleString()}`
+  const displaySub  = isQuote
+    ? priceNote
+    : pricePerPc
+      ? `/ pc  ·  ₱${price.toLocaleString()} ${priceNote}`
+      : priceNote
 
   if (view === 'list') {
     return (
@@ -298,8 +311,8 @@ function ProductCard({ product, view }) {
             ))}
           </div>
           <div className="shrink-0 text-right">
-            <div className="text-white font-bold text-base" style={{ fontFamily: "'Playfair Display', serif" }}>{price}</div>
-            <div className="text-ivory-300/30 text-[10px] font-mono mb-3">{priceNote}</div>
+            <div className="text-white font-bold text-base" style={{ fontFamily: "'Playfair Display', serif" }}>{displayMain}</div>
+            <div className="text-ivory-300/30 text-[10px] font-mono mb-3">{displaySub}</div>
             <Link to={`/products/${slug}`} className="btn-press text-xs py-2 px-4 whitespace-nowrap">
               Order Now
             </Link>
@@ -369,9 +382,9 @@ function ProductCard({ product, view }) {
         <div className="mt-auto flex items-end justify-between gap-2">
           <div>
             <div className="text-white font-bold text-lg leading-none" style={{ fontFamily: "'Playfair Display', serif" }}>
-              {price}
+              {displayMain}
             </div>
-            <div className="text-ivory-300/30 text-[9px] font-mono mt-0.5">{priceNote}</div>
+            <div className="text-ivory-300/30 text-[9px] font-mono mt-0.5">{displaySub}</div>
           </div>
           <Link to={`/products/${slug}`} className="btn-press text-[10px] py-2 px-3 shrink-0">
             Order <ArrowRight size={11} />
@@ -562,15 +575,16 @@ export default function ProductsPage() {
       </section>
 
       {/* ── Filter bar ── */}
-      <section className="sticky top-[60px] z-30 bg-ink-900/95 backdrop-blur border-b border-white/[0.06]">
+      <section className="sticky top-[60px] z-30 backdrop-blur border-b" style={{ background: 'var(--surface-card)', borderColor: 'var(--border-subtle)' }}>
         <div className="max-w-7xl mx-auto px-6 py-3 flex items-center gap-3 overflow-x-auto">
           {/* Search */}
-          <div className="flex items-center gap-2 bg-ink-800 border border-white/[0.08] rounded-sm px-3 py-2 shrink-0 w-44">
-            <Search size={12} className="text-ivory-300/30 shrink-0" />
+          <div className="flex items-center gap-2 rounded-sm px-3 py-2 shrink-0 w-44 border" style={{ background: 'var(--surface-raised)', borderColor: 'var(--border-subtle)' }}>
+            <Search size={12} style={{ color: 'var(--text-muted)' }} className="shrink-0" />
             <input
               value={search} onChange={e => setSearch(e.target.value)}
               placeholder="Search…"
-              className="bg-transparent text-xs text-ivory-200 placeholder-ivory-300/25 outline-none w-full font-mono"
+              className="bg-transparent text-xs outline-none w-full font-mono"
+              style={{ color: 'var(--text-primary)' }}
             />
           </div>
 
@@ -581,7 +595,7 @@ export default function ProductsPage() {
                 className="shrink-0 px-3 py-1.5 rounded-sm text-xs font-mono tracking-wide border transition-all duration-200"
                 style={activeCat === cat.id
                   ? { background: 'var(--wp-green)', color: '#fff', border: '1px solid var(--wp-green-dk)' }
-                  : { background: 'transparent', color: 'rgba(216,216,216,0.4)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                  : { background: 'var(--surface-raised)', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}>
                 {cat.label}
               </button>
             ))}
@@ -592,15 +606,15 @@ export default function ProductsPage() {
             <button onClick={() => setView('grid')}
               className="p-2 rounded-sm border transition-all"
               style={view === 'grid'
-                ? { background: 'var(--ink-700,#242424)', border: '1px solid rgba(255,255,255,0.12)', color: 'var(--wp-green)' }
-                : { border: '1px solid rgba(255,255,255,0.06)', color: 'rgba(216,216,216,0.3)' }}>
+                ? { background: 'var(--surface-raised)', border: '1px solid var(--border-medium)', color: 'var(--wp-green)' }
+                : { border: '1px solid var(--border-subtle)', color: 'var(--text-faint)' }}>
               <Grid size={13} />
             </button>
             <button onClick={() => setView('list')}
               className="p-2 rounded-sm border transition-all"
               style={view === 'list'
-                ? { background: 'var(--ink-700,#242424)', border: '1px solid rgba(255,255,255,0.12)', color: 'var(--wp-green)' }
-                : { border: '1px solid rgba(255,255,255,0.06)', color: 'rgba(216,216,216,0.3)' }}>
+                ? { background: 'var(--surface-raised)', border: '1px solid var(--border-medium)', color: 'var(--wp-green)' }
+                : { border: '1px solid var(--border-subtle)', color: 'var(--text-faint)' }}>
               <List size={13} />
             </button>
           </div>

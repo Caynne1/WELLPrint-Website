@@ -6,6 +6,7 @@ import AboutPage       from './pages/AboutPage'
 import ContactPage     from './pages/ContactPage'
 import ProductsPage    from './pages/ProductsPage'
 import ProductDetailPage from './pages/ProductDetailPage'
+import CartPage          from './pages/CartPage'
 import PlaceholderPage from './pages/PlaceholderPage'
 
 export default function App() {
@@ -32,7 +33,7 @@ export default function App() {
         {/* ── Phase 3 (Cart & Checkout) ── */}
         <Route
           path="/cart"
-          element={<PlaceholderPage title="Your Cart" phase="Phase 3" />}
+          element={<CartPage />}
         />
         <Route
           path="/checkout"
