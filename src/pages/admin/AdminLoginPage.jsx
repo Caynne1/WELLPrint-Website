@@ -60,7 +60,7 @@ export default function AdminLoginPage() {
                   type="text"
                   value={identifier}
                   onChange={e => setIdentifier(e.target.value)}
-                  placeholder="username or email@wellprint.com.ph"
+                  placeholder="username or email"
                   required
                   autoComplete="username"
                   className="w-full bg-ink-900 border border-white/[0.10] rounded-sm pl-9 pr-4 py-3 text-sm text-ivory-200 placeholder-ivory-300/20 outline-none transition-all focus:border-wp-green/60 focus:ring-1 focus:ring-wp-green/20"

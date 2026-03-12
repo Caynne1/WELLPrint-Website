@@ -113,10 +113,11 @@ export default function AboutPage() {
             {/* Main image placeholder */}
             <div className="relative rounded-sm overflow-hidden bg-ink-700 border border-white/[0.08]"
               style={{ aspectRatio: '4/3' }}>
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-ivory-300/20">
-                <Printer size={48} />
-                <span className="font-mono text-xs tracking-widest uppercase">Press Room Photo</span>
-              </div>
+              <img
+                src="/images/press-room.jpg"
+                alt="WELLPrint Press Room"
+                className="w-full h-full object-cover"
+              />
               {/* Corner accent */}
               <div className="absolute top-4 left-4 w-6 h-6 border-t-2 border-l-2 border-wp-green/60" />
               <div className="absolute bottom-4 right-4 w-6 h-6 border-b-2 border-r-2 border-wp-green/60" />
@@ -193,13 +194,11 @@ export default function AboutPage() {
             <div ref={chairRef} className="animate-on-scroll md:col-span-2">
               <div className="relative rounded-sm overflow-hidden bg-ink-700 border border-white/[0.08]"
                 style={{ aspectRatio: '3/4' }}>
-                {/* Placeholder UI */}
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
-                  <div className="w-20 h-20 rounded-full bg-ink-600 border-2 border-white/10 flex items-center justify-center">
-                    <Users size={32} className="text-ivory-300/20" />
-                  </div>
-                  <span className="font-mono text-[10px] tracking-widest uppercase text-ivory-300/20">Chairman Photo</span>
-                </div>
+                <img
+                  src="/images/chairman.jpg"
+                  alt="Chairman, WELLPrint"
+                  className="w-full h-full object-cover"
+                />
                 {/* Corner decorations */}
                 <div className="absolute top-4 left-4 w-8 h-8 border-t-2 border-l-2 border-wp-yellow/50" />
                 <div className="absolute bottom-4 right-4 w-8 h-8 border-b-2 border-r-2 border-wp-yellow/50" />
@@ -208,7 +207,7 @@ export default function AboutPage() {
               {/* Name plate */}
               <div className="mt-4 p-4 bg-ink-800 border border-white/[0.07] rounded-sm">
                 <div className="text-white font-bold text-lg mb-0.5" style={{ fontFamily: "'DM Serif Display', serif" }}>
-                  [Chairman Name]
+                  Engr. Eglesciano "Boboy" Bereso
                 </div>
                 <div className="text-ivory-300/40 text-xs font-mono tracking-wider uppercase">
                   Chairman, WELLPRINT
