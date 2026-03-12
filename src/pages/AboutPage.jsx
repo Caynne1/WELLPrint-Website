@@ -114,7 +114,7 @@ export default function AboutPage() {
             <div className="relative rounded-sm overflow-hidden bg-ink-700 border border-white/[0.08]"
               style={{ aspectRatio: '4/3' }}>
               <img
-                src="/images/press-room.jpg"
+                src="/images/print.png"
                 alt="WELLPrint Press Room"
                 className="w-full h-full object-cover"
               />
