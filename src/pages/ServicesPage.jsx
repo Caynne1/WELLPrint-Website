@@ -3,80 +3,123 @@ import { Link } from 'react-router-dom'
 import {
   Layers, Printer, Maximize, Package, BookOpen,
   CreditCard, ArrowRight, MonitorPlay, PenTool,
+  FileText, Flag, Sticker,
 } from 'lucide-react'
 import PageHero from '../components/ui/PageHero'
 
+// Alternating border colors using CMYK brand palette
+const BORDER_COLORS = [
+  'var(--wp-green)',  // Cyan-ish green
+  '#C8341A',          // Magenta-red
+  '#D4810A',          // Yellow-amber
+  '#29ABE2',          // Cyan blue
+  'var(--wp-green)',
+  '#C8341A',
+  '#D4810A',
+  '#29ABE2',
+  'var(--wp-green)',
+  '#C8341A',
+  '#D4810A',
+]
+
 const SERVICES = [
   {
-    Icon:    CreditCard,
-    title:   'Business Cards',
-    desc:    'First impressions in 350gsm. Matte, gloss, spot UV, foil, or letterpress finishes — your card, your identity.',
-    tag:     'Most Popular',
-    href:    '/products?cat=business-cards',
-    accent:  'var(--wp-green)',
+    Icon:   CreditCard,
+    title:  'Business Cards',
+    desc:   'First impressions in 350gsm. Matte, gloss, spot UV, foil, or letterpress finishes — your card, your identity.',
+    tag:    'Most Popular',
+    href:   '/products?cat=business-cards',
+    accent: 'var(--wp-green)',
   },
   {
-    Icon:    Printer,
-    title:   'Digital Printing',
-    desc:    'Fast turnaround for flyers, leaflets, and promotional materials. CMYK precision on every sheet.',
-    tag:     '48hr Ready',
-    href:    '/products?cat=digital',
-    accent:  '#C8341A',
+    Icon:   Printer,
+    title:  'Digital Printing',
+    desc:   'Fast, full-colour printing for any quantity — from short runs to bulk orders. CMYK precision on every sheet with quick turnaround.',
+    tag:    '48hr Ready',
+    href:   '/products?cat=digital',
+    accent: '#C8341A',
   },
   {
-    Icon:    Layers,
-    title:   'Offset Lithography',
-    desc:    'Industrial-scale runs with unmatched colour consistency and Pantone matching for bulk orders.',
-    tag:     'High Volume',
-    href:    '/products?cat=offset',
-    accent:  '#4A5568',
+    Icon:   Layers,
+    title:  'Offset Lithography',
+    desc:   'Industrial-scale runs with unmatched colour consistency and Pantone matching. The gold standard for high-volume print jobs.',
+    tag:    'High Volume',
+    href:   '/products?cat=offset',
+    accent: '#4A5568',
   },
   {
-    Icon:    Maximize,
-    title:   'Large Format',
-    desc:    'Banners, posters, and trade show displays printed up to 5m wide at 1440dpi clarity.',
-    tag:     'Up to 5m',
-    href:    '/products?cat=large-format',
-    accent:  '#D4810A',
+    Icon:   Maximize,
+    title:  'Large Format',
+    desc:   'Posters, trade show displays, and oversized prints up to 5m wide at 1440dpi clarity. Bold visuals that command attention.',
+    tag:    'Up to 5m',
+    href:   '/products?cat=large-format',
+    accent: '#D4810A',
   },
   {
-    Icon:    Package,
-    title:   'Custom Packaging',
-    desc:    'Boxes, bags, and mailers that make unboxing as memorable as the product inside.',
-    tag:     'Brand Ready',
-    href:    '/products?cat=packaging',
-    accent:  'var(--wp-green)',
+    Icon:   Package,
+    title:  'Custom Packaging',
+    desc:   'Boxes, bags, and mailers designed to make unboxing as memorable as the product inside. Fully customisable shapes and finishes.',
+    tag:    'Brand Ready',
+    href:   '/products?cat=packaging',
+    accent: 'var(--wp-green)',
   },
   {
-    Icon:    BookOpen,
-    title:   'Booklets & Catalogs',
-    desc:    'Saddle-stitched, perfect-bound, or spiral. From lookbooks to annual reports, we bind them all.',
-    tag:     'Custom Sizes',
-    href:    '/products?cat=booklets',
-    accent:  '#C8341A',
+    Icon:   BookOpen,
+    title:  'Booklets & Catalogs',
+    desc:   'Saddle-stitched, perfect-bound, or spiral-bound. From product lookbooks to company annual reports, we bind them all.',
+    tag:    'Custom Sizes',
+    href:   '/products?cat=booklets',
+    accent: '#C8341A',
   },
   {
-    Icon:    MonitorPlay,
-    title:   'Signage',
-    desc:    'Indoor and outdoor signage solutions — from retail displays and wayfinding systems to event banners built to last.',
-    tag:     'Indoor & Outdoor',
-    href:    '/products?cat=signage',
-    accent:  '#D4810A',
-    id:      'signage',
+    Icon:   MonitorPlay,
+    title:  'Signage',
+    desc:   'Indoor and outdoor signage solutions — from retail displays and wayfinding systems to event standees and store signs built to last.',
+    tag:    'Indoor & Outdoor',
+    href:   '/products?cat=signage',
+    accent: '#D4810A',
+    id:     'signage',
   },
   {
-    Icon:    PenTool,
-    title:   'Professional Layout Design',
-    desc:    'Expert design services to craft print-ready artwork, structured layouts, and brand-consistent collateral that stands out.',
-    tag:     'Design Service',
-    href:    '/contact',
-    accent:  'var(--wp-green)',
-    id:      'layout-design',
-    cta:     'Get a Quote',
+    Icon:   FileText,
+    title:  'Flyers & Leaflets',
+    desc:   'Eye-catching flyers and leaflets for promotions, events, and campaigns. Available in various sizes with single or double-sided printing.',
+    tag:    'Fast Turnaround',
+    href:   '/products?cat=flyers',
+    accent: 'var(--wp-green)',
+    id:     'flyers',
+  },
+  {
+    Icon:   Flag,
+    title:  'Banners',
+    desc:   'Vinyl, fabric, and mesh banners for events, storefronts, and trade shows. Weatherproof options available for long-term outdoor use.',
+    tag:    'Event Ready',
+    href:   '/products?cat=banners',
+    accent: '#4A5568',
+    id:     'banners',
+  },
+  {
+    Icon:   Sticker,
+    title:  'Stickers',
+    desc:   'Die-cut, sheet, or roll stickers in any shape and size. Perfect for product labels, packaging seals, branding, and promotional giveaways.',
+    tag:    'Any Shape',
+    href:   '/products?cat=stickers',
+    accent: '#C8341A',
+    id:     'stickers',
+  },
+  {
+    Icon:   PenTool,
+    title:  'Professional Layout Design',
+    desc:   'Expert design services to craft print-ready artwork, structured layouts, and brand-consistent collateral that truly stands out.',
+    tag:    'Design Service',
+    href:   '/contact',
+    accent: 'var(--wp-green)',
+    id:     'layout-design',
+    cta:    'Get a Quote',
   },
 ]
 
-function ServiceCard({ Icon, title, desc, tag, href, accent, delay, id, cta }) {
+function ServiceCard({ Icon, title, desc, tag, href, accent, borderColor, delay, id, cta }) {
   const cardRef = useRef(null)
 
   useEffect(() => {
@@ -95,7 +138,13 @@ function ServiceCard({ Icon, title, desc, tag, href, accent, delay, id, cta }) {
       id={id}
       ref={cardRef}
       className="animate-on-scroll card-press group relative overflow-hidden cursor-pointer"
-      style={{ transitionDelay: `${delay}ms` }}
+      style={{
+        transitionDelay: `${delay}ms`,
+        border: `1px solid ${borderColor}40`,
+        transition: 'border-color 0.3s ease',
+      }}
+      onMouseEnter={e => e.currentTarget.style.borderColor = `${borderColor}90`}
+      onMouseLeave={e => e.currentTarget.style.borderColor = `${borderColor}40`}
     >
       <Link to={href} className="block p-7 h-full">
         {/* Accent border top */}
@@ -172,7 +221,7 @@ export default function ServicesPage() {
           {/* Cards grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {SERVICES.map((s, i) => (
-              <ServiceCard key={s.title} {...s} delay={i * 70} />
+              <ServiceCard key={s.title} {...s} borderColor={BORDER_COLORS[i]} delay={i * 70} />
             ))}
           </div>
 

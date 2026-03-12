@@ -1,10 +1,10 @@
 const ITEMS = [
-  'Business Cards', 'Flyers', 'Brochures', 'Banners',
-  'Posters', 'Offset Printing', 'Digital Printing', 'Custom Packaging',
-  'Letterheads', 'Folders', 'Stickers', 'Large Format',
-  'Business Cards', 'Flyers', 'Brochures', 'Banners',
-  'Posters', 'Offset Printing', 'Digital Printing', 'Custom Packaging',
-  'Letterheads', 'Folders', 'Stickers', 'Large Format',
+  'Business Cards', 'Digital Printing', 'Signage', 'Large Format',
+  'Custom Packaging', 'Booklets & Catalogs', 'Offset Lithography', 'Flyers',
+  'Banners', 'Stickers', 'Tarpaulins', 'Layout Design',
+  'Business Cards', 'Digital Printing', 'Signage', 'Large Format',
+  'Custom Packaging', 'Booklets & Catalogs', 'Offset Lithography', 'Flyers',
+  'Banners', 'Stickers', 'Tarpaulins', 'Layout Design',
 ]
 
 export default function MarqueeStrip() {

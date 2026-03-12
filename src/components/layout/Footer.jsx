@@ -2,26 +2,28 @@ import { Link } from 'react-router-dom'
 import { Mail, Phone, MapPin, Instagram, Facebook, Linkedin, ArrowUpRight } from 'lucide-react'
 
 const SERVICES = [
-  { label: 'Business Cards',    href: '/products?cat=business-cards' },
-  { label: 'Flyers & Leaflets', href: '/products?cat=flyers' },
-  { label: 'Banners & Signage', href: '/products?cat=banners' },
-  { label: 'Brochures',         href: '/products?cat=brochures' },
-  { label: 'Custom Packaging',  href: '/products?cat=packaging' },
-  { label: 'Offset Printing',   href: '/products?cat=offset' },
+  { label: 'Business Cards',           href: '/products?cat=business-cards' },
+  { label: 'Digital Printing',         href: '/products?cat=digital' },
+  { label: 'Large Format & Banners',   href: '/products?cat=large-format' },
+  { label: 'Signage',                  href: '/products?cat=signage' },
+  { label: 'Custom Packaging',         href: '/products?cat=packaging' },
+  { label: 'Booklets & Catalogs',      href: '/products?cat=booklets' },
+  { label: 'Offset Lithography',       href: '/products?cat=offset' },
+  { label: 'Professional Layout Design', href: '/services#layout-design' },
 ]
 const COMPANY = [
-  { label: 'About WellPrint',   href: '/about' },
-  { label: 'Our Process',       href: '/about#process' },
-  { label: 'Quality Promise',   href: '/about#quality' },
-  { label: 'Careers',           href: '/careers' },
-  { label: 'Blog',              href: '/blog' },
+  { label: 'About WELLPrint',  href: '/about' },
+  { label: 'Our Process',      href: '/about#process' },
+  { label: 'Quality Promise',  href: '/about#quality' },
+  { label: 'Services',         href: '/services' },
+  { label: 'Contact Us',       href: '/contact' },
 ]
 const SUPPORT = [
-  { label: 'Track Your Order',  href: '/track' },
+  { label: 'Track Your Order',    href: '/track' },
   { label: 'File Specifications', href: '/file-specs' },
-  { label: 'FAQs',              href: '/faq' },
-  { label: 'Terms of Service',  href: '/terms' },
-  { label: 'Privacy Policy',    href: '/privacy' },
+  { label: 'FAQs',                href: '/faq' },
+  { label: 'Terms of Service',    href: '/terms' },
+  { label: 'Privacy Policy',      href: '/privacy' },
 ]
 
 export default function Footer() {
@@ -39,11 +41,11 @@ export default function Footer() {
           {/* Brand */}
           <div className="lg:col-span-2">
             <Link to="/" className="block mb-6 w-fit">
-              <img src="/logo.svg" alt="WellPrint" className="h-14 w-auto object-contain" />
+              <img src="/logo.svg" alt="WELLPrint" className="h-14 w-auto object-contain" />
             </Link>
 
             <p className="text-ivory-300/55 text-sm leading-relaxed mb-6 max-w-xs">
-              Precision printing for businesses, creatives, and brands that demand nothing less than exceptional quality.
+              Precision printing for businesses, creatives, and brands that demand nothing less than exceptional quality — right here in the Philippines.
             </p>
 
             {/* CMYK bar */}
@@ -51,9 +53,9 @@ export default function Footer() {
 
             <ul className="space-y-3 mb-8">
               {[
-                { Icon: Mail,    text: 'hello@wellprint.com',   href: 'mailto:hello@wellprint.com' },
-                { Icon: Phone,   text: '+1 (800) 555-PRINT',    href: 'tel:+18005557746' },
-                { Icon: MapPin,  text: '123 Press Lane, New York, NY 10001', href: null },
+                { Icon: Mail,   text: 'hello@wellprint.com.ph',        href: 'mailto:hello@wellprint.com.ph' },
+                { Icon: Phone,  text: '+63 (2) 8XXX-XXXX',             href: 'tel:+6328XXXXXXX' },
+                { Icon: MapPin, text: 'Metro Manila, Philippines',      href: null },
               ].map(({ Icon, text, href }) => (
                 <li key={text}>
                   {href ? (
@@ -134,11 +136,11 @@ export default function Footer() {
         <hr className="section-rule mb-8" />
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-xs text-ivory-300/25 font-mono tracking-wider">
-            © {year} WellPrint, Inc. All rights reserved.
+            © {year} WELLPrint · Bereso Group. All rights reserved.
           </p>
           <div className="flex items-center gap-6">
             <span className="badge badge-green">ISO 9001 Certified</span>
-            <span className="text-xs text-ivory-300/25 font-mono">Secure checkout · 256-bit SSL</span>
+            <span className="text-xs text-ivory-300/25 font-mono">Secure uploads · 256-bit SSL</span>
           </div>
         </div>
       </div>
