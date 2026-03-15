@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
+import { supabase } from '../lib/supabase'
 import PageHero from '../components/ui/PageHero'
 import {
   Trash2, Plus, Minus, ShoppingCart, ArrowRight,
@@ -110,10 +111,11 @@ const ORDER_STEPS = [
   { icon: PackageCheck,  title: 'Pickup or Delivery', desc: 'Your order is quality-checked, packed, and ready for pickup or delivery to your location.',                     color: 'var(--wp-green)'   },
 ]
 
-function CheckoutForm({ cart, totalPrice }) {
+function CheckoutForm({ cart, totalPrice, onSuccess }) {
   const [form, setForm] = useState({ name:'', company:'', email:'', phone:'', inquiryType:'', notes:'', file:null })
   const [errors, setErrors] = useState({})
   const [status, setStatus] = useState('idle')
+  const [submitError, setSubmitError] = useState(null)
   const set = (k) => (e) => setForm(f => ({ ...f, [k]: e.target.value }))
 
   function validate() {
@@ -126,12 +128,42 @@ function CheckoutForm({ cart, totalPrice }) {
     return e
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault()
     const e2 = validate()
     if (Object.keys(e2).length) { setErrors(e2); return }
-    setErrors({}); setStatus('submitting')
-    setTimeout(() => setStatus('success'), 1800)
+    setErrors({})
+    setSubmitError(null)
+    setStatus('submitting')
+
+    try {
+      // Call SECURITY DEFINER function — bypasses RLS for anon customers
+      const { data: orderId, error: rpcErr } = await supabase.rpc('submit_order', {
+        p_customer_name:   form.name.trim(),
+        p_customer_email:  form.email.trim().toLowerCase(),
+        p_customer_phone:  form.phone.trim(),
+        p_customer_company: form.company.trim() || '',
+        p_order_type:      form.inquiryType,
+        p_notes:           form.notes.trim() || '',
+        p_estimated_total: totalPrice,
+        p_items: cart.map(item => ({
+          product_name: item.name,
+          qty:          item.qty,
+          unit:         item.unit ?? 'pcs',
+          unit_price:   item.unitPrice,
+        })),
+      })
+
+      if (rpcErr) throw rpcErr
+
+      // Done — clear cart and show success
+      setStatus('success')
+      if (onSuccess) onSuccess()
+    } catch (err) {
+      console.error('Order submission failed:', err)
+      setSubmitError(err.message ?? 'Something went wrong. Please try again.')
+      setStatus('idle')
+    }
   }
 
   if (status === 'success') {
@@ -150,8 +182,6 @@ function CheckoutForm({ cart, totalPrice }) {
         </p>
         <div className="flex flex-wrap gap-3 justify-center">
           <Link to="/products" className="btn-press text-sm">Continue Shopping</Link>
-          <button onClick={() => { setStatus('idle'); setForm({ name:'',company:'',email:'',phone:'',inquiryType:'',notes:'',file:null }) }}
-            className="btn-press-outline text-sm">Submit Another</button>
         </div>
       </div>
     )
@@ -248,16 +278,25 @@ function CheckoutForm({ cart, totalPrice }) {
         <p className="text-[10px] font-mono text-ivory-300/20 mt-1">Final price confirmed after review.</p>
       </div>
 
-      <div className="flex items-center justify-between pt-1">
-        <p className="text-[10px] font-mono text-ivory-300/25"><span style={{ color: 'var(--wp-green)' }}>*</span> Required fields</p>
-        <button type="submit" disabled={status === 'submitting'}
-          className="btn-press flex items-center gap-2 text-sm disabled:opacity-60 disabled:cursor-not-allowed">
-          {status === 'submitting' ? (
-            <><span className="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Sending…</>
-          ) : (
-            <> Send Order Inquiry <Send size={14} /> </>
-          )}
-        </button>
+      <div className="flex items-center justify-between pt-1 flex-col gap-3">
+        {submitError && (
+          <div className="w-full flex items-start gap-2 px-4 py-3 rounded-sm border text-xs"
+            style={{ background: 'rgba(236,0,140,0.08)', borderColor: 'rgba(236,0,140,0.25)', color: '#EC008C' }}>
+            <AlertCircle size={13} className="shrink-0 mt-0.5" />
+            <span>{submitError}</span>
+          </div>
+        )}
+        <div className="flex items-center justify-between w-full">
+          <p className="text-[10px] font-mono text-ivory-300/25"><span style={{ color: 'var(--wp-green)' }}>*</span> Required fields</p>
+          <button type="submit" disabled={status === 'submitting'}
+            className="btn-press flex items-center gap-2 text-sm disabled:opacity-60 disabled:cursor-not-allowed">
+            {status === 'submitting' ? (
+              <><span className="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Sending…</>
+            ) : (
+              <> Send Order Inquiry <Send size={14} /> </>
+            )}
+          </button>
+        </div>
       </div>
     </form>
   )
@@ -267,6 +306,10 @@ export default function CartPage() {
   const { cart, totalItems, totalPrice, clearCart } = useCart()
   const [showClearConfirm, setShowClearConfirm] = useState(false)
   const isEmpty = cart.length === 0
+
+  function handleOrderSuccess() {
+    clearCart()
+  }
 
   return (
     <>
@@ -435,7 +478,7 @@ export default function CartPage() {
                 </h2>
                 <div className="grid lg:grid-cols-3 gap-10">
                   <div className="lg:col-span-2">
-                    <CheckoutForm cart={cart} totalPrice={totalPrice} />
+                    <CheckoutForm cart={cart} totalPrice={totalPrice} onSuccess={handleOrderSuccess} />
                   </div>
 
                   {/* What happens next + contact */}

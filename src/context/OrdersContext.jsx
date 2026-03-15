@@ -34,7 +34,7 @@ export function OrdersProvider({ children }) {
           customer_email,
           customer_phone,
           customer_company,
-          order_items ( id, product_name, qty, unit, unit_price ),
+          order_items ( id, name, qty, unit, unit_price ),
           email_threads ( id, from_role, sent_by, sent_at, subject, body )
         `)
         .order('created_at', { ascending: false })
@@ -56,7 +56,7 @@ export function OrdersProvider({ children }) {
           company: o.customer_company ?? '',
         },
         items: (o.order_items ?? []).map(i => ({
-          name:      i.product_name,
+          name:      i.name,
           qty:       i.qty,
           unit:      i.unit,
           unitPrice: i.unit_price,
@@ -81,6 +81,20 @@ export function OrdersProvider({ children }) {
   }, [])
 
   useEffect(() => { fetchOrders() }, [fetchOrders])
+
+  // Real-time: re-fetch whenever a new order is inserted or updated
+  useEffect(() => {
+    const channel = supabase
+      .channel('orders-realtime')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'orders' },
+        () => { fetchOrders() }
+      )
+      .subscribe()
+
+    return () => { supabase.removeChannel(channel) }
+  }, [fetchOrders])
 
   async function updateStatus(id, status) {
     // Optimistic update
