@@ -2,9 +2,9 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useOrders, ORDER_STATUSES } from '../../context/OrdersContext'
 import AdminLayout from '../../components/admin/AdminLayout'
-import { Search, ArrowRight, Filter } from 'lucide-react'
+import { Search, ArrowRight, Filter, Loader2, RefreshCw } from 'lucide-react'
 
-function formatPHP(n) { return '\u20B1' + n.toLocaleString('en-PH', { minimumFractionDigits: 0 }) }
+function formatPHP(n) { return '\u20B1' + Number(n).toLocaleString('en-PH', { minimumFractionDigits: 0 }) }
 function timeAgo(iso) {
   const diff = (Date.now() - new Date(iso)) / 1000
   if (diff < 60) return 'just now'
@@ -16,9 +16,9 @@ function timeAgo(iso) {
 const ALL_STATUSES = ['all', ...Object.keys(ORDER_STATUSES)]
 
 export default function AdminOrdersPage() {
-  const { orders } = useOrders()
-  const [search, setSearch]   = useState('')
-  const [filter, setFilter]   = useState('all')
+  const { orders, loading, error, refetch } = useOrders()
+  const [search, setSearch] = useState('')
+  const [filter, setFilter] = useState('all')
 
   const filtered = orders
     .filter(o => filter === 'all' || o.status === filter)
@@ -29,13 +29,19 @@ export default function AdminOrdersPage() {
         || o.customer.name.toLowerCase().includes(q)
         || o.customer.email.toLowerCase().includes(q)
     })
-    .sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt))
 
   return (
     <AdminLayout>
-      <div className="mb-7">
-        <h1 className="text-white text-2xl font-bold mb-1" style={{ fontFamily: "'DM Serif Display', serif" }}>Orders</h1>
-        <p className="text-ivory-300/40 text-sm">{orders.length} total inquiries · {orders.filter(o=>o.status==='new').length} new</p>
+      <div className="mb-7 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-white text-2xl font-bold mb-1" style={{ fontFamily: "'DM Serif Display', serif" }}>Orders</h1>
+          <p className="text-ivory-300/40 text-sm">
+            {loading ? 'Loading…' : `${orders.length} total · ${orders.filter(o => o.status === 'new').length} new`}
+          </p>
+        </div>
+        <button onClick={refetch} className="flex items-center gap-2 px-3 py-2 rounded-sm text-xs font-mono border border-white/[0.08] text-ivory-300/40 hover:text-white transition-all">
+          <RefreshCw size={12} /> Refresh
+        </button>
       </div>
 
       {/* Filters + search */}
@@ -67,21 +73,29 @@ export default function AdminOrdersPage() {
 
       {/* Orders table */}
       <div className="bg-ink-800 border border-white/[0.07] rounded-sm overflow-hidden">
-        {filtered.length === 0 ? (
-          <div className="py-16 text-center text-ivory-300/30 font-mono text-sm">No orders found</div>
+        {loading ? (
+          <div className="py-16 flex items-center justify-center gap-2 text-ivory-300/30">
+            <Loader2 size={16} className="animate-spin" /> Loading orders…
+          </div>
+        ) : error ? (
+          <div className="py-16 text-center">
+            <p className="text-ivory-300/30 font-mono text-sm mb-3">{error}</p>
+            <button onClick={refetch} className="text-xs font-mono text-wp-green hover:underline">Try again</button>
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="py-16 text-center text-ivory-300/30 font-mono text-sm">
+            {orders.length === 0 ? 'No orders yet' : 'No orders match your filters'}
+          </div>
         ) : (
           <div className="divide-y divide-white/[0.04]">
             {filtered.map(order => {
-              const st = ORDER_STATUSES[order.status]
+              const st = ORDER_STATUSES[order.status] ?? ORDER_STATUSES.new
               const unreplied = order.status === 'new' || (order.status === 'quoted' && order.emailThread.length === 0)
               return (
                 <Link key={order.id} to={`/admin/orders/${order.id}`}
                   className="flex items-center gap-4 px-5 py-4 hover:bg-white/[0.02] transition-colors group">
-                  {/* Status dot */}
                   <div className="w-2 h-2 rounded-full shrink-0" style={{ background: st.color }} />
-
                   <div className="min-w-0 flex-1 grid sm:grid-cols-3 gap-2">
-                    {/* ID + Status */}
                     <div>
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-white text-xs font-mono font-bold">{order.id}</span>
@@ -90,20 +104,17 @@ export default function AdminOrdersPage() {
                       <span className="text-[9px] font-mono px-2 py-0.5 rounded-sm mt-1 inline-block"
                         style={{ background: st.bg, color: st.color }}>{st.label}</span>
                     </div>
-
-                    {/* Customer */}
                     <div className="hidden sm:block">
                       <div className="text-white text-xs font-semibold truncate">{order.customer.name}</div>
                       <div className="text-ivory-300/35 text-[10px] font-mono truncate">{order.customer.email}</div>
                     </div>
-
-                    {/* Items + total */}
                     <div className="hidden sm:block text-right">
                       <div className="text-white text-xs font-mono font-bold">{formatPHP(order.estimatedTotal)}</div>
-                      <div className="text-ivory-300/25 text-[10px] font-mono">{order.items.length} item{order.items.length !== 1 ? 's' : ''} · {timeAgo(order.createdAt)}</div>
+                      <div className="text-ivory-300/25 text-[10px] font-mono">
+                        {order.items.length} item{order.items.length !== 1 ? 's' : ''} · {timeAgo(order.createdAt)}
+                      </div>
                     </div>
                   </div>
-
                   <ArrowRight size={13} className="text-ivory-300/20 group-hover:text-wp-green transition-colors shrink-0" />
                 </Link>
               )

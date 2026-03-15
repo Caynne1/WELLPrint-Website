@@ -1,11 +1,14 @@
 import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
-import { LayoutDashboard, Package, LogOut, Menu, X, Printer, ChevronRight, User, Bell } from 'lucide-react'
+import { LayoutDashboard, Package, LogOut, Menu, X, Printer, ChevronRight, User, Bell, Users, BarChart2, ShoppingBag, Shield } from 'lucide-react'
 
 const NAV = [
-  { to: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/admin/orders',    icon: Package,          label: 'Orders'    },
+  { to: '/admin/dashboard',  icon: LayoutDashboard, label: 'Dashboard' },
+  { to: '/admin/orders',     icon: Package,         label: 'Orders'    },
+  { to: '/admin/products',   icon: ShoppingBag,     label: 'Products'  },
+  { to: '/admin/analytics',  icon: BarChart2,       label: 'Analytics' },
+  { to: '/admin/staff',      icon: Users,           label: 'Staff',    adminOnly: true },
 ]
 
 function Sidebar({ mobile = false, onClose }) {
@@ -29,7 +32,7 @@ function Sidebar({ mobile = false, onClose }) {
       </div>
 
       <nav className="flex-1 space-y-1">
-        {NAV.map(({ to, icon: Icon, label }) => {
+        {NAV.filter(n => !n.adminOnly || user?.role === 'admin').map(({ to, icon: Icon, label }) => {
           const active = location.pathname.startsWith(to)
           return (
             <Link key={to} to={to} onClick={onClose}
@@ -51,7 +54,10 @@ function Sidebar({ mobile = false, onClose }) {
           </div>
           <div className="min-w-0">
             <div className="text-white text-xs font-semibold truncate">{user?.name}</div>
-            <div className="font-mono text-[9px] text-ivory-300/30 truncate capitalize">{user?.role}</div>
+            <div className="font-mono text-[9px] text-ivory-300/30 truncate capitalize flex items-center gap-1">
+              {user?.role === 'admin' ? <Shield size={8} style={{ color: '#EC008C' }} /> : <User size={8} />}
+              {user?.role}
+            </div>
           </div>
         </div>
         <button onClick={handleLogout}

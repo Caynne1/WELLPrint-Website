@@ -13,6 +13,9 @@ import AdminLoginPage       from './pages/admin/AdminLoginPage'
 import AdminDashboardPage   from './pages/admin/AdminDashboardPage'
 import AdminOrdersPage      from './pages/admin/AdminOrdersPage'
 import AdminOrderDetailPage from './pages/admin/AdminOrderDetailPage'
+import AdminStaffPage       from './pages/admin/AdminStaffPage'
+import AdminProductsPage    from './pages/admin/AdminProductsPage'
+import AdminAnalyticsPage   from './pages/admin/AdminAnalyticsPage'
 
 function RequireAuth({ children }) {
   const { user } = useAuth()
@@ -46,6 +49,9 @@ export default function App() {
       <Route path="/admin/dashboard" element={<RequireAuth><AdminDashboardPage /></RequireAuth>} />
       <Route path="/admin/orders" element={<RequireAuth><AdminOrdersPage /></RequireAuth>} />
       <Route path="/admin/orders/:id" element={<RequireAuth><AdminOrderDetailPage /></RequireAuth>} />
+      <Route path="/admin/products" element={<RequireAuth><AdminProductsPage /></RequireAuth>} />
+      <Route path="/admin/analytics" element={<RequireAuth><AdminAnalyticsPage /></RequireAuth>} />
+      <Route path="/admin/staff" element={<RequireAuth><AdminStaffPage /></RequireAuth>} />
 
       {/* 404 */}
       <Route path="*" element={<PublicLayout><PlaceholderPage title="404 — Page Not Found" phase="Error" /></PublicLayout>} />
