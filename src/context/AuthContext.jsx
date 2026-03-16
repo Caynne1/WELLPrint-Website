@@ -1,17 +1,61 @@
-import { createContext, useContext, useState, useEffect } from 'react'
+import { createContext, useContext, useState, useEffect, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 
 const AuthContext = createContext(null)
 
+// ─── Permission definitions ────────────────────────────────────────────────
+export const ALL_PERMISSIONS = [
+  'view_orders',
+  'manage_orders',
+  'view_products',
+  'manage_products',
+  'view_analytics',
+]
+
+export const PERMISSION_LABELS = {
+  view_orders:     'View Orders',
+  manage_orders:   'Manage Orders (update status)',
+  view_products:   'View Products',
+  manage_products: 'Manage Products (add / edit / delete)',
+  view_analytics:  'View Analytics',
+}
+
+// ─── Provider ──────────────────────────────────────────────────────────────
 export function AuthProvider({ children }) {
   const [user,    setUser]    = useState(null)
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [error,   setError]   = useState(null)
 
-  // On mount — restore session from Supabase
+  const hydrateUser = useCallback(async (authUser) => {
+    const { data: profile } = await supabase
+      .from('staff_profiles')
+      .select('username, name, role, permissions')
+      .eq('id', authUser.id)
+      .single()
+
+    const role        = profile?.role ?? 'staff'
+    const permissions = role === 'admin'
+      ? ALL_PERMISSIONS
+      : (profile?.permissions ?? [])
+
+    setUser({
+      id:          authUser.id,
+      email:       authUser.email,
+      username:    profile?.username ?? authUser.email,
+      name:        profile?.name     ?? authUser.email,
+      role,
+      permissions,
+      loginAt:     new Date().toISOString(),
+    })
+  }, [])
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) hydrateUser(session.user)
+      if (session?.user) {
+        hydrateUser(session.user).finally(() => setLoading(false))
+      } else {
+        setLoading(false)
+      }
     })
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -20,37 +64,19 @@ export function AuthProvider({ children }) {
     })
 
     return () => subscription.unsubscribe()
-  }, [])
-
-  async function hydrateUser(authUser) {
-    const { data: profile } = await supabase
-      .from('staff_profiles')
-      .select('username, name, role')
-      .eq('id', authUser.id)
-      .single()
-
-    setUser({
-      id:       authUser.id,
-      email:    authUser.email,
-      username: profile?.username ?? authUser.email,
-      name:     profile?.name     ?? authUser.email,
-      role:     profile?.role     ?? 'staff',
-      loginAt:  new Date().toISOString(),
-    })
-  }
+  }, [hydrateUser])
 
   async function login(identifier, password) {
     setLoading(true)
     setError(null)
-
     try {
-      let email = identifier
+      let email = identifier.trim()
 
-      if (!identifier.includes('@')) {
+      if (!email.includes('@')) {
         const { data: profile, error: profileErr } = await supabase
           .from('staff_profiles')
           .select('email')
-          .eq('username', identifier.toLowerCase().trim())
+          .eq('username', email.toLowerCase())
           .single()
 
         if (profileErr || !profile) {
@@ -69,9 +95,12 @@ export function AuthProvider({ children }) {
         return { ok: false }
       }
 
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session?.user) await hydrateUser(session.user)
+
       setLoading(false)
       return { ok: true }
-    } catch (e) {
+    } catch {
       setError('Something went wrong. Please try again.')
       setLoading(false)
       return { ok: false }
@@ -83,8 +112,26 @@ export function AuthProvider({ children }) {
     setUser(null)
   }
 
+  function hasPermission(key) {
+    if (!user) return false
+    if (user.role === 'admin') return true
+    return user.permissions.includes(key)
+  }
+
+  function hasRole(role) {
+    return user?.role === role
+  }
+
+  const isAdmin = user?.role === 'admin'
+  const isStaff = user?.role === 'staff'
+
   return (
-    <AuthContext.Provider value={{ user, loading, error, login, logout, isAdmin: user?.role === 'admin' }}>
+    <AuthContext.Provider value={{
+      user, loading, error,
+      login, logout,
+      hasPermission, hasRole,
+      isAdmin, isStaff,
+    }}>
       {children}
     </AuthContext.Provider>
   )

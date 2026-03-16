@@ -92,7 +92,7 @@ export default function AdminOrdersPage() {
               const st = ORDER_STATUSES[order.status] ?? ORDER_STATUSES.new
               const unreplied = order.status === 'new' || (order.status === 'quoted' && order.emailThread.length === 0)
               return (
-                <Link key={order.id} to={`/admin/orders/${order.id}`}
+                <Link key={order.id} to={`/dashboard/orders/${order.id}`}
                   className="flex items-center gap-4 px-5 py-4 hover:bg-white/[0.02] transition-colors group">
                   <div className="w-2 h-2 rounded-full shrink-0" style={{ background: st.color }} />
                   <div className="min-w-0 flex-1 grid sm:grid-cols-3 gap-2">

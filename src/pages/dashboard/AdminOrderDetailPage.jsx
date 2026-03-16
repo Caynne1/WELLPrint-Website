@@ -68,7 +68,7 @@ export default function AdminOrderDetailPage() {
       <div className="text-center py-20 text-ivory-300/40">
         <AlertCircle size={32} className="mx-auto mb-4" />
         <p>Order not found.</p>
-        <Link to="/admin/orders" className="text-wp-green mt-4 inline-block text-sm">← Back to orders</Link>
+        <Link to="/dashboard/orders" className="text-wp-green mt-4 inline-block text-sm">← Back to orders</Link>
       </div>
     </AdminLayout>
   )
@@ -111,7 +111,7 @@ export default function AdminOrderDetailPage() {
     <AdminLayout>
       <div className="flex items-start justify-between gap-4 mb-7 flex-wrap">
         <div>
-          <Link to="/admin/orders" className="inline-flex items-center gap-1.5 text-xs font-mono text-ivory-300/35 hover:text-white transition-colors mb-3">
+          <Link to="/dashboard/orders" className="inline-flex items-center gap-1.5 text-xs font-mono text-ivory-300/35 hover:text-white transition-colors mb-3">
             <ArrowLeft size={12} /> All Orders
           </Link>
           <div className="flex items-center gap-3 flex-wrap">
