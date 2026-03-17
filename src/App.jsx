@@ -17,6 +17,7 @@ import AdminOrderDetailPage from './pages/dashboard/AdminOrderDetailPage'
 import AdminStaffPage       from './pages/dashboard/AdminStaffPage'
 import AdminProductsPage    from './pages/dashboard/AdminProductsPage'
 import AdminAnalyticsPage   from './pages/dashboard/AdminAnalyticsPage'
+import AdminCategoriesPage  from './pages/dashboard/AdminCategoriesPage'
 
 // ─── Route guards ─────────────────────────────────────────────────────────
 
@@ -103,6 +104,8 @@ export default function App() {
         element={<RequirePermission permission="view_orders"><AdminOrderDetailPage /></RequirePermission>} />
       <Route path="/dashboard/products"
         element={<RequirePermission permission="view_products"><AdminProductsPage /></RequirePermission>} />
+      <Route path="/dashboard/categories"
+        element={<RequirePermission permission="manage_categories"><AdminCategoriesPage /></RequirePermission>} />
       <Route path="/dashboard/analytics"
         element={<RequirePermission permission="view_analytics"><AdminAnalyticsPage /></RequirePermission>} />
 

@@ -6,6 +6,7 @@ import {
   Heart, FileText, ArrowRight, ShoppingCart,
 } from 'lucide-react'
 import { useCart } from '../context/CartContext'
+import { useProduct } from '../hooks/useProducts'
 
 /* ── Product Data ── */
 const PRODUCTS = {
@@ -342,17 +343,29 @@ function useScrollReveal() {
 }
 
 /* ── Gallery ── */
-function Gallery({ count, accent }) {
+function Gallery({ imageUrls = [], accent }) {
+  // imageUrls is the combined list: [thumbnail, ...extra gallery images]
+  const count = imageUrls.length || 1
   const [active, setActive] = useState(0)
+
+  // Reset active index if images change (e.g. slug change)
+  useEffect(() => { setActive(0) }, [imageUrls])
+
+  const currentUrl = imageUrls[active] || null
+
   return (
     <div className="flex flex-col gap-3">
       <div className="relative bg-ink-700 border border-white/[0.08] rounded-sm overflow-hidden" style={{ aspectRatio: '1/1' }}>
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
-          <ImagePlus size={40} style={{ color: accent, opacity: 0.15 }} />
-          <span className="font-body text-[10px] tracking-widest uppercase text-ivory-300/15">
-            Product Image {active + 1}
-          </span>
-        </div>
+        {currentUrl ? (
+          <img src={currentUrl} alt={`Product image ${active + 1}`} className="w-full h-full object-cover" />
+        ) : (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+            <ImagePlus size={40} style={{ color: accent, opacity: 0.15 }} />
+            <span className="font-body text-[10px] tracking-widest uppercase text-ivory-300/15">
+              Product Image
+            </span>
+          </div>
+        )}
         <div className="absolute top-4 left-4 w-6 h-6 border-t-2 border-l-2" style={{ borderColor: `${accent}40` }} />
         <div className="absolute bottom-4 right-4 w-6 h-6 border-b-2 border-r-2" style={{ borderColor: `${accent}40` }} />
         {count > 1 && (
@@ -370,21 +383,21 @@ function Gallery({ count, accent }) {
           </>
         )}
       </div>
-      <div className="flex gap-2">
-        {Array.from({ length: count }, (_, i) => i).map(i => (
-          <button key={i} onClick={() => setActive(i)}
-            className="flex-1 border rounded-sm transition-all"
-            style={{
-              aspectRatio: '1/1', background: '#1A1A1A',
-              borderColor: active === i ? accent : 'rgba(255,255,255,0.07)',
-              boxShadow: active === i ? `0 0 0 1px ${accent}` : 'none',
-            }}>
-            <div className="w-full h-full flex items-center justify-center">
-              <ImagePlus size={12} style={{ color: accent, opacity: active === i ? 0.4 : 0.12 }} />
-            </div>
-          </button>
-        ))}
-      </div>
+      {count > 1 && (
+        <div className="flex gap-2">
+          {imageUrls.map((url, i) => (
+            <button key={i} onClick={() => setActive(i)}
+              className="flex-1 border rounded-sm transition-all overflow-hidden"
+              style={{
+                aspectRatio: '1/1', background: '#1A1A1A',
+                borderColor: active === i ? accent : 'rgba(255,255,255,0.07)',
+                boxShadow: active === i ? `0 0 0 1px ${accent}` : 'none',
+              }}>
+              <img src={url} alt={`Thumb ${i + 1}`} className="w-full h-full object-cover" />
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
@@ -518,8 +531,26 @@ function RelatedCard({ slug, product }) {
 /* ── Page ── */
 export default function ProductDetailPage() {
   const { slug } = useParams()
+
+  // Fetch real product data from Supabase
+  const { product: dbProduct, loading: dbLoading } = useProduct(slug)
+
   const product = PRODUCTS[slug] || PRODUCTS['business-cards-standard']
-  const { name, cat, catSlug, price, priceNote, minQty, tag, accent, rating, reviews, sold, desc, specs, options, turnaround, images, faqs } = product
+  const { name, cat, catSlug, price, priceNote, minQty, tag, accent, rating, reviews, sold, desc, specs, options, turnaround, faqs } = product
+
+  // Build image list from DB: thumbnail first, then gallery images
+  const galleryImages = dbProduct
+    ? [
+        ...(dbProduct.thumbnail_url ? [dbProduct.thumbnail_url] : []),
+        ...(Array.isArray(dbProduct.images) ? dbProduct.images : []),
+      ]
+    : []
+
+  // Use DB name/price if available, otherwise fall back to static data
+  const displayName      = dbProduct?.name ?? name
+  const displayBasePrice = dbProduct?.base_price ?? price
+  const displayDesc      = dbProduct?.short_description ?? desc
+  const displayTurnaround = dbProduct?.turnaround_days ? `${dbProduct.turnaround_days} business days` : turnaround
 
   const [selections, setSelections] = useState(() =>
     Object.fromEntries(Object.entries(options).map(([k, v]) => [k, v[0]]))
@@ -549,11 +580,10 @@ export default function ProductDetailPage() {
 
   function handleAddToCart() {
     const qty = getQty()
-    // unitPrice stored as per-piece so CartPage subtotal (unitPrice × qty) is correct
-    const unitPrice = price > 0 && minQty > 1 ? price / minQty : price
+    const unitPrice = displayBasePrice > 0 && minQty > 1 ? displayBasePrice / minQty : displayBasePrice
     addToCart({
       slug,
-      name,
+      name: displayName,
       unitPrice,
       priceNote: '/ pc',
       selections: { ...selections },
@@ -572,8 +602,8 @@ export default function ProductDetailPage() {
   const faqRef   = useScrollReveal()
   const relRef   = useScrollReveal()
 
-  const displayPrice = price > 0 ? `\u20B1${price.toLocaleString()}` : 'Get Quote'
-  const pricePerPc   = price > 0 && minQty > 1 ? (price / minQty) : null
+  const displayPrice  = displayBasePrice > 0 ? `₱${Number(displayBasePrice).toLocaleString()}` : 'Get Quote'
+  const pricePerPc    = displayBasePrice > 0 && minQty > 1 ? (displayBasePrice / minQty) : null
 
   return (
     <div className="min-h-screen bg-ink-900 pt-24 pb-20">
@@ -587,7 +617,7 @@ export default function ProductDetailPage() {
           <ChevronRight size={10} />
           <span className="text-ivory-300/30 uppercase">{cat}</span>
           <ChevronRight size={10} />
-          <span className="text-ivory-300/55">{name}</span>
+          <span className="text-ivory-300/55">{displayName}</span>
         </nav>
 
         {/* Main grid */}
@@ -595,7 +625,7 @@ export default function ProductDetailPage() {
 
           {/* Gallery */}
           <div className="lg:col-span-5">
-            <Gallery count={images} accent={accent} />
+            <Gallery imageUrls={galleryImages} accent={accent} />
           </div>
 
           {/* Info */}
@@ -609,7 +639,7 @@ export default function ProductDetailPage() {
               )}
               <h1 className="text-white leading-tight mb-3"
                 style={{ fontFamily: "'Lora', serif", fontWeight: 900, fontSize: 'clamp(1.5rem, 3vw, 2rem)' }}>
-                {name}
+                {displayName}
               </h1>
               <div className="flex items-center gap-3 flex-wrap">
                 <Stars rating={rating} />
@@ -639,7 +669,7 @@ export default function ProductDetailPage() {
               ) : (
                 <>
                   <div className="text-ivory-300/40 text-[10px] font-body tracking-widest uppercase mb-1">
-                    {price > 0 ? 'Price' : 'Pricing'}
+                    {displayBasePrice > 0 ? 'Price' : 'Pricing'}
                   </div>
                   <div className="flex items-baseline gap-2">
                     <span className="text-white font-black"
@@ -669,7 +699,7 @@ export default function ProductDetailPage() {
             <div className="flex items-center gap-2.5 text-sm">
               <CheckCircle size={15} style={{ color: 'var(--wp-green)', flexShrink: 0 }} />
               <span className="text-ivory-300/55">
-                Ready in <span className="text-white font-semibold">{turnaround}</span>
+                Ready in <span className="text-white font-semibold">{displayTurnaround}</span>
               </span>
             </div>
 
@@ -678,17 +708,17 @@ export default function ProductDetailPage() {
               {/* Add to Cart — primary action */}
               <button
                 onClick={handleAddToCart}
-                disabled={price === 0}
+                disabled={displayBasePrice === 0}
                 className="w-full flex items-center justify-center gap-2.5 text-sm py-3.5 rounded-sm font-bold uppercase tracking-widest transition-all btn-press"
                 style={addedToCart
                   ? { background: 'var(--wp-green)', color: '#0a0a0a' }
-                  : price === 0
+                  : displayBasePrice === 0
                     ? { background: 'rgba(255,255,255,0.05)', color: 'rgba(216,216,216,0.25)', cursor: 'not-allowed', border: '1px solid rgba(255,255,255,0.08)' }
                     : {}
                 }>
                 {addedToCart
                   ? <><CheckCircle size={16} /> Added to Cart!</>
-                  : price === 0
+                  : displayBasePrice === 0
                     ? <><ShoppingCart size={16} /> Quote Required</>
                     : <><ShoppingCart size={16} /> Add to Cart</>
                 }
@@ -793,7 +823,7 @@ export default function ProductDetailPage() {
             <div className="h-px w-8" style={{ background: accent }} />
             <span className="font-body text-[10px] tracking-[0.25em] uppercase" style={{ color: accent }}>About This Product</span>
           </div>
-          <p className="text-ivory-300/60 leading-relaxed max-w-3xl">{desc}</p>
+          <p className="text-ivory-300/60 leading-relaxed max-w-3xl">{displayDesc}</p>
         </div>
 
         {/* FAQs */}

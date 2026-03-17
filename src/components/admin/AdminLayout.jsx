@@ -6,14 +6,15 @@ import { useTheme } from '../../context/ThemeContext'
 import {
   LayoutDashboard, Package, LogOut, Menu, X, Printer,
   ChevronRight, User, Bell, Users, BarChart2, ShoppingBag,
-  Shield, Sun, Moon, Home, ExternalLink
+  Shield, Sun, Moon, Home, ExternalLink, Tag
 } from 'lucide-react'
 
 const NAV = [
-  { to: '/dashboard',          icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/dashboard/orders',   icon: Package,         label: 'Orders'    },
-  { to: '/dashboard/products', icon: ShoppingBag,     label: 'Products'  },
-  { to: '/dashboard/analytics',icon: BarChart2,       label: 'Analytics' },
+  { to: '/dashboard',             icon: LayoutDashboard, label: 'Dashboard',  perm: null               },
+  { to: '/dashboard/orders',      icon: Package,         label: 'Orders',     perm: 'view_orders'      },
+  { to: '/dashboard/products',    icon: ShoppingBag,     label: 'Products',   perm: 'view_products'    },
+  { to: '/dashboard/categories',  icon: Tag,             label: 'Categories', perm: 'manage_categories'},
+  { to: '/dashboard/analytics',   icon: BarChart2,       label: 'Analytics',  perm: 'view_analytics'   },
 ]
 
 const ADMIN_NAV = [
@@ -21,7 +22,7 @@ const ADMIN_NAV = [
 ]
 
 function Sidebar({ mobile = false, onClose }) {
-  const { user, logout } = useAuth()
+  const { user, logout, hasPermission } = useAuth()
   const { theme, toggleTheme } = useTheme()
   const location = useLocation()
   const navigate = useNavigate()
@@ -61,7 +62,7 @@ function Sidebar({ mobile = false, onClose }) {
 
       {/* Nav links */}
       <nav className="flex-1 space-y-1">
-        {NAV.map(({ to, icon: Icon, label }) => {
+        {NAV.filter(({ perm }) => !perm || user?.role === 'admin' || hasPermission(perm)).map(({ to, icon: Icon, label }) => {
           const active = location.pathname === to || (to !== '/dashboard' && location.pathname.startsWith(to))
           const linkColor = active ? activeNavColor : textMuted
           return (

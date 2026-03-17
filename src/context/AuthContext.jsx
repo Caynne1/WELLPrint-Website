@@ -9,15 +9,17 @@ export const ALL_PERMISSIONS = [
   'manage_orders',
   'view_products',
   'manage_products',
+  'manage_categories',
   'view_analytics',
 ]
 
 export const PERMISSION_LABELS = {
-  view_orders:     'View Orders',
-  manage_orders:   'Manage Orders (update status)',
-  view_products:   'View Products',
-  manage_products: 'Manage Products (add / edit / delete)',
-  view_analytics:  'View Analytics',
+  view_orders:       'View Orders',
+  manage_orders:     'Manage Orders (update status)',
+  view_products:     'View Products',
+  manage_products:   'Manage Products (add / edit / delete)',
+  manage_categories: 'Manage Categories (add / edit / delete)',
+  view_analytics:    'View Analytics',
 }
 
 // ─── Provider ──────────────────────────────────────────────────────────────

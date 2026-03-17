@@ -72,6 +72,7 @@ export function useProduct(slug) {
           .from('products')
           .select(`
             *,
+            images,
             categories ( id, name, slug )
           `)
           .eq('slug', slug)
@@ -100,22 +101,41 @@ export function useProduct(slug) {
   return { product, variants, loading, error }
 }
 
-// ── Fetch all categories ───────────────────────────────────────
+// ── Fetch all categories (with real-time sync) ────────────────
 export function useCategories() {
   const [categories, setCategories] = useState([])
   const [loading, setLoading]       = useState(true)
 
-  useEffect(() => {
-    const run = async () => {
-      const { data } = await supabase
+  const fetch = useCallback(async () => {
+    // Try sort_order first, fall back to name if column missing
+    let { data, error } = await supabase
+      .from('categories')
+      .select('*')
+      .order('sort_order', { ascending: true })
+    if (error) {
+      const fallback = await supabase
         .from('categories')
         .select('*')
-        .order('sort_order', { ascending: true })
-      setCategories(data ?? [])
-      setLoading(false)
+        .order('name', { ascending: true })
+      data = fallback.data
     }
-    run()
+    setCategories(data ?? [])
+    setLoading(false)
   }, [])
 
-  return { categories, loading }
+  useEffect(() => {
+    fetch()
+
+    // Real-time: re-fetch whenever categories change so dropdowns/filters stay current
+    const channel = supabase
+      .channel('categories-hook-sync')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'categories' }, () => {
+        fetch()
+      })
+      .subscribe()
+
+    return () => { supabase.removeChannel(channel) }
+  }, [fetch])
+
+  return { categories, loading, refetch: fetch }
 }

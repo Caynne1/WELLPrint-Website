@@ -5,9 +5,9 @@ import { useAuth } from '../../context/AuthContext'
 import AdminLayout from '../../components/admin/AdminLayout'
 import {
   Package, Clock, CheckCircle, ArrowRight, Inbox,
-  RefreshCw, AlertCircle, Zap, Star, ClipboardList,
-  Eye, Edit3, TrendingUp, User, Calendar, Bell,
-  ShoppingBag, BarChart2, Lock, CheckSquare
+  RefreshCw, AlertCircle, Zap, ClipboardList,
+  Eye, Edit3, User, Bell,
+  ShoppingBag, BarChart2, Lock, CheckSquare, Tag,
 } from 'lucide-react'
 
 function formatPHP(n) { return '₱' + Number(n).toLocaleString('en-PH', { minimumFractionDigits: 0 }) }
@@ -68,6 +68,31 @@ function TaskItem({ text, done = false, urgent = false }) {
   )
 }
 
+/* ── Quick Access tile ── */
+function QuickTile({ label, to, icon: Icon, color, allowed }) {
+  if (allowed) {
+    return (
+      <Link to={to}
+        className="flex flex-col items-center gap-2 p-3 rounded-sm border border-transparent hover:border-white/[0.07] hover:bg-white/[0.03] transition-all group">
+        <div className="w-8 h-8 rounded-sm flex items-center justify-center"
+          style={{ background: `${color}12`, border: `1px solid ${color}22` }}>
+          <Icon size={15} style={{ color }} />
+        </div>
+        <span className="text-[10px] font-body text-ivory-300/40 group-hover:text-white transition-colors text-center">{label}</span>
+      </Link>
+    )
+  }
+  return (
+    <div className="flex flex-col items-center gap-2 p-3 rounded-sm border border-white/[0.04] opacity-30 cursor-not-allowed">
+      <div className="w-8 h-8 rounded-sm flex items-center justify-center"
+        style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+        <Lock size={13} className="text-ivory-300/30" />
+      </div>
+      <span className="text-[10px] font-body text-ivory-300/25 text-center">{label}</span>
+    </div>
+  )
+}
+
 export default function StaffDashboardPage() {
   const { orders, refetch } = useOrders()
   const { user, hasPermission } = useAuth()
@@ -77,15 +102,15 @@ export default function StaffDashboardPage() {
   const greeting = () => { const h = now.getHours(); return h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening' }
 
   const newOrders    = orders.filter(o => o.status === 'new')
-  const activeOrders = orders.filter(o => !['completed','cancelled'].includes(o.status))
+  const activeOrders = orders.filter(o => !['completed', 'cancelled'].includes(o.status))
   const todayOrders  = orders.filter(o => new Date(o.createdAt).toDateString() === now.toDateString())
+  const handledOrders = orders.filter(o => o.status !== 'new').length
+  const recentActivity = [...orders].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 4)
 
-  // Staff's personal stats (orders they may have touched — simulated via recency)
-  const handledOrders    = orders.filter(o => o.status !== 'new').length
-  const completedToday   = orders.filter(o => o.status === 'completed' && new Date(o.createdAt).toDateString() === now.toDateString()).length
-
-  const urgentOrders     = newOrders.slice(0, 5)
-  const recentActivity   = [...orders].sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 4)
+  const canViewOrders    = hasPermission('view_orders')
+  const canManageOrders  = hasPermission('manage_orders')
+  const canViewProducts  = hasPermission('view_products')
+  const canViewAnalytics = hasPermission('view_analytics')
 
   const PERMISSION_LABELS_MAP = {
     view_orders:     'View Orders',
@@ -102,10 +127,12 @@ export default function StaffDashboardPage() {
     { text: 'Check artwork submissions', urgent: false },
   ]
 
-  const canViewOrders     = hasPermission('view_orders')
-  const canManageOrders   = hasPermission('manage_orders')
-  const canViewProducts   = hasPermission('view_products')
-  const canViewAnalytics  = hasPermission('view_analytics')
+  const QUICK_TILES = [
+    { label: 'Orders',     to: '/dashboard/orders',     icon: Package,    color: '#CD1B6E', perm: 'view_orders'    },
+    { label: 'Products',   to: '/dashboard/products',   icon: ShoppingBag,color: '#FDC010', perm: 'view_products'  },
+    { label: 'Categories', to: '/dashboard/categories', icon: Tag,        color: '#1993D2', perm: 'manage_categories' },
+    { label: 'Analytics',  to: '/dashboard/analytics',  icon: BarChart2,  color: '#13A150', perm: 'view_analytics' },
+  ]
 
   return (
     <AdminLayout>
@@ -127,7 +154,8 @@ export default function StaffDashboardPage() {
             )}
           </p>
         </div>
-        <button onClick={refetch} className="flex items-center gap-2 px-3 py-2 rounded-sm text-xs font-body border border-white/[0.08] text-ivory-300/40 hover:text-white hover:border-wp-green/40 transition-all">
+        <button onClick={refetch}
+          className="flex items-center gap-2 px-3 py-2 rounded-sm text-xs font-body border border-white/[0.08] text-ivory-300/40 hover:text-white hover:border-wp-green/40 transition-all">
           <RefreshCw size={12} /> Refresh
         </button>
       </div>
@@ -142,7 +170,8 @@ export default function StaffDashboardPage() {
               {newOrders.length} new order {newOrders.length > 1 ? 'inquiries need' : 'inquiry needs'} attention
             </span>
           </div>
-          <Link to="/dashboard/orders?filter=new" className="flex items-center gap-1 text-xs font-body hover:underline" style={{ color: '#CD1B6E' }}>
+          <Link to="/dashboard/orders?filter=new"
+            className="flex items-center gap-1 text-xs font-body hover:underline" style={{ color: '#CD1B6E' }}>
             Review <ArrowRight size={11} />
           </Link>
         </div>
@@ -151,13 +180,14 @@ export default function StaffDashboardPage() {
       {/* KPI row */}
       <div className="grid grid-cols-3 gap-4 mb-6">
         {[
-          { label: 'Awaiting',   value: newOrders.length,    icon: Inbox,       color: '#CD1B6E', sub: 'New inquiries' },
-          { label: 'In Progress',value: activeOrders.length, icon: Clock,       color: '#FDC010', sub: 'Active orders' },
-          { label: 'Handled',    value: handledOrders,       icon: CheckCircle, color: '#13A150', sub: 'Processed' },
+          { label: 'Awaiting',    value: newOrders.length,    icon: Inbox,       color: '#CD1B6E', sub: 'New inquiries'  },
+          { label: 'In Progress', value: activeOrders.length, icon: Clock,       color: '#FDC010', sub: 'Active orders'  },
+          { label: 'Handled',     value: handledOrders,       icon: CheckCircle, color: '#13A150', sub: 'Processed'      },
         ].map(({ label, value, icon: Icon, color, sub }) => (
           <div key={label} className="bg-ink-800 border border-white/[0.07] rounded-sm p-5 hover:border-white/[0.12] transition-all">
             <div className="flex items-start justify-between mb-3">
-              <div className="w-8 h-8 rounded-sm flex items-center justify-center" style={{ background: `${color}14`, border: `1px solid ${color}30` }}>
+              <div className="w-8 h-8 rounded-sm flex items-center justify-center"
+                style={{ background: `${color}14`, border: `1px solid ${color}30` }}>
                 <Icon size={15} style={{ color }} />
               </div>
             </div>
@@ -180,7 +210,8 @@ export default function StaffDashboardPage() {
               <span className="font-body text-[10px] tracking-widest uppercase text-wp-green">Your Queue</span>
             </div>
             {canViewOrders && (
-              <Link to="/dashboard/orders" className="text-[10px] font-body text-ivory-300/30 hover:text-wp-green transition-colors flex items-center gap-1">
+              <Link to="/dashboard/orders"
+                className="text-[10px] font-body text-ivory-300/30 hover:text-wp-green transition-colors flex items-center gap-1">
                 All orders <ArrowRight size={10} />
               </Link>
             )}
@@ -210,10 +241,13 @@ export default function StaffDashboardPage() {
                         <span className="text-[9px] font-body px-1.5 py-0.5 rounded-sm"
                           style={{ background: st.bg, color: st.color }}>{st.label}</span>
                         {order.status === 'new' && (
-                          <span className="text-[8px] font-body px-1 py-0.5 rounded-sm" style={{ background: 'rgba(236,0,140,0.15)', color: '#CD1B6E' }}>NEW</span>
+                          <span className="text-[8px] font-body px-1 py-0.5 rounded-sm"
+                            style={{ background: 'rgba(236,0,140,0.15)', color: '#CD1B6E' }}>NEW</span>
                         )}
                       </div>
-                      <div className="text-ivory-300/40 text-[10px] font-body truncate">{order.customer.name} · {timeAgo(order.createdAt)}</div>
+                      <div className="text-ivory-300/40 text-[10px] font-body truncate">
+                        {order.customer.name} · {timeAgo(order.createdAt)}
+                      </div>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                       <span className="text-white text-xs font-body font-bold">{formatPHP(order.estimatedTotal)}</span>
@@ -251,7 +285,7 @@ export default function StaffDashboardPage() {
             </div>
           </div>
 
-          {/* Quick access (permission-gated) */}
+          {/* Quick access */}
           <div className="bg-ink-800 border border-white/[0.07] rounded-sm overflow-hidden">
             <div className="px-5 py-3.5 border-b border-white/[0.06] flex items-center gap-2"
               style={{ background: 'rgba(19,161,80,0.04)' }}>
@@ -259,37 +293,10 @@ export default function StaffDashboardPage() {
               <span className="font-body text-[10px] tracking-widest uppercase text-wp-green">Quick Access</span>
             </div>
             <div className="p-3 grid grid-cols-2 gap-2">
-              {[
-                { label: 'Orders',    to: '/dashboard/orders',    icon: Package,    color: '#CD1B6E', perm: 'view_orders' },
-                { label: 'Products',  to: '/dashboard/products',  icon: ShoppingBag,color: '#FDC010', perm: 'view_products' },
-                { label: 'Analytics', to: '/dashboard/analytics', icon: BarChart2,  color: '#1993D2', perm: 'view_analytics' },
-              ].map(({ label, to, icon: Icon, color, perm }) => {
-                const allowed = hasPermission(perm)
-                return allowed ? (
-                  <Link key={to} to={to}
-                    className="flex flex-col items-center gap-2 p-3 rounded-sm border border-transparent hover:border-white/[0.07] hover:bg-white/[0.03] transition-all group">
-                    <div className="w-8 h-8 rounded-sm flex items-center justify-center" style={{ background: `${color}12`, border: `1px solid ${color}22` }}>
-                      <Icon size={15} style={{ color }} />
-                    </div>
-                    <span className="text-[10px] font-body text-ivory-300/40 group-hover:text-white transition-colors text-center">{label}</span>
-                  </Link>
-                ) : (
-                  <div key={to}
-                    className="flex flex-col items-center gap-2 p-3 rounded-sm border border-white/[0.04] opacity-30 cursor-not-allowed">
-                    <div className="w-8 h-8 rounded-sm flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
-                      <Lock size={13} className="text-ivory-300/30" />
-                    </div>
-                    <span className="text-[10px] font-body text-ivory-300/25 text-center">{label}</span>
-                  </div>
-                )
-              })}
-              <div className="flex flex-col items-center gap-2 p-3 rounded-sm border border-white/[0.04] opacity-30 cursor-not-allowed"
-                title="Admin only">
-                <div className="w-8 h-8 rounded-sm flex items-center justify-center" style={{ background: 'rgba(236,0,140,0.06)', border: '1px solid rgba(236,0,140,0.12)' }}>
-                  <Lock size={13} style={{ color: 'rgba(236,0,140,0.4)' }} />
-                </div>
-                <span className="text-[10px] font-body text-ivory-300/20 text-center">Staff Mgmt</span>
-              </div>
+              {QUICK_TILES.map(({ label, to, icon, color, perm }) => (
+                <QuickTile key={to} label={label} to={to} icon={icon} color={color}
+                  allowed={hasPermission(perm)} />
+              ))}
             </div>
           </div>
         </div>
