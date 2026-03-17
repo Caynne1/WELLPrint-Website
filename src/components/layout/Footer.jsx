@@ -32,7 +32,7 @@ export default function Footer() {
     <footer className="bg-ink-950 border-t border-white/[0.07] pt-20 pb-10 relative overflow-hidden">
       {/* Decorative faded logo watermark */}
       <div className="absolute bottom-0 right-0 opacity-[0.03] pointer-events-none select-none" aria-hidden="true">
-        <img src="/logo.svg" alt="" className="w-80 h-80 object-contain" />
+        <img src="/logos/icons/icon-main.svg" alt="" className="w-80 h-80 object-contain" />
       </div>
 
       <div className="max-w-7xl mx-auto px-6 relative z-10">
@@ -41,7 +41,7 @@ export default function Footer() {
           {/* Brand */}
           <div className="lg:col-span-2">
             <Link to="/" className="block mb-6 w-fit">
-              <img src="/logo.svg" alt="WELLPrint" className="h-14 w-auto object-contain" />
+              <img src="/logos/vertical/main-light.svg" alt="WELLPrint" className="h-20 w-auto object-contain" />
             </Link>
 
             <p className="text-ivory-300/55 text-sm leading-relaxed mb-6 max-w-xs">
@@ -94,7 +94,7 @@ export default function Footer() {
             { title: 'Support',  links: SUPPORT },
           ].map(({ title, links }) => (
             <div key={title}>
-              <h4 className="font-mono text-[10px] tracking-[0.2em] uppercase mb-5" style={{ color: 'var(--wp-green)' }}>
+              <h4 className="font-body text-[10px] tracking-[0.2em] uppercase mb-5" style={{ color: 'var(--wp-green)' }}>
                 {title}
               </h4>
               <ul className="space-y-2.5">
@@ -114,14 +114,14 @@ export default function Footer() {
         {/* Newsletter */}
         <div className="border border-white/[0.08] bg-ink-800/50 p-6 md:p-8 mb-12 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 rounded-sm">
           <div>
-            <h4 className="text-white text-lg mb-1" style={{ fontFamily: "'DM Serif Display', serif" }}>
+            <h4 className="text-white text-lg mb-1" style={{ fontFamily: "'Lora', serif" }}>
               Stay in the loop
             </h4>
             <p className="text-sm text-ivory-300/55">Deals, new products, and print tips — no spam.</p>
           </div>
           <form className="flex w-full md:w-auto gap-0" onSubmit={e => e.preventDefault()}>
             <input type="email" placeholder="your@email.com"
-              className="bg-ink-900 border border-white/[0.12] text-white placeholder:text-ivory-300/25 text-sm px-4 py-2.5 flex-1 md:w-64 focus:outline-none focus:border-wp-green/50 transition-colors font-mono rounded-none" />
+              className="bg-ink-900 border border-white/[0.12] text-white placeholder:text-ivory-300/25 text-sm px-4 py-2.5 flex-1 md:w-64 focus:outline-none focus:border-wp-green/50 transition-colors font-body rounded-none" />
             <button type="submit"
               className="px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-white whitespace-nowrap transition-colors duration-200 rounded-none"
               style={{ background: 'var(--wp-green)' }}
@@ -135,12 +135,12 @@ export default function Footer() {
         {/* Bottom */}
         <hr className="section-rule mb-8" />
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-ivory-300/25 font-mono tracking-wider">
+          <p className="text-xs text-ivory-300/25 font-body tracking-wider">
             © {year} WELLPrint · Bereso Group. All rights reserved.
           </p>
           <div className="flex items-center gap-6">
             <span className="badge badge-green">ISO 9001 Certified</span>
-            <span className="text-xs text-ivory-300/25 font-mono">Secure uploads · 256-bit SSL</span>
+            <span className="text-xs text-ivory-300/25 font-body">Secure uploads · 256-bit SSL</span>
           </div>
         </div>
       </div>

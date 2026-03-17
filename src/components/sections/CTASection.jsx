@@ -27,7 +27,7 @@ export default function CTASection() {
       >
         <span
           className="text-[60vw] font-black text-ivory-200 leading-none block"
-          style={{ fontFamily: "'Playfair Display', serif" }}
+          style={{ fontFamily: "'Lora', serif" }}
         >
           W
         </span>
@@ -46,14 +46,14 @@ export default function CTASection() {
         ref={ref}
         className="animate-on-scroll relative z-10 max-w-4xl mx-auto px-6 text-center"
       >
-        <span className="font-mono text-[10px] tracking-[0.25em] text-wp-green uppercase block mb-6">
+        <span className="font-body text-[10px] tracking-[0.25em] text-wp-green uppercase block mb-6">
           Ready to Print?
         </span>
 
         <h2
           className="text-ivory-50 mb-6 leading-tight"
           style={{
-            fontFamily: "'Playfair Display', serif",
+            fontFamily: "'Lora', serif",
             fontWeight: 900,
             fontSize: 'clamp(2.5rem, 6vw, 5rem)',
           }}
@@ -79,7 +79,7 @@ export default function CTASection() {
         </div>
 
         {/* Trust micro-copy */}
-        <p className="text-xs text-ivory-300/30 font-mono mt-8 tracking-wider">
+        <p className="text-xs text-ivory-300/30 font-body mt-8 tracking-wider">
           No account required · Secure file upload · 256-bit SSL encryption
         </p>
       </div>

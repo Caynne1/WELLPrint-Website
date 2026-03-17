@@ -34,12 +34,12 @@ export default function AdminOrdersPage() {
     <AdminLayout>
       <div className="mb-7 flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-white text-2xl font-bold mb-1" style={{ fontFamily: "'DM Serif Display', serif" }}>Orders</h1>
+          <h1 className="text-white text-2xl font-bold mb-1" style={{ fontFamily: "'Lora', serif" }}>Orders</h1>
           <p className="text-ivory-300/40 text-sm">
             {loading ? 'Loading…' : `${orders.length} total · ${orders.filter(o => o.status === 'new').length} new`}
           </p>
         </div>
-        <button onClick={refetch} className="flex items-center gap-2 px-3 py-2 rounded-sm text-xs font-mono border border-white/[0.08] text-ivory-300/40 hover:text-white transition-all">
+        <button onClick={refetch} className="flex items-center gap-2 px-3 py-2 rounded-sm text-xs font-body border border-white/[0.08] text-ivory-300/40 hover:text-white transition-all">
           <RefreshCw size={12} /> Refresh
         </button>
       </div>
@@ -58,11 +58,11 @@ export default function AdminOrdersPage() {
             const active = filter === s
             return (
               <button key={s} onClick={() => setFilter(s)}
-                className="text-[10px] font-mono px-3 py-1.5 rounded-sm border transition-all capitalize"
+                className="text-[10px] font-body px-3 py-1.5 rounded-sm border transition-all capitalize"
                 style={{
-                  background: active ? (st ? st.bg : 'rgba(45,176,75,0.1)') : 'transparent',
+                  background: active ? (st ? st.bg : 'rgba(19,161,80,0.1)') : 'transparent',
                   color: active ? (st ? st.color : 'var(--wp-green)') : 'rgba(216,216,216,0.35)',
-                  borderColor: active ? (st ? st.color + '40' : 'rgba(45,176,75,0.3)') : 'rgba(255,255,255,0.08)',
+                  borderColor: active ? (st ? st.color + '40' : 'rgba(19,161,80,0.3)') : 'rgba(255,255,255,0.08)',
                 }}>
                 {st ? st.label : 'All'}
               </button>
@@ -79,11 +79,11 @@ export default function AdminOrdersPage() {
           </div>
         ) : error ? (
           <div className="py-16 text-center">
-            <p className="text-ivory-300/30 font-mono text-sm mb-3">{error}</p>
-            <button onClick={refetch} className="text-xs font-mono text-wp-green hover:underline">Try again</button>
+            <p className="text-ivory-300/30 font-body text-sm mb-3">{error}</p>
+            <button onClick={refetch} className="text-xs font-body text-wp-green hover:underline">Try again</button>
           </div>
         ) : filtered.length === 0 ? (
-          <div className="py-16 text-center text-ivory-300/30 font-mono text-sm">
+          <div className="py-16 text-center text-ivory-300/30 font-body text-sm">
             {orders.length === 0 ? 'No orders yet' : 'No orders match your filters'}
           </div>
         ) : (
@@ -98,19 +98,19 @@ export default function AdminOrdersPage() {
                   <div className="min-w-0 flex-1 grid sm:grid-cols-3 gap-2">
                     <div>
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-white text-xs font-mono font-bold">{order.id}</span>
-                        {unreplied && <span className="text-[8px] font-mono px-1.5 py-0.5 rounded-sm" style={{ background: 'rgba(236,0,140,0.15)', color: '#EC008C' }}>NEW</span>}
+                        <span className="text-white text-xs font-body font-bold">{order.id}</span>
+                        {unreplied && <span className="text-[8px] font-body px-1.5 py-0.5 rounded-sm" style={{ background: 'rgba(236,0,140,0.15)', color: '#CD1B6E' }}>NEW</span>}
                       </div>
-                      <span className="text-[9px] font-mono px-2 py-0.5 rounded-sm mt-1 inline-block"
+                      <span className="text-[9px] font-body px-2 py-0.5 rounded-sm mt-1 inline-block"
                         style={{ background: st.bg, color: st.color }}>{st.label}</span>
                     </div>
                     <div className="hidden sm:block">
                       <div className="text-white text-xs font-semibold truncate">{order.customer.name}</div>
-                      <div className="text-ivory-300/35 text-[10px] font-mono truncate">{order.customer.email}</div>
+                      <div className="text-ivory-300/35 text-[10px] font-body truncate">{order.customer.email}</div>
                     </div>
                     <div className="hidden sm:block text-right">
-                      <div className="text-white text-xs font-mono font-bold">{formatPHP(order.estimatedTotal)}</div>
-                      <div className="text-ivory-300/25 text-[10px] font-mono">
+                      <div className="text-white text-xs font-body font-bold">{formatPHP(order.estimatedTotal)}</div>
+                      <div className="text-ivory-300/25 text-[10px] font-body">
                         {order.items.length} item{order.items.length !== 1 ? 's' : ''} · {timeAgo(order.createdAt)}
                       </div>
                     </div>

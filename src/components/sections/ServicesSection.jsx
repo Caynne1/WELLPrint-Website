@@ -108,7 +108,7 @@ function ServiceCard({ Icon, title, desc, tag, href, accent, delay }) {
         <div className="flex items-start justify-between mb-3">
           <h3
             className="text-ivory-100 text-lg font-medium pr-4 leading-tight"
-            style={{ fontFamily: "'DM Serif Display', serif" }}
+            style={{ fontFamily: "'Lora', serif" }}
           >
             {title}
           </h3>
@@ -170,7 +170,7 @@ export default function ServicesSection() {
         <div ref={titleRef} className="animate-on-scroll mb-16">
           <div className="flex items-center gap-4 mb-5">
             <div className="h-[1px] w-12 bg-wp-green" />
-            <span className="font-mono text-[10px] tracking-[0.25em] text-wp-green uppercase">
+            <span className="font-body text-[10px] tracking-[0.25em] text-wp-green uppercase">
               What We Offer
             </span>
           </div>
@@ -178,7 +178,7 @@ export default function ServicesSection() {
             <h2
               className="text-ivory-50 leading-tight max-w-lg"
               style={{
-                fontFamily: "'Playfair Display', serif",
+                fontFamily: "'Lora', serif",
                 fontWeight: 900,
                 fontSize: 'clamp(2.2rem, 4vw, 3.5rem)',
               }}

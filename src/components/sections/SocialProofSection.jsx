@@ -49,11 +49,11 @@ function TestimonialCard({ quote, author, role, init, delay }) {
       </p>
       <div className="flex items-center gap-3">
         <div className="w-9 h-9 bg-wp-green flex items-center justify-center flex-shrink-0">
-          <span className="text-ink-950 font-bold text-xs font-mono">{init}</span>
+          <span className="text-ink-950 font-bold text-xs font-body">{init}</span>
         </div>
         <div>
           <p className="text-ivory-200 text-sm font-semibold leading-tight">{author}</p>
-          <p className="text-xs text-ivory-300/40 font-mono">{role}</p>
+          <p className="text-xs text-ivory-300/40 font-body">{role}</p>
         </div>
       </div>
     </div>
@@ -93,7 +93,7 @@ export default function SocialProofSection() {
             <div className="w-16 h-16 bg-ink-950 flex items-center justify-center flex-shrink-0">
               <span
                 className="text-wp-green font-black text-2xl leading-none"
-                style={{ fontFamily: "'Playfair Display', serif" }}
+                style={{ fontFamily: "'Lora', serif" }}
               >
                 10%
               </span>
@@ -101,7 +101,7 @@ export default function SocialProofSection() {
             <div>
               <h3
                 className="text-ink-950 text-xl md:text-2xl font-black leading-tight"
-                style={{ fontFamily: "'Playfair Display', serif" }}
+                style={{ fontFamily: "'Lora', serif" }}
               >
                 Bulk Order Discount — Automatic
               </h3>
@@ -127,13 +127,13 @@ export default function SocialProofSection() {
         </div>
         <div className="max-w-7xl mx-auto px-6">
           <div className="mb-14 text-center">
-            <span className="font-mono text-[10px] tracking-[0.25em] text-wp-green uppercase block mb-4">
+            <span className="font-body text-[10px] tracking-[0.25em] text-wp-green uppercase block mb-4">
               Client Stories
             </span>
             <h2
               className="text-ivory-50"
               style={{
-                fontFamily: "'Playfair Display', serif",
+                fontFamily: "'Lora', serif",
                 fontWeight: 900,
                 fontSize: 'clamp(1.8rem, 3.5vw, 2.8rem)',
               }}

@@ -57,13 +57,13 @@ export default function ProcessSection() {
           ref={el => refs.current[0] = el}
           className="animate-on-scroll mb-20 text-center"
         >
-          <span className="font-mono text-[10px] tracking-[0.25em] text-wp-green uppercase block mb-4">
+          <span className="font-body text-[10px] tracking-[0.25em] text-wp-green uppercase block mb-4">
             Our Process
           </span>
           <h2
             className="text-ivory-50"
             style={{
-              fontFamily: "'Playfair Display', serif",
+              fontFamily: "'Lora', serif",
               fontWeight: 900,
               fontSize: 'clamp(2rem, 4vw, 3.2rem)',
             }}
@@ -96,7 +96,7 @@ export default function ProcessSection() {
                 </div>
                 {/* Step number — floating */}
                 <span
-                  className="absolute -top-3 -right-3 w-7 h-7 bg-wp-green flex items-center justify-center text-ink-950 font-black font-mono text-xs z-20"
+                  className="absolute -top-3 -right-3 w-7 h-7 bg-wp-green flex items-center justify-center text-ink-950 font-black font-body text-xs z-20"
                 >
                   {i + 1}
                 </span>
@@ -104,7 +104,7 @@ export default function ProcessSection() {
 
               <h3
                 className="text-ivory-100 text-lg mb-3 leading-tight"
-                style={{ fontFamily: "'DM Serif Display', serif" }}
+                style={{ fontFamily: "'Lora', serif" }}
               >
                 {title}
               </h3>

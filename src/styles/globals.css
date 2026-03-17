@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ─── CSS Design Tokens ─── */
+/* ─── CSS Design Tokens — WELLPrint Brand Book ─── */
 :root {
   --ink-950:     #0A0A0A;
   --ink-900:     #111111;
@@ -13,14 +13,22 @@
   --ivory-200:   #F0F0F0;
   --ivory-300:   #D8D8D8;
 
-  /* WellPrint brand — from logo */
-  --wp-green:    #2DB04B;
-  --wp-green-dk: #1E8A38;
-  --wp-green-lt: #3FCF5E;
-  --wp-cyan:     #29ABE2;
-  --wp-magenta:  #EC008C;
-  --wp-yellow:   #FBB03B;
-  --wp-black:    #231F20;
+  /* WELLPrint Brand Book — Main Colors */
+  --wp-dark:       #1A1F2C;  /* main dark background */
+  --wp-green-main: #004600;  /* main dark green */
+  --wp-yellow-main:#EAC120;  /* main yellow */
+
+  /* WELLPrint Brand Book — Secondary Colors (CMYK-derived) */
+  --wp-green:    #13A150;
+  --wp-cyan:     #1993D2;
+  --wp-magenta:  #CD1B6E;
+  --wp-yellow:   #FDC010;
+  --wp-black:    #000000;
+
+  /* Derived shades */
+  --wp-green-dk: #006318;
+  --wp-green-lt: #7EB751;
+  --wp-cyan-dk:  #002C5F;
 
   --transition-fast:   150ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-normal: 300ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -40,123 +48,233 @@
   --scrollbar-track: #111111;
 }
 
-/* ─── Light Mode Overrides ─── */
+/* ─── Light Mode — WELLPrint Brand Book ─── */
+/* Palette: muted sage-grey · desaturated greens · soft warm neutrals — easy on eyes */
 [data-theme="light"] {
-  --ink-950:    #E4E8EE;
-  --ink-900:    #EEF1F6;
-  --ink-800:    #FFFFFF;
-  --ink-700:    #DDE2EA;
+  /* Surface scale — muted, low-brightness, not blinding white */
+  --ink-950:    #D8DDD6;   /* muted sage — page bg */
+  --ink-900:    #E0E5DE;   /* slightly lighter sections */
+  --ink-800:    #E8EDE6;   /* card surface */
+  --ink-700:    #CDD3CB;   /* sunken / divider bg */
 
-  --ivory-50:   #0D0D0D;
-  --ivory-100:  #1A1A1A;
-  --ivory-200:  #252525;
-  --ivory-300:  #2E2E2E;
+  /* Text — soft dark, not harsh black */
+  --ivory-50:   #1A2E1A;   /* headings */
+  --ivory-100:  #223322;   /* sub-headings */
+  --ivory-200:  #2E4230;   /* body text dark */
+  --ivory-300:  #3D5040;   /* body text medium */
 
-  --surface-page:    #EEF1F6;
-  --surface-card:    #FFFFFF;
-  --surface-raised:  #DDE2EA;
-  --surface-sunken:  #E4E8EE;
-  --border-subtle:   rgba(0,0,0,0.09);
-  --border-medium:   rgba(0,0,0,0.15);
-  --text-primary:    #0D0D0D;
-  --text-secondary:  #2E2E2E;
-  --text-muted:      #5A6270;
-  --text-faint:      #8B95A1;
-  --scrollbar-track: #EEF1F6;
+  /* Semantic surfaces */
+  --surface-page:    #D8DDD6;
+  --surface-card:    #E8EDE6;
+  --surface-raised:  #D0D6CE;
+  --surface-sunken:  #C8CEC6;
+
+  /* Borders — subtle, low contrast */
+  --border-subtle:   rgba(0,50,0,0.10);
+  --border-medium:   rgba(0,50,0,0.18);
+
+  /* Text tokens */
+  --text-primary:    #1A2E1A;
+  --text-secondary:  #2E4230;
+  --text-muted:      #506650;
+  --text-faint:      #7A907A;
+  --scrollbar-track: #D0D6CE;
+
+  /* Brand accent overrides for light */
+  --wp-green:        #2A5C2A;
+  --wp-green-dk:     #1A3C1A;
+  --wp-green-lt:     #4A8C4A;
+  --wp-yellow-main:  #C8A800;
 }
 
-/* ── Backgrounds ── */
-[data-theme="light"] .bg-ink-950 { background-color: #E4E8EE !important; }
-[data-theme="light"] .bg-ink-900 { background-color: #EEF1F6 !important; }
-[data-theme="light"] .bg-ink-800 { background-color: #FFFFFF !important; }
-[data-theme="light"] .bg-ink-700 { background-color: #DDE2EA !important; }
-[data-theme="light"] .bg-ink-600 { background-color: #CDD4DE !important; }
-[data-theme="light"] [class*="bg-ink-800\/"] { background-color: rgba(255,255,255,0.85) !important; }
-[data-theme="light"] [class*="bg-ink-900\/"] { background-color: rgba(238,241,246,0.9)  !important; }
-[data-theme="light"] [class*="bg-ink-950\/"] { background-color: rgba(228,232,238,0.9)  !important; }
-[data-theme="light"] .bg-ivory-200\/10 { background-color: rgba(0,0,0,0.05) !important; }
-[data-theme="light"] .bg-ivory-200\/5  { background-color: rgba(0,0,0,0.03) !important; }
+/* ── Page & section backgrounds — muted, low brightness ── */
+[data-theme="light"] body {
+  background-color: #D8DDD6;
+  background-image: none;
+}
 
-/* ── Headings always dark ── */
+[data-theme="light"] .bg-ink-950 { background-color: #D8DDD6 !important; }
+[data-theme="light"] .bg-ink-900 { background-color: #E0E5DE !important; }
+[data-theme="light"] .bg-ink-800 { background-color: #E8EDE6 !important; }
+[data-theme="light"] .bg-ink-700 { background-color: #CDD3CB !important; }
+[data-theme="light"] .bg-ink-600 { background-color: #C5CBC3 !important; }
+[data-theme="light"] [class*="bg-ink-800\/"] { background-color: rgba(232,237,230,0.92) !important; }
+[data-theme="light"] [class*="bg-ink-900\/"] { background-color: rgba(224,229,222,0.95) !important; }
+[data-theme="light"] [class*="bg-ink-950\/"] { background-color: rgba(216,221,214,0.95) !important; }
+[data-theme="light"] .bg-ivory-200\/10 { background-color: rgba(0,50,0,0.05) !important; }
+[data-theme="light"] .bg-ivory-200\/5  { background-color: rgba(0,50,0,0.03) !important; }
+
+/* ── Headings — brand dark green (not inside sidebar) ── */
 [data-theme="light"] h1,
 [data-theme="light"] h2,
 [data-theme="light"] h3,
 [data-theme="light"] h4,
-[data-theme="light"] h5 { color: #0D0D0D !important; }
+[data-theme="light"] h5 { color: #1A2E1A !important; }
 
-/* ── text-white → near-black ── */
-[data-theme="light"] .text-white        { color: #0D0D0D !important; }
-[data-theme="light"] .hover\:text-white:hover { color: #0D0D0D !important; }
+/* ── text-white → brand dark green (but NOT inside aside/sidebar) ── */
+[data-theme="light"] .text-white:not(aside .text-white)              { color: #1A2E1A !important; }
+[data-theme="light"] .hover\:text-white:hover:not(aside *)           { color: #0E1E0E !important; }
+[data-theme="light"] aside .text-white                               { color: #FFFFFF !important; }
 
-/* ── Solid ivory text ── */
-[data-theme="light"] .text-ivory-50     { color: #0D0D0D !important; }
-[data-theme="light"] .text-ivory-100    { color: #1A1A1A !important; }
-[data-theme="light"] .text-ivory-200    { color: #252525 !important; }
-[data-theme="light"] .text-ivory-300    { color: #2E2E2E !important; }
+/* ── Solid ivory text → green scale (not inside aside) ── */
+[data-theme="light"] .text-ivory-50:not(aside *)  { color: #1A2E1A !important; }
+[data-theme="light"] .text-ivory-100:not(aside *) { color: #223322 !important; }
+[data-theme="light"] .text-ivory-200:not(aside *) { color: #2E4230 !important; }
+[data-theme="light"] .text-ivory-300:not(aside *) { color: #3D5040 !important; }
 
-/* ── Opacity variants — mapped to readable greys ── */
-[data-theme="light"] .text-ivory-300\/10  { color: #C8CDD4 !important; }
-[data-theme="light"] .text-ivory-300\/15  { color: #B8BFC9 !important; }
-[data-theme="light"] .text-ivory-300\/20  { color: #A8B0BB !important; }
-[data-theme="light"] .text-ivory-300\/25  { color: #9CA3AF !important; }
-[data-theme="light"] .text-ivory-300\/30  { color: #8B95A1 !important; }
-[data-theme="light"] .text-ivory-300\/35  { color: #7A8491 !important; }
-[data-theme="light"] .text-ivory-300\/40  { color: #6B7280 !important; }
-[data-theme="light"] .text-ivory-300\/45  { color: #5F6B78 !important; }
-[data-theme="light"] .text-ivory-300\/50  { color: #525E6A !important; }
-[data-theme="light"] .text-ivory-300\/55  { color: #48545F !important; }
-[data-theme="light"] .text-ivory-300\/60  { color: #3D4955 !important; }
-[data-theme="light"] .text-ivory-300\/65  { color: #333F4A !important; }
-[data-theme="light"] .text-ivory-300\/70  { color: #2A3540 !important; }
-[data-theme="light"] .text-ivory-200\/70  { color: #333F4A !important; }
-[data-theme="light"] .text-ivory-200\/80  { color: #252F3A !important; }
-[data-theme="light"] .hover\:text-ivory-300\/60:hover { color: #3D4955 !important; }
-[data-theme="light"] .placeholder\:text-ivory-300\/25::placeholder { color: #9CA3AF !important; }
+/* Inside aside — always white-scale */
+[data-theme="light"] aside .text-ivory-50,
+[data-theme="light"] aside .text-ivory-100,
+[data-theme="light"] aside .text-ivory-200,
+[data-theme="light"] aside .text-ivory-300  { color: rgba(255,255,255,0.85) !important; }
+[data-theme="light"] aside [class*="text-ivory-300\/"] { color: rgba(255,255,255,0.50) !important; }
 
-/* ── Borders → dark subtle lines ── */
-[data-theme="light"] [class*="border-white"]  { border-color: rgba(0,0,0,0.10) !important; }
-[data-theme="light"] [class*="border-ivory"]  { border-color: rgba(0,0,0,0.10) !important; }
-[data-theme="light"] [class*="divide-white"]  { border-color: rgba(0,0,0,0.08) !important; }
+/* ── Opacity variants — green-tinted readable scale ── */
+[data-theme="light"] .text-ivory-300\/10  { color: #B8CCB8 !important; }
+[data-theme="light"] .text-ivory-300\/15  { color: #A8C0A8 !important; }
+[data-theme="light"] .text-ivory-300\/20  { color: #98B498 !important; }
+[data-theme="light"] .text-ivory-300\/25  { color: #88A888 !important; }
+[data-theme="light"] .text-ivory-300\/30  { color: #6A8A70 !important; }
+[data-theme="light"] .text-ivory-300\/35  { color: #6A8F6A !important; }
+[data-theme="light"] .text-ivory-300\/40  { color: #506655 !important; }
+[data-theme="light"] .text-ivory-300\/45  { color: #4E7555 !important; }
+[data-theme="light"] .text-ivory-300\/50  { color: #3A5040 !important; }
+[data-theme="light"] .text-ivory-300\/55  { color: #3A5E42 !important; }
+[data-theme="light"] .text-ivory-300\/60  { color: #2C4432 !important; }
+[data-theme="light"] .text-ivory-300\/65  { color: #28472F !important; }
+[data-theme="light"] .text-ivory-300\/70  { color: #1A3020 !important; }
+[data-theme="light"] .text-ivory-200\/70  { color: #223828 !important; }
+[data-theme="light"] .text-ivory-200\/80  { color: #1A2E1A !important; }
+[data-theme="light"] .hover\:text-ivory-300\/60:hover       { color: #305238 !important; }
+[data-theme="light"] .placeholder\:text-ivory-300\/25::placeholder { color: #88A888 !important; }
 
-/* ── Navbar scrolled ── */
-[data-theme="light"] .bg-ink-900\/96 { background-color: rgba(238,241,246,0.97) !important; }
+/* ── Borders — warm green-tinted ── */
+[data-theme="light"] [class*="border-white"]  { border-color: rgba(0,50,0,0.12) !important; }
+[data-theme="light"] [class*="border-ivory"]  { border-color: rgba(0,50,0,0.12) !important; }
+[data-theme="light"] [class*="divide-white"]  { border-color: rgba(0,50,0,0.08) !important; }
 
-/* ── Cards ── */
+/* ── Navbar — warm white with green border accent ── */
+[data-theme="light"] .bg-ink-900\/96 {
+  background-color: rgba(224,229,222,0.97) !important;
+  border-bottom-color: rgba(0,50,0,0.12) !important;
+}
+
+/* ── Cards — clean white with warm shadow ── */
 [data-theme="light"] .card-press {
-  background: #FFFFFF !important;
-  border-color: rgba(0,0,0,0.09) !important;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.07), 0 4px 16px rgba(0,0,0,0.05);
+  background: #E0E6DE !important;
+  border-color: rgba(0,50,0,0.09) !important;
+  box-shadow: 0 1px 3px rgba(0,30,0,0.04), 0 4px 16px rgba(0,30,0,0.03);
 }
 [data-theme="light"] .card-press:hover {
-  box-shadow: 0 8px 32px rgba(0,0,0,0.12), 0 0 0 1px rgba(45,176,75,0.25) !important;
+  border-color: rgba(0,50,0,0.18) !important;
+  box-shadow: 0 6px 24px rgba(0,30,0,0.07), 0 0 0 1px rgba(0,50,0,0.10) !important;
+  transform: translateY(-4px);
+}
+
+/* ── Buttons in light mode — rich dark green ── */
+[data-theme="light"] .btn-press {
+  background: #2A5C2A !important;
+  border-color: #1A3C1A !important;
+  box-shadow: 4px 4px 0 #1A3C1A !important;
+  color: #D4B000 !important;
+}
+[data-theme="light"] .btn-press:hover {
+  background: #3A6C3A !important;
+  box-shadow: 6px 6px 0 #1A3C1A !important;
+  color: #FFFFFF !important;
+}
+[data-theme="light"] .btn-press-ghost:hover {
+  border-color: #004600 !important;
+  color: #004600 !important;
+  background: rgba(0,70,0,0.06) !important;
+}
+[data-theme="light"] .btn-press-outline {
+  color: #2A5C2A !important;
+  border-color: #2A5C2A !important;
+}
+[data-theme="light"] .btn-press-outline:hover {
+  background: #2A5C2A !important;
+  color: #D4B000 !important;
 }
 
 /* ── Inputs ── */
 [data-theme="light"] input,
 [data-theme="light"] select,
 [data-theme="light"] textarea {
-  background-color: #F8F9FB !important;
-  color: #0D0D0D !important;
-  border-color: rgba(0,0,0,0.15) !important;
+  background-color: #DDE3DB !important;
+  color: #1A2E1A !important;
+  border-color: rgba(0,50,0,0.18) !important;
+}
+[data-theme="light"] input:focus,
+[data-theme="light"] select:focus,
+[data-theme="light"] textarea:focus {
+  border-color: #004600 !important;
+  box-shadow: 0 0 0 3px rgba(0,50,0,0.08) !important;
+  outline: none !important;
 }
 [data-theme="light"] input::placeholder,
-[data-theme="light"] textarea::placeholder { color: #9CA3AF !important; }
+[data-theme="light"] textarea::placeholder { color: #7A9B7A !important; }
 
 /* ── Section rule ── */
 [data-theme="light"] .section-rule {
-  background: linear-gradient(90deg, transparent, rgba(0,0,0,0.09), transparent);
+  background: linear-gradient(90deg, transparent, rgba(0,50,0,0.12), transparent);
 }
 
 /* ── Badges ── */
 [data-theme="light"] .badge-ivory {
-  background: rgba(0,0,0,0.06);
-  color: #3D4955;
-  border-color: rgba(0,0,0,0.12);
+  background: rgba(0,70,0,0.07);
+  color: #1A3D1A;
+  border-color: rgba(0,70,0,0.15);
 }
+[data-theme="light"] .badge-green {
+  background: rgba(0,50,0,0.08);
+  color: #004600;
+  border-color: rgba(0,70,0,0.2);
+}
+[data-theme="light"] .badge-yellow {
+  background: rgba(234,193,32,0.15);
+  color: #7A5E00;
+  border-color: rgba(234,193,32,0.4);
+}
+[data-theme="light"] .badge-cyan {
+  background: rgba(25,147,210,0.10);
+  color: #00558A;
+  border-color: rgba(25,147,210,0.25);
+}
+[data-theme="light"] .badge-magenta {
+  background: rgba(205,27,110,0.08);
+  color: #8A0040;
+  border-color: rgba(205,27,110,0.2);
+}
+
+/* ── CMYK bar in light — bolder ── */
+[data-theme="light"] .cmyk-bar {
+  background: linear-gradient(90deg, #1993D2 25%, #CD1B6E 25% 50%, #EAC120 50% 75%, #004600 75%);
+  height: 4px;
+}
+
+/* ── Green underline hover ── */
+[data-theme="light"] .green-underline::after { background: #004600; }
+
+/* ── Focus ring ── */
+[data-theme="light"] *:focus-visible { outline-color: #004600 !important; }
+
+/* ── Scrollbar ── */
+[data-theme="light"] ::-webkit-scrollbar-thumb { background: #004600; }
+[data-theme="light"] ::-webkit-scrollbar-thumb:hover { background: #006318; }
+
+/* ── wp-green glow → forest green glow ── */
+[data-theme="light"] [style*="rgba(19,161,80"] {
+  /* passthrough — handled by token override */
+}
+
+/* ── Hero section in light — cream with golden warmth ── */
+[data-theme="light"] .bg-wp-green\/\[0\.04\]  { background-color: rgba(0,70,0,0.06) !important; }
+[data-theme="light"] .bg-press-amber\/\[0\.03\] { background-color: rgba(234,193,32,0.06) !important; }
 
 /* ── Smooth transitions ── */
 [data-theme="light"] * {
-  transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+  transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -172,7 +290,7 @@ html {
 body {
   background-color: var(--surface-page);
   color: var(--text-primary);
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Montserrat', sans-serif;
   font-size: 16px;
   line-height: 1.6;
   overflow-x: hidden;
@@ -184,10 +302,11 @@ body {
 ::-webkit-scrollbar-thumb { background: var(--wp-green); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--wp-green-lt); }
 
-.font-display { font-family: 'Playfair Display', Georgia, serif; }
-.font-heading { font-family: 'DM Serif Display', Georgia, serif; }
-.font-body    { font-family: 'DM Sans', sans-serif; }
-.font-mono    { font-family: 'DM Mono', monospace; }
+/* Brand Book Typefaces: Lora Bold for headings, Montserrat for sub-headings & body */
+.font-display { font-family: 'Lora', Georgia, serif; }
+.font-heading { font-family: 'Lora', Georgia, serif; }
+.font-body    { font-family: 'Montserrat', sans-serif; }
+.font-mono    { font-family: 'Montserrat', sans-serif; }
 
 .section-rule {
   border: none;
@@ -200,7 +319,7 @@ body {
   display: inline-flex; align-items: center; gap: 0.5rem;
   padding: 0.75rem 1.75rem;
   background: var(--wp-green); color: #fff;
-  font-family: 'DM Sans', sans-serif; font-weight: 700;
+  font-family: 'Montserrat', sans-serif; font-weight: 700;
   font-size: 0.875rem; letter-spacing: 0.04em; text-transform: uppercase;
   border: 2px solid var(--wp-green-dk);
   box-shadow: 4px 4px 0 var(--wp-green-dk);
@@ -214,19 +333,19 @@ body {
   display: inline-flex; align-items: center; gap: 0.5rem;
   padding: 0.75rem 1.75rem;
   background: transparent; color: var(--text-primary);
-  font-family: 'DM Sans', sans-serif; font-weight: 600;
+  font-family: 'Montserrat', sans-serif; font-weight: 600;
   font-size: 0.875rem; letter-spacing: 0.04em; text-transform: uppercase;
   border: 2px solid var(--border-medium);
   cursor: pointer; text-decoration: none; border-radius: 2px;
   transition: all var(--transition-fast);
 }
-.btn-press-ghost:hover { border-color: var(--wp-green); color: var(--wp-green); background: rgba(45,176,75,0.07); }
+.btn-press-ghost:hover { border-color: var(--wp-green); color: var(--wp-green); background: rgba(19,161,80,0.07); }
 
 .btn-press-outline {
   display: inline-flex; align-items: center; gap: 0.5rem;
   padding: 0.75rem 1.75rem;
   background: transparent; color: var(--wp-green);
-  font-family: 'DM Sans', sans-serif; font-weight: 700;
+  font-family: 'Montserrat', sans-serif; font-weight: 700;
   font-size: 0.875rem; letter-spacing: 0.04em; text-transform: uppercase;
   border: 2px solid var(--wp-green);
   cursor: pointer; text-decoration: none; border-radius: 2px;
@@ -238,12 +357,12 @@ body {
 .badge {
   display: inline-block; padding: 0.2rem 0.65rem;
   font-size: 0.68rem; font-weight: 600; letter-spacing: 0.09em;
-  text-transform: uppercase; font-family: 'DM Mono', monospace; border-radius: 2px;
+  text-transform: uppercase; font-family: 'Montserrat', sans-serif; border-radius: 2px;
 }
-.badge-green   { background: rgba(45,176,75,0.12);  color: #3FCF5E; border: 1px solid rgba(45,176,75,0.3); }
-.badge-cyan    { background: rgba(41,171,226,0.12); color: #5CC8F0; border: 1px solid rgba(41,171,226,0.3); }
-.badge-yellow  { background: rgba(251,176,59,0.12); color: #FBB03B; border: 1px solid rgba(251,176,59,0.3); }
-.badge-magenta { background: rgba(236,0,140,0.10);  color: #F050AA; border: 1px solid rgba(236,0,140,0.25); }
+.badge-green   { background: rgba(19,161,80,0.12);   color: #7EB751; border: 1px solid rgba(19,161,80,0.3); }
+.badge-cyan    { background: rgba(25,147,210,0.12);  color: #00BAFF; border: 1px solid rgba(25,147,210,0.3); }
+.badge-yellow  { background: rgba(253,192,16,0.12);  color: #FDC010; border: 1px solid rgba(253,192,16,0.3); }
+.badge-magenta { background: rgba(205,27,110,0.10);  color: #FF66A6; border: 1px solid rgba(205,27,110,0.25); }
 .badge-ivory   { background: rgba(240,240,240,0.07); color: #D8D8D8; border: 1px solid rgba(240,240,240,0.14); }
 
 /* ── Cards ── */
@@ -255,8 +374,8 @@ body {
 }
 .card-press:hover {
   transform: translateY(-4px);
-  border-color: rgba(45,176,75,0.28);
-  box-shadow: 0 16px 40px rgba(0,0,0,0.15), 0 0 0 1px rgba(45,176,75,0.08);
+  border-color: rgba(19,161,80,0.28);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.15), 0 0 0 1px rgba(19,161,80,0.08);
 }
 
 /* ── Underline hover ── */
@@ -286,10 +405,242 @@ body {
 @keyframes slideLeft{ 0% { opacity:0; transform:translateX(40px); } 100% { opacity:1; transform:translateX(0); } }
 @keyframes lineDraw { 0% { stroke-dashoffset:600; } 100% { stroke-dashoffset:0; } }
 
-/* ── CMYK color strip ── */
+/* ── CMYK color strip — Brand Book exact colors ── */
 .cmyk-bar {
   display: flex; height: 3px;
-  background: linear-gradient(90deg, #29ABE2 25%, #EC008C 25% 50%, #FBB03B 50% 75%, #231F20 75%);
+  background: linear-gradient(90deg, #1993D2 25%, #CD1B6E 25% 50%, #FDC010 50% 75%, #000000 75%);
 }
 
 *:focus-visible { outline: 2px solid var(--wp-green); outline-offset: 3px; }
+/* ═══════════════════════════════════════════════════════
+   LIGHT MODE — Section & Component Deep Overrides
+   Based on WELLPrint Brand Book: warm cream · dark green · golden yellow
+   ═══════════════════════════════════════════════════════ */
+
+/* ── Hero: warm cream bg with subtle golden radial ── */
+[data-theme="light"] section.bg-ink-950,
+[data-theme="light"] section.min-h-screen {
+  background-color: #E0E5DE !important;
+}
+
+/* ── Section alternating warmth ── */
+[data-theme="light"] .bg-ink-950.py-24,
+[data-theme="light"] .bg-ink-950.py-20 {
+  background-color: #D8DDD6 !important;
+}
+
+/* ── Marquee strip — dark green anchor ── */
+[data-theme="light"] .bg-wp-green { background-color: #2A5C2A !important; }
+
+/* ── wp-green text → dark green ── */
+[data-theme="light"] .text-wp-green    { color: #2A5C2A !important; }
+[data-theme="light"] .text-wp-yellow   { color: #7A5E00 !important; }
+[data-theme="light"] .text-press-amber { color: #7A5E00 !important; }
+[data-theme="light"] .text-press-gold  { color: #7A5E00 !important; }
+
+/* ── wp-green border → dark green ── */
+[data-theme="light"] .border-wp-green { border-color: rgba(0,70,0,0.3) !important; }
+
+/* ── Background tints ── */
+[data-theme="light"] .bg-wp-green\/10  { background-color: rgba(0,70,0,0.07) !important; }
+[data-theme="light"] .bg-wp-green\/5   { background-color: rgba(0,70,0,0.04) !important; }
+[data-theme="light"] .bg-press-amber\/10 { background-color: rgba(234,193,32,0.10) !important; }
+
+/* ── Process step numbers — golden ── */
+[data-theme="light"] .text-wp-green.text-6xl,
+[data-theme="light"] .text-wp-green.text-5xl,
+[data-theme="light"] .text-wp-green.text-4xl {
+  color: #EAC120 !important;
+  -webkit-text-stroke: 1px #004600;
+  text-shadow: 2px 2px 0 rgba(0,70,0,0.15);
+}
+
+/* ── Social proof / stats numbers ── */
+[data-theme="light"] [class*="text-wp-green"][class*="font-black"] {
+  color: #004600 !important;
+}
+
+/* ── Footer in light — rich dark green ── */
+[data-theme="light"] footer,
+[data-theme="light"] footer.bg-ink-950 {
+  background-color: #1A3C1A !important;
+  background-image:
+    radial-gradient(ellipse 70% 50% at 50% 100%, rgba(180,150,0,0.08) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 30% at 0% 0%, rgba(42,92,42,0.06) 0%, transparent 50%);
+}
+[data-theme="light"] footer h1,
+[data-theme="light"] footer h2,
+[data-theme="light"] footer h3,
+[data-theme="light"] footer h4,
+[data-theme="light"] footer h5,
+[data-theme="light"] footer p,
+[data-theme="light"] footer a,
+[data-theme="light"] footer span,
+[data-theme="light"] footer .text-white,
+[data-theme="light"] footer .text-ivory-50,
+[data-theme="light"] footer .text-ivory-100,
+[data-theme="light"] footer .text-ivory-200,
+[data-theme="light"] footer .text-ivory-300 {
+  color: #F5F0E8 !important;
+}
+[data-theme="light"] footer a:hover { color: #EAC120 !important; }
+[data-theme="light"] footer [class*="text-ivory-300\/"] { color: rgba(245,240,232,0.55) !important; }
+[data-theme="light"] footer [class*="border-white"],
+[data-theme="light"] footer [class*="border-ivory"],
+[data-theme="light"] footer [class*="divide-white"] {
+  border-color: rgba(245,240,232,0.12) !important;
+}
+[data-theme="light"] footer .bg-wp-green,
+[data-theme="light"] footer .btn-press {
+  background: #EAC120 !important;
+  color: #004600 !important;
+  border-color: #C8A200 !important;
+  box-shadow: 4px 4px 0 #C8A200 !important;
+}
+[data-theme="light"] footer .btn-press:hover {
+  background: #FDC010 !important;
+  box-shadow: 6px 6px 0 #C8A200 !important;
+}
+[data-theme="light"] footer .cmyk-bar {
+  background: linear-gradient(90deg, #1993D2 25%, #CD1B6E 25% 50%, #EAC120 50% 75%, rgba(255,255,255,0.6) 75%);
+}
+
+/* ── CTA Section — dark green with gold accent ── */
+[data-theme="light"] .bg-wp-green-main,
+[data-theme="light"] section[class*="bg-wp-green"] {
+  background-color: #004600 !important;
+}
+[data-theme="light"] section[class*="bg-wp-green"] h1,
+[data-theme="light"] section[class*="bg-wp-green"] h2,
+[data-theme="light"] section[class*="bg-wp-green"] h3,
+[data-theme="light"] section[class*="bg-wp-green"] p,
+[data-theme="light"] section[class*="bg-wp-green"] span {
+  color: #F5F0E8 !important;
+}
+
+
+/* ── Watermark W — tinted green ── */
+[data-theme="light"] .text-ivory-200.text-\[38vw\] { color: rgba(0,70,0,0.04) !important; }
+
+/* ── Product cards — clean white with green hover ring ── */
+[data-theme="light"] .card-press .text-wp-green { color: #2A5C2A !important; }
+
+/* ── Price displays ── */
+[data-theme="light"] [style*="'Lora', serif"][style*="fontWeight: 900"],
+[data-theme="light"] [style*="'Lora', serif"][class*="font-black"] {
+  color: #004600 !important;
+}
+
+/* ── Tag/category chips ── */
+[data-theme="light"] [style*="background: rgba(19,161,80"] {
+  background: rgba(0,50,0,0.08) !important;
+}
+[data-theme="light"] [style*="color: var(--wp-green)"] { color: #004600 !important; }
+
+/* ── Horizontal rule / dividers ── */
+[data-theme="light"] hr { border-color: rgba(0,70,0,0.1) !important; }
+
+/* ═══════════════════════════════════════════════════════
+   LIGHT MODE — Admin Dashboard Content Area
+   ═══════════════════════════════════════════════════════ */
+
+/* Main content area background */
+[data-theme="light"] main {
+  background-color: #D0D6CE;
+}
+
+/* Dashboard cards */
+[data-theme="light"] main .card-press,
+[data-theme="light"] main [class*="bg-ink-800"],
+[data-theme="light"] main [class*="bg-ink-900"],
+[data-theme="light"] main [class*="bg-ink-950"] {
+  background-color: #E0E6DE !important;
+  border-color: rgba(0,50,0,0.10) !important;
+}
+
+/* All text inside main content — ensure dark on light */
+[data-theme="light"] main p,
+[data-theme="light"] main span,
+[data-theme="light"] main div,
+[data-theme="light"] main label,
+[data-theme="light"] main td,
+[data-theme="light"] main th {
+  color: inherit;
+}
+
+/* Ensure white text classes used in dashboard cards become dark */
+[data-theme="light"] main .text-white { color: #1A2E1A !important; }
+[data-theme="light"] main [class*="text-ivory"] { color: #1A3D1A !important; }
+[data-theme="light"] main [class*="text-ivory-300\/2"] { color: #6A8F6A !important; }
+[data-theme="light"] main [class*="text-ivory-300\/3"] { color: #4A6B4A !important; }
+[data-theme="light"] main [class*="text-ivory-300\/4"] { color: #305238 !important; }
+
+/* Stats number text */
+[data-theme="light"] main [style*="'Lora', serif"] { color: #1A2E1A !important; }
+
+/* Notification / alert banners */
+[data-theme="light"] main [style*="rgba(205,27,110"] {
+  background: rgba(205,27,110,0.06) !important;
+  border-color: rgba(205,27,110,0.2) !important;
+}
+[data-theme="light"] main [style*="color: '#CD1B6E'"],
+[data-theme="light"] main [style*='color: "#CD1B6E"'] { color: #8A0040 !important; }
+
+/* Order ID chips */
+[data-theme="light"] main [style*="background: 'rgba(19,161,80"],
+[data-theme="light"] main [style*='background: "rgba(19,161,80'] {
+  background: rgba(0,50,0,0.08) !important;
+}
+
+/* Table rows */
+[data-theme="light"] main tr { border-color: rgba(0,70,0,0.07) !important; }
+[data-theme="light"] main tr:hover { background: rgba(0,70,0,0.03) !important; }
+
+/* Status badges */
+[data-theme="light"] main [style*="rgba(19,161,80,0.1)"] { background: rgba(0,50,0,0.08) !important; }
+[data-theme="light"] main [style*="rgba(19,161,80,0.2)"] { background: rgba(0,50,0,0.12) !important; }
+
+/* Search/input in dashboard */
+[data-theme="light"] main input,
+[data-theme="light"] main select {
+  background: #FFFFFF !important;
+  color: #004600 !important;
+  border-color: rgba(0,70,0,0.18) !important;
+}
+
+/* Chart / mini bar areas */
+[data-theme="light"] main [style*="rgba(251,176,59"],
+[data-theme="light"] main [style*="rgba(253,192,16"] {
+  /* keep yellow tints as-is, they're fine */
+}
+
+/* ═══════════════════════════════════════════════════════
+   SIDEBAR — Always dark green bg, always white text
+   This is the ONLY aside rule. No other aside rules exist.
+   ═══════════════════════════════════════════════════════ */
+[data-theme="light"] aside {
+  background-color: #1E4020 !important;
+  color: rgba(255,255,255,0.85) !important;
+}
+
+/* Every child inherits white — but nav links get explicit rules */
+[data-theme="light"] aside *:not(nav a):not(nav a *) {
+  color: inherit;
+}
+
+/* Nav links: visible white by default */
+[data-theme="light"] aside nav a {
+  color: rgba(255,255,255,0.80) !important;
+}
+[data-theme="light"] aside nav a:hover {
+  color: #FFFFFF !important;
+}
+
+/* Navbar (header) links — dark green on cream */
+[data-theme="light"] header nav a {
+  color: #2C4F2C !important;
+}
+[data-theme="light"] header nav a:hover,
+[data-theme="light"] header nav a.active {
+  color: #004600 !important;
+}

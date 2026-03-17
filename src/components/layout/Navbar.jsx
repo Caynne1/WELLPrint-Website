@@ -55,11 +55,11 @@ export default function Navbar() {
         <nav className="max-w-7xl mx-auto px-6 flex items-center justify-between">
 
           {/* Logo */}
-          <Link to="/" className="flex items-center group" aria-label="WellPrint Home">
+          <Link to="/" className="flex items-center group" aria-label="WELLPrint Home">
             <img
-              src="/logo.svg"
-              alt="WellPrint"
-              className="h-10 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+              src={theme === 'dark' ? '/logos/horizontal/main-dark.svg' : '/logos/horizontal/main-light.svg'}
+              alt="WELLPrint"
+              className="h-9 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
             />
           </Link>
 
@@ -97,7 +97,7 @@ export default function Navbar() {
             >
               <span
                 className="absolute inset-0 rounded-sm opacity-0 group-hover:opacity-100 transition-opacity"
-                style={{ background: 'rgba(45,176,75,0.07)' }}
+                style={{ background: 'rgba(19,161,80,0.07)' }}
               />
               {theme === 'dark'
                 ? <Sun size={16} style={{ color: 'var(--wp-yellow)' }} />
@@ -107,7 +107,7 @@ export default function Navbar() {
 
             <Link to="/cart" className="relative p-2 text-ivory-300 hover:text-white transition-colors" aria-label="Cart">
               <ShoppingCart size={20} />
-              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full text-[9px] font-bold text-white flex items-center justify-center font-mono"
+              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full text-[9px] font-bold text-white flex items-center justify-center font-body"
                 style={{ background: 'var(--wp-green)' }}>{totalItems}</span>
             </Link>
 
@@ -120,13 +120,13 @@ export default function Navbar() {
                   style={{
                     borderColor: 'var(--wp-green)',
                     color: 'var(--wp-green)',
-                    background: 'rgba(45,176,75,0.08)',
+                    background: 'rgba(19,161,80,0.08)',
                   }}
                 >
                   <User size={14} />
                   <span className="max-w-[96px] truncate">{user.name}</span>
-                  <span className="text-[9px] font-mono uppercase px-1.5 py-0.5 rounded"
-                    style={{ background: 'rgba(45,176,75,0.15)', color: 'var(--wp-green)' }}>
+                  <span className="text-[9px] font-body uppercase px-1.5 py-0.5 rounded"
+                    style={{ background: 'rgba(19,161,80,0.15)', color: 'var(--wp-green)' }}>
                     {user.role}
                   </span>
                   <ChevronDown size={13} className={clsx('transition-transform duration-200', userMenuOpen && 'rotate-180')} />
@@ -146,7 +146,7 @@ export default function Navbar() {
                     <button
                       onClick={() => { logout(); setUserMenuOpen(false); navigate('/') }}
                       className="w-full flex items-center gap-2.5 px-4 py-3 text-sm transition-colors hover:bg-white/5"
-                      style={{ color: '#EC008C' }}>
+                      style={{ color: '#CD1B6E' }}>
                       <LogOut size={14} />
                       Sign Out
                     </button>
@@ -165,7 +165,7 @@ export default function Navbar() {
                 onMouseEnter={e => {
                   e.currentTarget.style.borderColor = 'var(--wp-green)'
                   e.currentTarget.style.color = 'var(--wp-green)'
-                  e.currentTarget.style.background = 'rgba(45,176,75,0.07)'
+                  e.currentTarget.style.background = 'rgba(19,161,80,0.07)'
                 }}
                 onMouseLeave={e => {
                   e.currentTarget.style.borderColor = 'var(--border-subtle)'
@@ -193,7 +193,7 @@ export default function Navbar() {
             </button>
             <Link to="/cart" className="relative p-2 text-ivory-300 hover:text-white">
               <ShoppingCart size={20} />
-              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full text-[9px] font-bold text-white flex items-center justify-center font-mono"
+              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full text-[9px] font-bold text-white flex items-center justify-center font-body"
                 style={{ background: 'var(--wp-green)' }}>{totalItems}</span>
             </Link>
             <button onClick={() => setMenuOpen(v => !v)} className="p-2 text-ivory-300 hover:text-white"
@@ -216,7 +216,7 @@ export default function Navbar() {
           style={{ background: 'var(--surface-page)', borderColor: 'var(--border-subtle)' }}
         >
           <div className="mb-8 flex justify-center">
-            <img src="/logo.png" alt="WellPrint" className="h-14 w-auto object-contain" />
+            <img src="/logos/vertical/main-dark.svg" alt="WELLPrint" className="h-20 w-auto object-contain" />
           </div>
           <ul className="flex flex-col gap-1 mb-8">
             {NAV_LINKS.map((link) => (
@@ -237,11 +237,11 @@ export default function Navbar() {
             {user ? (
               <div className="space-y-2">
                 <div className="flex items-center gap-2 px-4 py-3 rounded-sm"
-                  style={{ background: 'rgba(45,176,75,0.08)', border: '1px solid rgba(45,176,75,0.2)' }}>
+                  style={{ background: 'rgba(19,161,80,0.08)', border: '1px solid rgba(19,161,80,0.2)' }}>
                   <User size={14} style={{ color: 'var(--wp-green)' }} />
                   <span className="text-sm font-medium text-white flex-1 truncate">{user.name}</span>
-                  <span className="text-[9px] font-mono uppercase px-1.5 py-0.5 rounded"
-                    style={{ background: 'rgba(45,176,75,0.2)', color: 'var(--wp-green)' }}>{user.role}</span>
+                  <span className="text-[9px] font-body uppercase px-1.5 py-0.5 rounded"
+                    style={{ background: 'rgba(19,161,80,0.2)', color: 'var(--wp-green)' }}>{user.role}</span>
                 </div>
                 <Link to="/admin/dashboard"
                   className="flex items-center gap-2 px-4 py-3 rounded-sm text-sm transition-colors"
@@ -252,7 +252,7 @@ export default function Navbar() {
                 <button
                   onClick={() => { logout(); navigate('/') }}
                   className="w-full flex items-center gap-2 px-4 py-3 rounded-sm text-sm transition-colors"
-                  style={{ border: '1px solid rgba(236,0,140,0.25)', color: '#EC008C', background: 'rgba(236,0,140,0.06)' }}>
+                  style={{ border: '1px solid rgba(236,0,140,0.25)', color: '#CD1B6E', background: 'rgba(236,0,140,0.06)' }}>
                   <LogOut size={14} />
                   Sign Out
                 </button>
@@ -269,7 +269,7 @@ export default function Navbar() {
           </div>
           <div className="mt-auto">
             <div className="cmyk-bar rounded-full" />
-            <p className="text-center text-xs font-mono mt-3 tracking-wider" style={{ color: 'var(--text-faint)' }}>
+            <p className="text-center text-xs font-body mt-3 tracking-wider" style={{ color: 'var(--text-faint)' }}>
               Premium Printing Since 2010
             </p>
           </div>

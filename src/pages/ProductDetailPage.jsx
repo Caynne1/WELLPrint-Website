@@ -349,7 +349,7 @@ function Gallery({ count, accent }) {
       <div className="relative bg-ink-700 border border-white/[0.08] rounded-sm overflow-hidden" style={{ aspectRatio: '1/1' }}>
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
           <ImagePlus size={40} style={{ color: accent, opacity: 0.15 }} />
-          <span className="font-mono text-[10px] tracking-widest uppercase text-ivory-300/15">
+          <span className="font-body text-[10px] tracking-widest uppercase text-ivory-300/15">
             Product Image {active + 1}
           </span>
         </div>
@@ -412,7 +412,7 @@ function OptionGroup({ label, choices, selected, onSelect, accent }) {
   return (
     <div>
       <div className="flex items-baseline gap-2 mb-2.5">
-        <span className="font-mono text-[10px] tracking-widest uppercase text-ivory-300/40">{label}:</span>
+        <span className="font-body text-[10px] tracking-widest uppercase text-ivory-300/40">{label}:</span>
         <span className="text-white text-xs font-semibold">{displaySelected}</span>
       </div>
       <div className="flex flex-wrap gap-2 items-center">
@@ -420,7 +420,7 @@ function OptionGroup({ label, choices, selected, onSelect, accent }) {
           const isActive = !customMode && c === selected
           return (
             <button key={c} onClick={() => { onSelect(c); setCustomMode(false); setCustomInput('') }}
-              className="px-3 py-2 text-xs rounded-sm border transition-all font-mono"
+              className="px-3 py-2 text-xs rounded-sm border transition-all font-body"
               style={isActive
                 ? { borderColor: accent, color: accent, background: `${accent}12`, boxShadow: `0 0 0 1px ${accent}` }
                 : { borderColor: 'rgba(255,255,255,0.10)', color: 'rgba(216,216,216,0.45)', background: 'transparent' }
@@ -434,7 +434,7 @@ function OptionGroup({ label, choices, selected, onSelect, accent }) {
         {isQuantity && (
           <button
             onClick={() => { setCustomMode(true); setCustomInput(''); onSelect('Custom') }}
-            className="px-3 py-2 text-xs rounded-sm border transition-all font-mono"
+            className="px-3 py-2 text-xs rounded-sm border transition-all font-body"
             style={customMode
               ? { borderColor: accent, color: accent, background: `${accent}12`, boxShadow: `0 0 0 1px ${accent}` }
               : { borderColor: 'rgba(255,255,255,0.10)', color: 'rgba(216,216,216,0.45)', background: 'transparent' }
@@ -463,7 +463,7 @@ function OptionGroup({ label, choices, selected, onSelect, accent }) {
                 onSelect('Custom')
               }
             }}
-            className="w-36 h-10 px-3 text-sm font-mono border rounded-sm focus:outline-none transition-all"
+            className="w-36 h-10 px-3 text-sm font-body border rounded-sm focus:outline-none transition-all"
             style={{
               background: 'rgba(255,255,255,0.04)',
               borderColor: customInput ? accent : 'rgba(255,255,255,0.12)',
@@ -471,7 +471,7 @@ function OptionGroup({ label, choices, selected, onSelect, accent }) {
               boxShadow: customInput ? `0 0 0 1px ${accent}40` : 'none',
             }}
           />
-          <span className="text-ivory-300/35 text-xs font-mono">pcs</span>
+          <span className="text-ivory-300/35 text-xs font-body">pcs</span>
         </div>
       )}
     </div>
@@ -503,10 +503,10 @@ function RelatedCard({ slug, product }) {
       </div>
       <div className="min-w-0">
         <p className="text-white text-xs font-semibold leading-snug group-hover:text-wp-green transition-colors line-clamp-2"
-          style={{ fontFamily: "'DM Serif Display', serif" }}>
+          style={{ fontFamily: "'Lora', serif" }}>
           {product.name}
         </p>
-        <p className="text-ivory-300/40 text-[10px] font-mono mt-0.5">
+        <p className="text-ivory-300/40 text-[10px] font-body mt-0.5">
           {product.price > 0 ? `\u20B1${product.price.toLocaleString()}` : 'Get Quote'}{' '}
           <span className="text-ivory-300/25">{product.priceNote}</span>
         </p>
@@ -580,7 +580,7 @@ export default function ProductDetailPage() {
       <div className="max-w-7xl mx-auto px-6">
 
         {/* Breadcrumb */}
-        <nav className="flex items-center gap-2 text-[10px] font-mono tracking-wider text-ivory-300/30 mb-8 flex-wrap">
+        <nav className="flex items-center gap-2 text-[10px] font-body tracking-wider text-ivory-300/30 mb-8 flex-wrap">
           <Link to="/" className="hover:text-ivory-300/60 transition-colors">Home</Link>
           <ChevronRight size={10} />
           <Link to="/products" className="hover:text-ivory-300/60 transition-colors">Products</Link>
@@ -602,21 +602,21 @@ export default function ProductDetailPage() {
           <div className="lg:col-span-4 flex flex-col gap-5">
             <div>
               {tag && (
-                <div className="inline-flex items-center gap-1.5 mb-3 px-2.5 py-1 rounded-sm text-[10px] font-mono font-bold tracking-widest uppercase"
+                <div className="inline-flex items-center gap-1.5 mb-3 px-2.5 py-1 rounded-sm text-[10px] font-body font-bold tracking-widest uppercase"
                   style={{ background: `${accent}18`, color: accent, border: `1px solid ${accent}35` }}>
                   {tag}
                 </div>
               )}
               <h1 className="text-white leading-tight mb-3"
-                style={{ fontFamily: "'Playfair Display', serif", fontWeight: 900, fontSize: 'clamp(1.5rem, 3vw, 2rem)' }}>
+                style={{ fontFamily: "'Lora', serif", fontWeight: 900, fontSize: 'clamp(1.5rem, 3vw, 2rem)' }}>
                 {name}
               </h1>
               <div className="flex items-center gap-3 flex-wrap">
                 <Stars rating={rating} />
-                <span className="text-wp-yellow text-sm font-bold font-mono">{rating}</span>
-                <span className="text-ivory-300/30 text-xs font-mono">{reviews} Ratings</span>
+                <span className="text-wp-yellow text-sm font-bold font-body">{rating}</span>
+                <span className="text-ivory-300/30 text-xs font-body">{reviews} Ratings</span>
                 <div className="h-3 w-px bg-white/10" />
-                <span className="text-ivory-300/30 text-xs font-mono">{sold} Sold</span>
+                <span className="text-ivory-300/30 text-xs font-body">{sold} Sold</span>
               </div>
             </div>
 
@@ -624,33 +624,33 @@ export default function ProductDetailPage() {
             <div className="bg-ink-800 border border-white/[0.07] rounded-sm px-5 py-4">
               {pricePerPc ? (
                 <>
-                  <div className="text-ivory-300/40 text-[10px] font-mono tracking-widest uppercase mb-1">Price per piece</div>
+                  <div className="text-ivory-300/40 text-[10px] font-body tracking-widest uppercase mb-1">Price per piece</div>
                   <div className="flex items-baseline gap-2">
                     <span className="text-white font-black"
-                      style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(1.6rem, 3vw, 2.2rem)' }}>
+                      style={{ fontFamily: "'Lora', serif", fontSize: 'clamp(1.6rem, 3vw, 2.2rem)' }}>
                       ₱{pricePerPc % 1 === 0 ? pricePerPc.toLocaleString() : pricePerPc.toFixed(2)}
                     </span>
-                    <span className="text-ivory-300/35 text-xs font-mono">/ pc</span>
+                    <span className="text-ivory-300/35 text-xs font-body">/ pc</span>
                   </div>
                   <div className="flex items-center gap-1.5 mt-1.5">
-                    <span className="text-ivory-300/25 text-[10px] font-mono">{displayPrice} {priceNote}</span>
+                    <span className="text-ivory-300/25 text-[10px] font-body">{displayPrice} {priceNote}</span>
                   </div>
                 </>
               ) : (
                 <>
-                  <div className="text-ivory-300/40 text-[10px] font-mono tracking-widest uppercase mb-1">
+                  <div className="text-ivory-300/40 text-[10px] font-body tracking-widest uppercase mb-1">
                     {price > 0 ? 'Price' : 'Pricing'}
                   </div>
                   <div className="flex items-baseline gap-2">
                     <span className="text-white font-black"
-                      style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(1.6rem, 3vw, 2.2rem)' }}>
+                      style={{ fontFamily: "'Lora', serif", fontSize: 'clamp(1.6rem, 3vw, 2.2rem)' }}>
                       {displayPrice}
                     </span>
-                    <span className="text-ivory-300/35 text-xs font-mono">{priceNote}</span>
+                    <span className="text-ivory-300/35 text-xs font-body">{priceNote}</span>
                   </div>
                 </>
               )}
-              <p className="text-ivory-300/30 text-[10px] font-mono mt-1.5">
+              <p className="text-ivory-300/30 text-[10px] font-body mt-1.5">
                 Final price confirmed via inquiry · Bulk discounts available
               </p>
             </div>
@@ -721,7 +721,7 @@ export default function ProductDetailPage() {
             {/* Share */}
             <div className="flex items-center gap-2 pt-1">
               <Share2 size={12} className="text-ivory-300/25" />
-              <span className="text-ivory-300/25 text-[10px] font-mono tracking-wider">Share this product</span>
+              <span className="text-ivory-300/25 text-[10px] font-body tracking-wider">Share this product</span>
             </div>
           </div>
 
@@ -730,7 +730,7 @@ export default function ProductDetailPage() {
             <div className="bg-ink-800 border border-white/[0.07] rounded-sm p-5">
               <div className="flex items-center gap-2 mb-3">
                 <FileText size={14} style={{ color: accent }} />
-                <span className="font-mono text-[10px] tracking-widest uppercase" style={{ color: accent }}>File Requirements</span>
+                <span className="font-body text-[10px] tracking-widest uppercase" style={{ color: accent }}>File Requirements</span>
               </div>
               <ul className="space-y-2">
                 {['PDF, AI, or EPS format', '300 DPI resolution', '3mm bleed on all sides', 'Fonts outlined / embedded', 'CMYK color mode'].map(r => (
@@ -741,13 +741,13 @@ export default function ProductDetailPage() {
                 ))}
               </ul>
               <Link to="/file-specs"
-                className="flex items-center gap-1.5 mt-4 text-[10px] font-mono tracking-wider text-ivory-300/30 hover:text-wp-green transition-colors">
+                className="flex items-center gap-1.5 mt-4 text-[10px] font-body tracking-wider text-ivory-300/30 hover:text-wp-green transition-colors">
                 Full File Spec Guide <ChevronRight size={10} />
               </Link>
             </div>
 
             <div className="bg-ink-800 border border-white/[0.07] rounded-sm p-5 space-y-3">
-              <div className="font-mono text-[10px] tracking-widest uppercase text-ivory-300/30 mb-1">Our Promise</div>
+              <div className="font-body text-[10px] tracking-widest uppercase text-ivory-300/30 mb-1">Our Promise</div>
               {[
                 { text: 'Color accuracy guaranteed',   color: 'var(--wp-green)' },
                 { text: 'Reprint if we make an error', color: 'var(--wp-green)' },
@@ -762,7 +762,7 @@ export default function ProductDetailPage() {
 
             {related.length > 0 && (
               <div ref={relRef} className="animate-on-scroll">
-                <div className="font-mono text-[10px] tracking-widest uppercase text-ivory-300/30 mb-3">Also in {cat}</div>
+                <div className="font-body text-[10px] tracking-widest uppercase text-ivory-300/30 mb-3">Also in {cat}</div>
                 <div className="space-y-2">
                   {related.map(([s, p]) => <RelatedCard key={s} slug={s} product={p} />)}
                 </div>
@@ -775,12 +775,12 @@ export default function ProductDetailPage() {
         <div ref={specsRef} className="animate-on-scroll mb-12">
           <div className="flex items-center gap-3 mb-6">
             <div className="h-px w-8" style={{ background: accent }} />
-            <span className="font-mono text-[10px] tracking-[0.25em] uppercase" style={{ color: accent }}>Product Specifications</span>
+            <span className="font-body text-[10px] tracking-[0.25em] uppercase" style={{ color: accent }}>Product Specifications</span>
           </div>
           <div className="bg-ink-800 border border-white/[0.07] rounded-sm overflow-hidden">
             {specs.map((s, i) => (
               <div key={s.label} className={`grid grid-cols-3 sm:grid-cols-4 gap-4 px-6 py-4 ${i % 2 !== 0 ? 'bg-ink-700/30' : ''}`}>
-                <div className="font-mono text-[10px] tracking-widest uppercase text-ivory-300/35 col-span-1">{s.label}</div>
+                <div className="font-body text-[10px] tracking-widest uppercase text-ivory-300/35 col-span-1">{s.label}</div>
                 <div className="text-ivory-200/80 text-sm col-span-2 sm:col-span-3">{s.value}</div>
               </div>
             ))}
@@ -791,7 +791,7 @@ export default function ProductDetailPage() {
         <div className="mb-12">
           <div className="flex items-center gap-3 mb-6">
             <div className="h-px w-8" style={{ background: accent }} />
-            <span className="font-mono text-[10px] tracking-[0.25em] uppercase" style={{ color: accent }}>About This Product</span>
+            <span className="font-body text-[10px] tracking-[0.25em] uppercase" style={{ color: accent }}>About This Product</span>
           </div>
           <p className="text-ivory-300/60 leading-relaxed max-w-3xl">{desc}</p>
         </div>
@@ -800,7 +800,7 @@ export default function ProductDetailPage() {
         <div ref={faqRef} className="animate-on-scroll mb-12">
           <div className="flex items-center gap-3 mb-6">
             <div className="h-px w-8" style={{ background: accent }} />
-            <span className="font-mono text-[10px] tracking-[0.25em] uppercase" style={{ color: accent }}>Frequently Asked</span>
+            <span className="font-body text-[10px] tracking-[0.25em] uppercase" style={{ color: accent }}>Frequently Asked</span>
           </div>
           <div className="max-w-3xl bg-ink-800 border border-white/[0.07] rounded-sm px-6">
             {faqs.map(f => <FAQ key={f.q} q={f.q} a={f.a} />)}

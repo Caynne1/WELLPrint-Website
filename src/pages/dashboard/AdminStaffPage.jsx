@@ -18,8 +18,8 @@ function timeAgo(iso) {
 }
 
 const ROLE_META = {
-  admin: { label: 'Admin', color: '#EC008C', bg: 'rgba(236,0,140,0.12)', icon: Shield },
-  staff: { label: 'Staff', color: '#29ABE2', bg: 'rgba(41,171,226,0.12)', icon: User },
+  admin: { label: 'Admin', color: '#CD1B6E', bg: 'rgba(236,0,140,0.12)', icon: Shield },
+  staff: { label: 'Staff', color: '#1993D2', bg: 'rgba(25,147,210,0.12)', icon: User },
 }
 
 // ── Reusable Modal ─────────────────────────────────────────────
@@ -32,8 +32,8 @@ function Modal({ title, subtitle, onClose, children, accentColor = 'var(--wp-gre
         <div className="flex items-start justify-between px-6 py-4 border-b border-white/[0.07] shrink-0"
           style={{ background: 'var(--ink-950,#0a0a0a)' }}>
           <div>
-            <span className="font-mono text-[10px] tracking-widest uppercase" style={{ color: accentColor }}>{title}</span>
-            {subtitle && <p className="text-ivory-300/40 text-[10px] font-mono mt-0.5">{subtitle}</p>}
+            <span className="font-body text-[10px] tracking-widest uppercase" style={{ color: accentColor }}>{title}</span>
+            {subtitle && <p className="text-ivory-300/40 text-[10px] font-body mt-0.5">{subtitle}</p>}
           </div>
           <button onClick={onClose} className="text-ivory-300/30 hover:text-white transition-colors mt-0.5"><X size={16} /></button>
         </div>
@@ -46,14 +46,14 @@ function Modal({ title, subtitle, onClose, children, accentColor = 'var(--wp-gre
 function Field({ label, error, children }) {
   return (
     <div className="mb-4">
-      <label className="block font-mono text-[10px] tracking-widest uppercase text-ivory-300/40 mb-2">{label}</label>
+      <label className="block font-body text-[10px] tracking-widest uppercase text-ivory-300/40 mb-2">{label}</label>
       {children}
-      {error && <p className="mt-1 text-[10px] font-mono" style={{ color: '#EC008C' }}>{error}</p>}
+      {error && <p className="mt-1 text-[10px] font-body" style={{ color: '#CD1B6E' }}>{error}</p>}
     </div>
   )
 }
 
-const inputClass = "w-full bg-ink-800 border border-white/[0.10] rounded-sm px-3 py-2.5 text-sm text-ivory-200 placeholder-ivory-300/20 outline-none focus:border-wp-green/60 transition-all font-mono"
+const inputClass = "w-full bg-ink-800 border border-white/[0.10] rounded-sm px-3 py-2.5 text-sm text-ivory-200 placeholder-ivory-300/20 outline-none focus:border-wp-green/60 transition-all font-body"
 
 // ── Inline permissions editor shown per-row ────────────────────
 function PermissionsPanel({ staff: s, onSaved }) {
@@ -93,16 +93,16 @@ function PermissionsPanel({ staff: s, onSaved }) {
     <div className="px-5 pb-5 pt-1">
       {/* Bulk actions */}
       <div className="flex items-center justify-between mb-3">
-        <span className="font-mono text-[10px] tracking-widest uppercase text-ivory-300/30">Permissions</span>
+        <span className="font-body text-[10px] tracking-widest uppercase text-ivory-300/30">Permissions</span>
         <div className="flex items-center gap-2">
           <button onClick={grantAll} disabled={allGranted}
-            className="font-mono text-[9px] px-2 py-1 rounded-sm border transition-all disabled:opacity-30"
-            style={{ borderColor: 'rgba(45,176,75,0.25)', color: '#2DB04B', background: 'rgba(45,176,75,0.06)' }}>
+            className="font-body text-[9px] px-2 py-1 rounded-sm border transition-all disabled:opacity-30"
+            style={{ borderColor: 'rgba(19,161,80,0.25)', color: '#13A150', background: 'rgba(19,161,80,0.06)' }}>
             Grant All
           </button>
           <button onClick={revokeAll} disabled={noneGranted}
-            className="font-mono text-[9px] px-2 py-1 rounded-sm border transition-all disabled:opacity-30"
-            style={{ borderColor: 'rgba(236,0,140,0.25)', color: '#EC008C', background: 'rgba(236,0,140,0.06)' }}>
+            className="font-body text-[9px] px-2 py-1 rounded-sm border transition-all disabled:opacity-30"
+            style={{ borderColor: 'rgba(236,0,140,0.25)', color: '#CD1B6E', background: 'rgba(236,0,140,0.06)' }}>
             Revoke All
           </button>
         </div>
@@ -116,21 +116,21 @@ function PermissionsPanel({ staff: s, onSaved }) {
             <button key={perm} type="button" onClick={() => toggle(perm)}
               className="flex items-center gap-3 px-3 py-2.5 rounded-sm border text-left transition-all group"
               style={{
-                background:   on ? 'rgba(45,176,75,0.07)' : 'rgba(255,255,255,0.02)',
-                borderColor:  on ? 'rgba(45,176,75,0.25)' : 'rgba(255,255,255,0.07)',
+                background:   on ? 'rgba(19,161,80,0.07)' : 'rgba(255,255,255,0.02)',
+                borderColor:  on ? 'rgba(19,161,80,0.25)' : 'rgba(255,255,255,0.07)',
               }}>
               {/* Toggle pill */}
               <div className="relative w-7 h-4 rounded-full shrink-0 transition-all"
-                style={{ background: on ? 'rgba(45,176,75,0.35)' : 'rgba(255,255,255,0.08)', border: `1px solid ${on ? 'rgba(45,176,75,0.5)' : 'rgba(255,255,255,0.12)'}` }}>
+                style={{ background: on ? 'rgba(19,161,80,0.35)' : 'rgba(255,255,255,0.08)', border: `1px solid ${on ? 'rgba(19,161,80,0.5)' : 'rgba(255,255,255,0.12)'}` }}>
                 <div className="absolute top-0.5 w-3 h-3 rounded-full transition-all"
-                  style={{ background: on ? '#2DB04B' : '#444', left: on ? '14px' : '2px', boxShadow: on ? '0 0 4px #2DB04B80' : 'none' }} />
+                  style={{ background: on ? '#13A150' : '#444', left: on ? '14px' : '2px', boxShadow: on ? '0 0 4px #13A15080' : 'none' }} />
               </div>
-              <span className="font-mono text-[10px] flex-1"
+              <span className="font-body text-[10px] flex-1"
                 style={{ color: on ? 'rgba(216,216,216,0.8)' : 'rgba(216,216,216,0.3)' }}>
                 {PERMISSION_LABELS[perm]}
               </span>
               {on
-                ? <CheckCircle size={11} style={{ color: '#2DB04B', opacity: 0.7 }} />
+                ? <CheckCircle size={11} style={{ color: '#13A150', opacity: 0.7 }} />
                 : <Lock size={11} className="text-ivory-300/15" />}
             </button>
           )
@@ -139,15 +139,15 @@ function PermissionsPanel({ staff: s, onSaved }) {
 
       {/* Save row */}
       <div className="flex items-center justify-between">
-        <span className="font-mono text-[9px] text-ivory-300/25">
+        <span className="font-body text-[9px] text-ivory-300/25">
           {perms.length}/{ALL_PERMISSIONS.length} permissions granted
         </span>
         <button onClick={save} disabled={saving}
-          className="flex items-center gap-2 px-4 py-2 rounded-sm text-xs font-mono font-bold transition-all disabled:opacity-50"
+          className="flex items-center gap-2 px-4 py-2 rounded-sm text-xs font-body font-bold transition-all disabled:opacity-50"
           style={{
-            background:   saved ? 'rgba(45,176,75,0.15)' : 'rgba(45,176,75,0.12)',
-            border:       `1px solid ${saved ? 'rgba(45,176,75,0.5)' : 'rgba(45,176,75,0.3)'}`,
-            color:        saved ? '#2DB04B' : 'var(--wp-green)',
+            background:   saved ? 'rgba(19,161,80,0.15)' : 'rgba(19,161,80,0.12)',
+            border:       `1px solid ${saved ? 'rgba(19,161,80,0.5)' : 'rgba(19,161,80,0.3)'}`,
+            color:        saved ? '#13A150' : 'var(--wp-green)',
           }}>
           {saving
             ? <><Loader2 size={11} className="animate-spin" /> Saving…</>
@@ -184,18 +184,18 @@ function RowMenu({ staff: s, isCurrentUser, onEdit, onManagePerms, onToggleStatu
         <div className="absolute right-0 top-9 z-50 w-48 rounded-sm border border-white/[0.12] overflow-hidden shadow-2xl"
           style={{ background: 'var(--ink-950,#0a0a0a)' }}>
           <button onClick={() => { setOpen(false); onEdit() }}
-            className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-mono text-ivory-300/60 hover:text-white hover:bg-white/[0.05] transition-all text-left">
+            className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-body text-ivory-300/60 hover:text-white hover:bg-white/[0.05] transition-all text-left">
             <Edit2 size={12} /> Edit Details
           </button>
           {s.role === 'staff' && (
             <button onClick={() => { setOpen(false); onManagePerms() }}
-              className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-mono text-ivory-300/60 hover:text-white hover:bg-white/[0.05] transition-all text-left">
+              className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-body text-ivory-300/60 hover:text-white hover:bg-white/[0.05] transition-all text-left">
               <Key size={12} /> Manage Permissions
             </button>
           )}
           {!isCurrentUser && (
             <button onClick={() => { setOpen(false); onToggleStatus() }}
-              className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-mono text-ivory-300/60 hover:text-white hover:bg-white/[0.05] transition-all text-left">
+              className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-body text-ivory-300/60 hover:text-white hover:bg-white/[0.05] transition-all text-left">
               {s.status === 'active'
                 ? <><XCircle size={12} /> Deactivate</>
                 : <><CheckCircle size={12} /> Activate</>}
@@ -203,8 +203,8 @@ function RowMenu({ staff: s, isCurrentUser, onEdit, onManagePerms, onToggleStatu
           )}
           {!isCurrentUser && (
             <button onClick={() => { setOpen(false); onDelete() }}
-              className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-mono transition-all text-left border-t border-white/[0.06]"
-              style={{ color: '#EC008C' }}
+              className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-body transition-all text-left border-t border-white/[0.06]"
+              style={{ color: '#CD1B6E' }}
               onMouseEnter={e => e.currentTarget.style.background = 'rgba(236,0,140,0.06)'}
               onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
               <Trash2 size={12} /> Remove Account
@@ -375,19 +375,19 @@ export default function AdminStaffPage() {
       {/* ── Page header ── */}
       <div className="mb-7 flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-white text-2xl font-bold mb-1" style={{ fontFamily: "'DM Serif Display', serif" }}>Staff Accounts</h1>
+          <h1 className="text-white text-2xl font-bold mb-1" style={{ fontFamily: "'Lora', serif" }}>Staff Accounts</h1>
           <p className="text-ivory-300/40 text-sm">
             {loading ? 'Loading…' : `${activeCount} active · ${adminCount} admin${adminCount !== 1 ? 's' : ''}`}
           </p>
         </div>
         <div className="flex items-center gap-2">
           <button onClick={fetchStaff}
-            className="flex items-center gap-1.5 px-3 py-2.5 rounded-sm text-xs font-mono border border-white/[0.08] text-ivory-300/40 hover:text-white transition-all">
+            className="flex items-center gap-1.5 px-3 py-2.5 rounded-sm text-xs font-body border border-white/[0.08] text-ivory-300/40 hover:text-white transition-all">
             <RefreshCw size={11} /> Refresh
           </button>
           <button onClick={openAdd}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-sm text-xs font-mono font-bold transition-all"
-            style={{ background: 'rgba(45,176,75,0.12)', border: '1px solid rgba(45,176,75,0.3)', color: 'var(--wp-green)' }}>
+            className="flex items-center gap-2 px-4 py-2.5 rounded-sm text-xs font-body font-bold transition-all"
+            style={{ background: 'rgba(19,161,80,0.12)', border: '1px solid rgba(19,161,80,0.3)', color: 'var(--wp-green)' }}>
             <Plus size={13} /> Add Staff
           </button>
         </div>
@@ -396,13 +396,13 @@ export default function AdminStaffPage() {
       {/* ── KPI cards ── */}
       <div className="grid grid-cols-3 gap-4 mb-6">
         {[
-          { label: 'Total Accounts', value: staff.length, color: '#29ABE2' },
-          { label: 'Active',         value: activeCount,  color: '#2DB04B' },
-          { label: 'Admins',         value: adminCount,   color: '#EC008C' },
+          { label: 'Total Accounts', value: staff.length, color: '#1993D2' },
+          { label: 'Active',         value: activeCount,  color: '#13A150' },
+          { label: 'Admins',         value: adminCount,   color: '#CD1B6E' },
         ].map(({ label, value, color }) => (
           <div key={label} className="bg-ink-800 border border-white/[0.07] rounded-sm p-4">
-            <div className="text-2xl font-black mb-0.5" style={{ fontFamily: "'Playfair Display', serif", color }}>{value}</div>
-            <div className="text-ivory-300/40 text-[10px] font-mono uppercase tracking-widest">{label}</div>
+            <div className="text-2xl font-black mb-0.5" style={{ fontFamily: "'Lora', serif", color }}>{value}</div>
+            <div className="text-ivory-300/40 text-[10px] font-body uppercase tracking-widest">{label}</div>
           </div>
         ))}
       </div>
@@ -422,7 +422,7 @@ export default function AdminStaffPage() {
             <Loader2 size={16} className="animate-spin" /> Loading staff…
           </div>
         ) : filtered.length === 0 ? (
-          <div className="py-16 text-center text-ivory-300/30 font-mono text-sm">No staff accounts found</div>
+          <div className="py-16 text-center text-ivory-300/30 font-body text-sm">No staff accounts found</div>
         ) : (
           <div>
             {filtered.map(s => {
@@ -443,7 +443,7 @@ export default function AdminStaffPage() {
                         background: s.status !== 'inactive' ? `${rm.color}14` : 'rgba(255,255,255,0.04)',
                         border: `1px solid ${s.status !== 'inactive' ? rm.color + '30' : 'rgba(255,255,255,0.08)'}`,
                         color: s.status !== 'inactive' ? rm.color : 'rgba(216,216,216,0.2)',
-                        fontFamily: "'Playfair Display', serif",
+                        fontFamily: "'Lora', serif",
                       }}>
                       {s.name?.charAt(0) ?? '?'}
                     </div>
@@ -453,22 +453,22 @@ export default function AdminStaffPage() {
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-white text-sm font-semibold">{s.name}</span>
                         {isCurrentUser && (
-                          <span className="text-[8px] font-mono px-1.5 py-0.5 rounded-sm"
-                            style={{ background: 'rgba(45,176,75,0.15)', color: 'var(--wp-green)' }}>YOU</span>
+                          <span className="text-[8px] font-body px-1.5 py-0.5 rounded-sm"
+                            style={{ background: 'rgba(19,161,80,0.15)', color: 'var(--wp-green)' }}>YOU</span>
                         )}
-                        <span className="text-[9px] font-mono px-2 py-0.5 rounded-sm flex items-center gap-1"
+                        <span className="text-[9px] font-body px-2 py-0.5 rounded-sm flex items-center gap-1"
                           style={{ background: rm.bg, color: rm.color }}>
                           <RIcon size={9} /> {rm.label}
                         </span>
-                        <span className="text-[9px] font-mono px-2 py-0.5 rounded-sm"
+                        <span className="text-[9px] font-body px-2 py-0.5 rounded-sm"
                           style={{
-                            background: s.status !== 'inactive' ? 'rgba(45,176,75,0.1)' : 'rgba(85,85,85,0.15)',
-                            color: s.status !== 'inactive' ? '#2DB04B' : '#666'
+                            background: s.status !== 'inactive' ? 'rgba(19,161,80,0.1)' : 'rgba(85,85,85,0.15)',
+                            color: s.status !== 'inactive' ? '#13A150' : '#666'
                           }}>
                           {s.status ?? 'active'}
                         </span>
                       </div>
-                      <div className="text-ivory-300/35 text-[10px] font-mono mt-0.5">
+                      <div className="text-ivory-300/35 text-[10px] font-body mt-0.5">
                         @{s.username} · {s.email}
                       </div>
                     </div>
@@ -479,29 +479,29 @@ export default function AdminStaffPage() {
                         onClick={() => toggleInlinePerms(s.id)}
                         className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-sm border transition-all shrink-0"
                         style={{
-                          background:   permsExpanded ? 'rgba(41,171,226,0.1)'  : 'rgba(255,255,255,0.03)',
-                          borderColor:  permsExpanded ? 'rgba(41,171,226,0.3)'  : 'rgba(255,255,255,0.08)',
-                          color:        permsExpanded ? '#29ABE2'               : 'rgba(216,216,216,0.35)',
+                          background:   permsExpanded ? 'rgba(25,147,210,0.1)'  : 'rgba(255,255,255,0.03)',
+                          borderColor:  permsExpanded ? 'rgba(25,147,210,0.3)'  : 'rgba(255,255,255,0.08)',
+                          color:        permsExpanded ? '#1993D2'               : 'rgba(216,216,216,0.35)',
                         }}>
                         <Key size={11} />
-                        <span className="font-mono text-[9px]">{grantedCount}/{ALL_PERMISSIONS.length} perms</span>
+                        <span className="font-body text-[9px]">{grantedCount}/{ALL_PERMISSIONS.length} perms</span>
                         {permsExpanded ? <ChevronUp size={10} /> : <ChevronDown size={10} />}
                       </button>
                     )}
                     {s.role === 'admin' && (
                       <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-sm shrink-0"
                         style={{ background: 'rgba(236,0,140,0.07)', border: '1px solid rgba(236,0,140,0.15)' }}>
-                        <Shield size={10} style={{ color: '#EC008C' }} />
-                        <span className="font-mono text-[9px]" style={{ color: '#EC008C' }}>Full Access</span>
+                        <Shield size={10} style={{ color: '#CD1B6E' }} />
+                        <span className="font-body text-[9px]" style={{ color: '#CD1B6E' }}>Full Access</span>
                       </div>
                     )}
 
                     {/* Last login */}
                     <div className="hidden lg:block text-right shrink-0">
-                      <div className="text-ivory-300/25 text-[10px] font-mono">
+                      <div className="text-ivory-300/25 text-[10px] font-body">
                         {s.last_login_at ? `Login ${timeAgo(s.last_login_at)}` : 'Never logged in'}
                       </div>
-                      <div className="text-ivory-300/15 text-[10px] font-mono">
+                      <div className="text-ivory-300/15 text-[10px] font-body">
                         Since {s.created_at?.split('T')[0]}
                       </div>
                     </div>
@@ -520,7 +520,7 @@ export default function AdminStaffPage() {
                   {/* ── Inline permissions panel (expands below row) ── */}
                   {permsExpanded && s.role === 'staff' && (
                     <div className="border-t border-white/[0.05]"
-                      style={{ background: 'rgba(41,171,226,0.03)' }}>
+                      style={{ background: 'rgba(25,147,210,0.03)' }}>
                       <PermissionsPanel
                         staff={s}
                         onSaved={handlePermsSaved}
@@ -561,7 +561,7 @@ export default function AdminStaffPage() {
                 const sel = form.role === r
                 return (
                   <button key={r} type="button" onClick={() => setForm(f => ({ ...f, role: r }))}
-                    className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-sm text-xs font-mono border transition-all"
+                    className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-sm text-xs font-body border transition-all"
                     style={{ background: sel ? rm.bg : 'transparent', color: sel ? rm.color : 'rgba(216,216,216,0.35)', borderColor: sel ? rm.color + '40' : 'rgba(255,255,255,0.08)' }}>
                     {r === 'admin' ? <Shield size={11} /> : <User size={11} />} {rm.label}
                   </button>
@@ -583,27 +583,27 @@ export default function AdminStaffPage() {
                         permissions: checked ? f.permissions.filter(p => p !== perm) : [...f.permissions, perm],
                       }))}
                       className="w-full flex items-center gap-3 px-3 py-2 rounded-sm border transition-all text-left"
-                      style={{ background: checked ? 'rgba(45,176,75,0.07)' : 'rgba(255,255,255,0.02)', borderColor: checked ? 'rgba(45,176,75,0.25)' : 'rgba(255,255,255,0.07)' }}>
+                      style={{ background: checked ? 'rgba(19,161,80,0.07)' : 'rgba(255,255,255,0.02)', borderColor: checked ? 'rgba(19,161,80,0.25)' : 'rgba(255,255,255,0.07)' }}>
                       <div className="w-4 h-4 rounded-sm shrink-0 flex items-center justify-center border"
-                        style={{ background: checked ? 'rgba(45,176,75,0.2)' : 'transparent', borderColor: checked ? 'var(--wp-green)' : 'rgba(255,255,255,0.15)' }}>
+                        style={{ background: checked ? 'rgba(19,161,80,0.2)' : 'transparent', borderColor: checked ? 'var(--wp-green)' : 'rgba(255,255,255,0.15)' }}>
                         {checked && <CheckCircle size={10} style={{ color: 'var(--wp-green)' }} />}
                       </div>
-                      <span className="font-mono text-[10px]" style={{ color: checked ? 'rgba(216,216,216,0.8)' : 'rgba(216,216,216,0.35)' }}>
+                      <span className="font-body text-[10px]" style={{ color: checked ? 'rgba(216,216,216,0.8)' : 'rgba(216,216,216,0.35)' }}>
                         {PERMISSION_LABELS[perm]}
                       </span>
                     </button>
                   )
                 })}
               </div>
-              <p className="text-[10px] font-mono text-ivory-300/25">Can be changed at any time from the staff list.</p>
+              <p className="text-[10px] font-body text-ivory-300/25">Can be changed at any time from the staff list.</p>
             </Field>
           )}
 
           {form.role === 'admin' && (
             <div className="mb-4 flex items-center gap-2 px-3 py-2.5 rounded-sm"
               style={{ background: 'rgba(236,0,140,0.07)', border: '1px solid rgba(236,0,140,0.18)' }}>
-              <Lock size={11} style={{ color: '#EC008C' }} />
-              <span className="font-mono text-[10px]" style={{ color: '#EC008C' }}>
+              <Lock size={11} style={{ color: '#CD1B6E' }} />
+              <span className="font-body text-[10px]" style={{ color: '#CD1B6E' }}>
                 Admin accounts have unrestricted access to all features.
               </span>
             </div>
@@ -633,12 +633,12 @@ export default function AdminStaffPage() {
 
           <div className="flex gap-3 mt-6">
             <button type="button" onClick={() => setShowModal(false)}
-              className="flex-1 py-2.5 rounded-sm text-xs font-mono border border-white/[0.08] text-ivory-300/40 hover:text-white transition-all">
+              className="flex-1 py-2.5 rounded-sm text-xs font-body border border-white/[0.08] text-ivory-300/40 hover:text-white transition-all">
               Cancel
             </button>
             <button type="button" onClick={handleSave} disabled={saving}
-              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-sm text-xs font-mono font-bold transition-all disabled:opacity-50"
-              style={{ background: 'rgba(45,176,75,0.15)', border: '1px solid rgba(45,176,75,0.3)', color: 'var(--wp-green)' }}>
+              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-sm text-xs font-body font-bold transition-all disabled:opacity-50"
+              style={{ background: 'rgba(19,161,80,0.15)', border: '1px solid rgba(19,161,80,0.3)', color: 'var(--wp-green)' }}>
               {saving ? <Loader2 size={12} className="animate-spin" /> : <Save size={12} />}
               {editTarget ? 'Save Changes' : 'Create Account'}
             </button>
@@ -651,17 +651,17 @@ export default function AdminStaffPage() {
         <Modal
           title="Manage Permissions"
           subtitle={`Editing access for ${showPermsModal.name}`}
-          accentColor="#29ABE2"
+          accentColor="#1993D2"
           onClose={() => setShowPermsModal(null)}>
           <div className="mb-4 flex items-center gap-3 px-4 py-3 rounded-sm"
-            style={{ background: 'rgba(41,171,226,0.07)', border: '1px solid rgba(41,171,226,0.18)' }}>
+            style={{ background: 'rgba(25,147,210,0.07)', border: '1px solid rgba(25,147,210,0.18)' }}>
             <div className="w-8 h-8 rounded-sm flex items-center justify-center font-bold text-sm shrink-0"
-              style={{ background: 'rgba(41,171,226,0.15)', border: '1px solid rgba(41,171,226,0.3)', color: '#29ABE2', fontFamily: "'Playfair Display', serif" }}>
+              style={{ background: 'rgba(25,147,210,0.15)', border: '1px solid rgba(25,147,210,0.3)', color: '#1993D2', fontFamily: "'Lora', serif" }}>
               {showPermsModal.name?.charAt(0)}
             </div>
             <div>
               <div className="text-white text-sm font-semibold">{showPermsModal.name}</div>
-              <div className="text-ivory-300/35 text-[10px] font-mono">@{showPermsModal.username}</div>
+              <div className="text-ivory-300/35 text-[10px] font-body">@{showPermsModal.username}</div>
             </div>
           </div>
 
@@ -677,25 +677,25 @@ export default function AdminStaffPage() {
 
       {/* ── Delete confirm ── */}
       {deleteConfirm && (
-        <Modal title="Remove Account" accentColor="#EC008C" onClose={() => setDeleteConfirm(null)}>
+        <Modal title="Remove Account" accentColor="#CD1B6E" onClose={() => setDeleteConfirm(null)}>
           <div className="flex items-center gap-3 mb-5 p-3 rounded-sm"
             style={{ background: 'rgba(236,0,140,0.06)', border: '1px solid rgba(236,0,140,0.15)' }}>
-            <AlertTriangle size={16} style={{ color: '#EC008C' }} />
+            <AlertTriangle size={16} style={{ color: '#CD1B6E' }} />
             <div>
               <p className="text-white text-sm font-semibold">{deleteConfirm.name}</p>
-              <p className="text-ivory-300/40 text-[10px] font-mono">@{deleteConfirm.username}</p>
+              <p className="text-ivory-300/40 text-[10px] font-body">@{deleteConfirm.username}</p>
             </div>
           </div>
           <p className="text-ivory-300/60 text-sm mb-1">Are you sure you want to remove this account?</p>
-          <p className="text-ivory-300/30 text-xs font-mono mb-6">This cannot be undone and will immediately revoke their login access.</p>
+          <p className="text-ivory-300/30 text-xs font-body mb-6">This cannot be undone and will immediately revoke their login access.</p>
           <div className="flex gap-3">
             <button type="button" onClick={() => setDeleteConfirm(null)}
-              className="flex-1 py-2.5 rounded-sm text-xs font-mono border border-white/[0.08] text-ivory-300/40 hover:text-white transition-all">
+              className="flex-1 py-2.5 rounded-sm text-xs font-body border border-white/[0.08] text-ivory-300/40 hover:text-white transition-all">
               Cancel
             </button>
             <button type="button" onClick={() => deleteStaff(deleteConfirm)}
-              className="flex-1 py-2.5 rounded-sm text-xs font-mono font-bold"
-              style={{ background: 'rgba(236,0,140,0.12)', border: '1px solid rgba(236,0,140,0.3)', color: '#EC008C' }}>
+              className="flex-1 py-2.5 rounded-sm text-xs font-body font-bold"
+              style={{ background: 'rgba(236,0,140,0.12)', border: '1px solid rgba(236,0,140,0.3)', color: '#CD1B6E' }}>
               Remove Account
             </button>
           </div>
@@ -704,8 +704,8 @@ export default function AdminStaffPage() {
 
       {/* ── Toast ── */}
       {toast && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-sm border text-xs font-mono shadow-xl"
-          style={{ background: toast.ok ? 'rgba(45,176,75,0.15)' : 'rgba(236,0,140,0.15)', borderColor: toast.ok ? 'rgba(45,176,75,0.3)' : 'rgba(236,0,140,0.3)', color: toast.ok ? '#2DB04B' : '#EC008C' }}>
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-sm border text-xs font-body shadow-xl"
+          style={{ background: toast.ok ? 'rgba(19,161,80,0.15)' : 'rgba(236,0,140,0.15)', borderColor: toast.ok ? 'rgba(19,161,80,0.3)' : 'rgba(236,0,140,0.3)', color: toast.ok ? '#13A150' : '#CD1B6E' }}>
           {toast.ok ? <CheckCircle size={13} /> : <XCircle size={13} />} {toast.msg}
         </div>
       )}

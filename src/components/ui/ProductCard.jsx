@@ -22,7 +22,7 @@ export default function ProductCard({ product }) {
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center gap-2">
             <ImageOff size={28} className="text-ivory-300/20" />
-            <span className="text-xs font-mono text-ivory-300/20 tracking-wider">No image</span>
+            <span className="text-xs font-body text-ivory-300/20 tracking-wider">No image</span>
           </div>
         )}
 
@@ -40,7 +40,7 @@ export default function ProductCard({ product }) {
       <div className="flex flex-col flex-1 p-5">
         <h3
           className="text-white text-base font-semibold mb-2 leading-snug group-hover:text-wp-green transition-colors duration-200"
-          style={{ fontFamily: "'DM Serif Display', serif" }}
+          style={{ fontFamily: "'Lora', serif" }}
         >
           {name}
         </h3>
@@ -54,12 +54,12 @@ export default function ProductCard({ product }) {
         {/* Price + CTA */}
         <div className="flex items-center justify-between mt-auto pt-4 border-t border-white/[0.07]">
           <div>
-            <span className="text-[10px] font-mono text-ivory-300/35 uppercase tracking-wider block">
+            <span className="text-[10px] font-body text-ivory-300/35 uppercase tracking-wider block">
               From
             </span>
             <span
               className="text-lg font-bold text-white leading-tight"
-              style={{ fontFamily: "'Playfair Display', serif" }}
+              style={{ fontFamily: "'Lora', serif" }}
             >
               ${Number(base_price).toFixed(2)}
             </span>

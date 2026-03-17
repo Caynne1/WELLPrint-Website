@@ -4,10 +4,10 @@ import { supabase } from '../lib/supabase'
 const OrdersContext = createContext(null)
 
 export const ORDER_STATUSES = {
-  new:             { label: 'New',            color: '#EC008C', bg: 'rgba(236,0,140,0.12)' },
-  quoted:          { label: 'Quoted',         color: '#FBB03B', bg: 'rgba(251,176,59,0.12)' },
-  artwork_pending: { label: 'Artwork Needed', color: '#29ABE2', bg: 'rgba(41,171,226,0.12)' },
-  printing:        { label: 'Printing',       color: '#2DB04B', bg: 'rgba(45,176,75,0.12)'  },
+  new:             { label: 'New',            color: '#CD1B6E', bg: 'rgba(236,0,140,0.12)' },
+  quoted:          { label: 'Quoted',         color: '#FDC010', bg: 'rgba(251,176,59,0.12)' },
+  artwork_pending: { label: 'Artwork Needed', color: '#1993D2', bg: 'rgba(25,147,210,0.12)' },
+  printing:        { label: 'Printing',       color: '#13A150', bg: 'rgba(19,161,80,0.12)'  },
   completed:       { label: 'Completed',      color: '#888',    bg: 'rgba(136,136,136,0.10)' },
   cancelled:       { label: 'Cancelled',      color: '#555',    bg: 'rgba(85,85,85,0.10)'   },
 }

@@ -33,7 +33,7 @@ function InfoCard({ icon: Icon, label, value, sub, href, accent, delay }) {
         <Icon size={20} style={{ color: accent }} />
       </div>
       <div>
-        <div className="font-mono text-[10px] tracking-widest uppercase mb-1" style={{ color: accent, opacity: 0.7 }}>{label}</div>
+        <div className="font-body text-[10px] tracking-widest uppercase mb-1" style={{ color: accent, opacity: 0.7 }}>{label}</div>
         <div className="text-white font-semibold text-sm leading-snug">{value}</div>
         {sub && <div className="text-ivory-300/40 text-xs mt-0.5">{sub}</div>}
       </div>
@@ -60,7 +60,7 @@ function SocialBtn({ icon: Icon, label, href, color }) {
 function Field({ label, required, error, children }) {
   return (
     <div>
-      <label className="block font-mono text-[10px] tracking-widest uppercase mb-2"
+      <label className="block font-body text-[10px] tracking-widest uppercase mb-2"
         style={{ color: error ? 'var(--wp-magenta)' : 'rgba(216,216,216,0.5)' }}>
         {label}{required && <span className="ml-1" style={{ color: 'var(--wp-green)' }}>*</span>}
       </label>
@@ -141,7 +141,7 @@ export default function ContactPage() {
             <div ref={infoRef} className="animate-on-scroll mb-8">
               <div className="flex items-center gap-3 mb-3">
                 <div className="h-px w-8 bg-wp-green" />
-                <span className="font-mono text-[10px] tracking-[0.25em] uppercase text-wp-green">Contact Details</span>
+                <span className="font-body text-[10px] tracking-[0.25em] uppercase text-wp-green">Contact Details</span>
               </div>
               <p className="text-ivory-300/50 text-sm leading-relaxed">
                 Reach us through any of the channels below. We typically respond within one business day.
@@ -164,7 +164,7 @@ export default function ContactPage() {
 
             {/* Social */}
             <div className="pt-4">
-              <div className="font-mono text-[10px] tracking-widest uppercase text-ivory-300/30 mb-3">Follow Us</div>
+              <div className="font-body text-[10px] tracking-widest uppercase text-ivory-300/30 mb-3">Follow Us</div>
               <div className="space-y-2">
                 <SocialBtn icon={Facebook}  label="WELLPrint on Facebook"  href="#" color="#1877F2" />
                 <SocialBtn icon={Instagram} label="@wellprint.ph"          href="#" color="#E1306C" />
@@ -180,11 +180,11 @@ export default function ContactPage() {
               <div ref={formRef} className="animate-on-scroll h-full flex flex-col items-center justify-center
                 text-center py-20 bg-ink-800 border border-white/[0.07] rounded-sm px-8">
                 <div className="w-16 h-16 rounded-full flex items-center justify-center mb-6"
-                  style={{ background: 'rgba(45,176,75,0.12)', border: '1px solid rgba(45,176,75,0.3)' }}>
+                  style={{ background: 'rgba(19,161,80,0.12)', border: '1px solid rgba(19,161,80,0.3)' }}>
                   <CheckCircle size={32} style={{ color: 'var(--wp-green)' }} />
                 </div>
                 <h3 className="text-white text-2xl font-bold mb-3"
-                  style={{ fontFamily: "'DM Serif Display', serif" }}>
+                  style={{ fontFamily: "'Lora', serif" }}>
                   Message Sent!
                 </h3>
                 <p className="text-ivory-300/55 text-sm max-w-sm leading-relaxed mb-8">
@@ -202,7 +202,7 @@ export default function ContactPage() {
 
                 <div className="flex items-center gap-3 mb-2">
                   <div className="h-px w-6 bg-wp-green" />
-                  <span className="font-mono text-[10px] tracking-[0.25em] uppercase text-wp-green">Send Us a Message</span>
+                  <span className="font-body text-[10px] tracking-[0.25em] uppercase text-wp-green">Send Us a Message</span>
                 </div>
 
                 {/* Row 1: Name + Company */}
@@ -258,7 +258,7 @@ export default function ContactPage() {
                 <Field label="Attach a File (optional)">
                   <label className={`${inputClass} flex items-center gap-3 cursor-pointer`}
                     style={{ paddingTop: '0.65rem', paddingBottom: '0.65rem' }}>
-                    <span className="text-ivory-300/30 shrink-0 text-xs font-mono">
+                    <span className="text-ivory-300/30 shrink-0 text-xs font-body">
                       {form.file ? form.file.name : 'No file chosen'}
                     </span>
                     <span className="ml-auto shrink-0 btn-press-outline text-[10px] py-1 px-3"
@@ -269,14 +269,14 @@ export default function ContactPage() {
                       accept=".pdf,.ai,.eps,.jpg,.jpeg,.png,.tiff,.zip"
                       onChange={e => setForm(f => ({ ...f, file: e.target.files[0] || null }))} />
                   </label>
-                  <p className="text-[10px] text-ivory-300/25 font-mono mt-1.5">
+                  <p className="text-[10px] text-ivory-300/25 font-body mt-1.5">
                     Accepted: PDF, AI, EPS, JPG, PNG, TIFF, ZIP · Max 20MB
                   </p>
                 </Field>
 
                 {/* Submit */}
                 <div className="flex items-center justify-between pt-2">
-                  <p className="text-[10px] font-mono text-ivory-300/25 tracking-wider">
+                  <p className="text-[10px] font-body text-ivory-300/25 tracking-wider">
                     <span style={{ color: 'var(--wp-green)' }}>*</span> Required fields
                   </p>
                   <button type="submit" disabled={status === 'submitting'}
@@ -302,7 +302,7 @@ export default function ContactPage() {
         <div ref={mapRef} className="animate-on-scroll max-w-7xl mx-auto px-6 py-16">
           <div className="flex items-center gap-3 mb-8">
             <div className="h-px w-8 bg-wp-green" />
-            <span className="font-mono text-[10px] tracking-[0.25em] uppercase text-wp-green">Find Us</span>
+            <span className="font-body text-[10px] tracking-[0.25em] uppercase text-wp-green">Find Us</span>
           </div>
 
           {/* Map embed placeholder */}
@@ -310,7 +310,7 @@ export default function ContactPage() {
             style={{ height: '360px' }}>
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-ivory-300/20">
               <MapPin size={40} />
-              <span className="font-mono text-xs tracking-widest uppercase">Google Maps Embed</span>
+              <span className="font-body text-xs tracking-widest uppercase">Google Maps Embed</span>
               <span className="text-xs text-ivory-300/15">Replace with your &lt;iframe&gt; embed code</span>
             </div>
             {/* Corner accents */}

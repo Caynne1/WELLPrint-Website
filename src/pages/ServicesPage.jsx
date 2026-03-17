@@ -12,11 +12,11 @@ const BORDER_COLORS = [
   'var(--wp-green)',  // Cyan-ish green
   '#C8341A',          // Magenta-red
   '#D4810A',          // Yellow-amber
-  '#29ABE2',          // Cyan blue
+  '#1993D2',          // Cyan blue
   'var(--wp-green)',
   '#C8341A',
   '#D4810A',
-  '#29ABE2',
+  '#1993D2',
   'var(--wp-green)',
   '#C8341A',
   '#D4810A',
@@ -165,7 +165,7 @@ function ServiceCard({ Icon, title, desc, tag, href, accent, borderColor, delay,
         <div className="flex items-start justify-between mb-3">
           <h3
             className="text-ivory-100 text-lg font-medium pr-4 leading-tight"
-            style={{ fontFamily: "'DM Serif Display', serif" }}
+            style={{ fontFamily: "'Lora', serif" }}
           >
             {title}
           </h3>

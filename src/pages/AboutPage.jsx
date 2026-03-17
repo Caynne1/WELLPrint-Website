@@ -24,10 +24,10 @@ function StatCard({ value, label, accent }) {
   const ref = useScrollReveal()
   return (
     <div ref={ref} className="animate-on-scroll text-center p-6">
-      <div className="text-5xl font-black mb-1 leading-none" style={{ fontFamily: "'Playfair Display', serif", color: accent || 'var(--wp-green)' }}>
+      <div className="text-5xl font-black mb-1 leading-none" style={{ fontFamily: "'Lora', serif", color: accent || 'var(--wp-green)' }}>
         {value}
       </div>
-      <div className="text-ivory-300/50 text-xs font-mono tracking-widest uppercase">{label}</div>
+      <div className="text-ivory-300/50 text-xs font-body tracking-widest uppercase">{label}</div>
     </div>
   )
 }
@@ -38,10 +38,10 @@ function ValueCard({ icon: Icon, title, body, delay }) {
   return (
     <div ref={ref} className="animate-on-scroll card-press p-8 group" style={{ transitionDelay: `${delay}ms` }}>
       <div className="w-12 h-12 rounded-sm flex items-center justify-center mb-5"
-        style={{ background: 'rgba(45,176,75,0.10)', border: '1px solid rgba(45,176,75,0.2)' }}>
+        style={{ background: 'rgba(19,161,80,0.10)', border: '1px solid rgba(19,161,80,0.2)' }}>
         <Icon size={22} style={{ color: 'var(--wp-green)' }} />
       </div>
-      <h3 className="text-white font-bold text-lg mb-2" style={{ fontFamily: "'DM Serif Display', serif" }}>{title}</h3>
+      <h3 className="text-white font-bold text-lg mb-2" style={{ fontFamily: "'Lora', serif" }}>{title}</h3>
       <p className="text-ivory-300/55 text-sm leading-relaxed">{body}</p>
     </div>
   )
@@ -82,11 +82,11 @@ export default function AboutPage() {
           <div>
             <div className="flex items-center gap-3 mb-6">
               <div className="h-px w-8 bg-wp-green" />
-              <span className="font-mono text-[10px] tracking-[0.25em] uppercase text-wp-green">Our Story</span>
+              <span className="font-body text-[10px] tracking-[0.25em] uppercase text-wp-green">Our Story</span>
             </div>
 
             <h2 ref={storyRef1} className="animate-on-scroll text-white mb-6 leading-snug"
-              style={{ fontFamily: "'Playfair Display', serif", fontWeight: 900, fontSize: 'clamp(1.8rem, 3.5vw, 2.8rem)' }}>
+              style={{ fontFamily: "'Lora', serif", fontWeight: 900, fontSize: 'clamp(1.8rem, 3.5vw, 2.8rem)' }}>
               From Internal Division<br />to Industry Leader
             </h2>
 
@@ -124,8 +124,8 @@ export default function AboutPage() {
             </div>
             {/* Floating badge */}
             <div className="absolute -bottom-5 -left-5 bg-ink-950 border border-white/[0.10] px-5 py-4 rounded-sm shadow-press">
-              <div className="text-2xl font-black text-wp-green" style={{ fontFamily: "'Playfair Display', serif" }}>2010</div>
-              <div className="text-ivory-300/40 text-[10px] font-mono tracking-widest uppercase">Founded</div>
+              <div className="text-2xl font-black text-wp-green" style={{ fontFamily: "'Lora', serif" }}>2010</div>
+              <div className="text-ivory-300/40 text-[10px] font-body tracking-widest uppercase">Founded</div>
             </div>
           </div>
         </div>
@@ -135,21 +135,21 @@ export default function AboutPage() {
       <section className="py-20 bg-ink-950 relative overflow-hidden">
         {/* BG accent */}
         <div className="absolute inset-0 pointer-events-none" aria-hidden="true"
-          style={{ background: 'radial-gradient(ellipse 60% 50% at 80% 50%, rgba(45,176,75,0.04) 0%, transparent 70%)' }} />
+          style={{ background: 'radial-gradient(ellipse 60% 50% at 80% 50%, rgba(19,161,80,0.04) 0%, transparent 70%)' }} />
 
         <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
           <div ref={missionRef} className="animate-on-scroll">
             <div className="flex items-center gap-3 mb-6">
               <div className="h-px w-8 bg-wp-green" />
-              <span className="font-mono text-[10px] tracking-[0.25em] uppercase text-wp-green">Mission & Vision</span>
+              <span className="font-body text-[10px] tracking-[0.25em] uppercase text-wp-green">Mission & Vision</span>
             </div>
             <h2 className="text-white mb-8 leading-snug"
-              style={{ fontFamily: "'Playfair Display', serif", fontWeight: 900, fontSize: 'clamp(1.8rem, 3vw, 2.5rem)' }}>
+              style={{ fontFamily: "'Lora', serif", fontWeight: 900, fontSize: 'clamp(1.8rem, 3vw, 2.5rem)' }}>
               Print That Moves <span className="italic" style={{ color: 'var(--wp-green)' }}>Business</span> Forward
             </h2>
             {/* Mission block */}
             <div className="mb-6 pl-5 border-l-2 border-wp-green/40">
-              <div className="font-mono text-[10px] tracking-widest uppercase text-wp-green/80 mb-1">Mission</div>
+              <div className="font-body text-[10px] tracking-widest uppercase text-wp-green/80 mb-1">Mission</div>
               <p className="text-ivory-300/70 leading-relaxed text-sm">
                 To deliver precision-crafted print solutions that amplify our clients' brand presence —
                 on time, on budget, and beyond expectation.
@@ -157,7 +157,7 @@ export default function AboutPage() {
             </div>
             {/* Vision block */}
             <div className="pl-5 border-l-2 border-wp-cyan/40">
-              <div className="font-mono text-[10px] tracking-widest uppercase text-wp-cyan/80 mb-1">Vision</div>
+              <div className="font-body text-[10px] tracking-widest uppercase text-wp-cyan/80 mb-1">Vision</div>
               <p className="text-ivory-300/70 leading-relaxed text-sm">
                 To be the most trusted commercial printing partner in the region — recognized for
                 quality, reliability, and a commitment to sustainable practices.
@@ -185,7 +185,7 @@ export default function AboutPage() {
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex items-center gap-3 mb-12">
             <div className="h-px w-8 bg-wp-green" />
-            <span className="font-mono text-[10px] tracking-[0.25em] uppercase text-wp-green">Leadership</span>
+            <span className="font-body text-[10px] tracking-[0.25em] uppercase text-wp-green">Leadership</span>
           </div>
 
           <div className="grid md:grid-cols-5 gap-12 items-start">
@@ -206,13 +206,13 @@ export default function AboutPage() {
 
               {/* Name plate */}
               <div className="mt-4 p-4 bg-ink-800 border border-white/[0.07] rounded-sm">
-                <div className="text-white font-bold text-lg mb-0.5" style={{ fontFamily: "'DM Serif Display', serif" }}>
+                <div className="text-white font-bold text-lg mb-0.5" style={{ fontFamily: "'Lora', serif" }}>
                   Engr. Eglesciano "Boboy" Bereso
                 </div>
-                <div className="text-ivory-300/40 text-xs font-mono tracking-wider uppercase">
+                <div className="text-ivory-300/40 text-xs font-body tracking-wider uppercase">
                   Chairman, WELLPRINT
                 </div>
-                <div className="text-ivory-300/30 text-xs font-mono tracking-wider">
+                <div className="text-ivory-300/30 text-xs font-body tracking-wider">
                   Bereso Group of Companies
                 </div>
               </div>
@@ -221,13 +221,13 @@ export default function AboutPage() {
             {/* Message */}
             <div className="md:col-span-3 flex flex-col justify-center">
               <h2 className="text-white mb-8 leading-snug"
-                style={{ fontFamily: "'Playfair Display', serif", fontWeight: 900, fontSize: 'clamp(1.6rem, 3vw, 2.4rem)' }}>
+                style={{ fontFamily: "'Lora', serif", fontWeight: 900, fontSize: 'clamp(1.6rem, 3vw, 2.4rem)' }}>
                 A Message from <span className="italic" style={{ color: 'var(--wp-yellow)' }}>Our Chairman</span>
               </h2>
 
               {/* Large opening quote mark */}
               <div className="text-8xl leading-none mb-4 -ml-1 select-none"
-                style={{ fontFamily: "'Playfair Display', serif", color: 'var(--wp-green)', opacity: 0.25 }}>
+                style={{ fontFamily: "'Lora', serif", color: 'var(--wp-green)', opacity: 0.25 }}>
                 "
               </div>
 
@@ -252,7 +252,7 @@ export default function AboutPage() {
 
               <div className="mt-8 flex items-center gap-4">
                 <div className="h-px flex-1 bg-white/[0.07]" />
-                <div className="font-mono text-[10px] tracking-widest uppercase text-ivory-300/30">
+                <div className="font-body text-[10px] tracking-widest uppercase text-ivory-300/30">
                   Espiel-Bereso Group
                 </div>
               </div>
@@ -266,12 +266,12 @@ export default function AboutPage() {
         <div className="max-w-7xl mx-auto px-6 text-center">
           <div className="flex items-center justify-center gap-3 mb-6">
             <div className="h-px w-8 bg-wp-green" />
-            <span className="font-mono text-[10px] tracking-[0.25em] uppercase text-wp-green">Part of a Larger Family</span>
+            <span className="font-body text-[10px] tracking-[0.25em] uppercase text-wp-green">Part of a Larger Family</span>
             <div className="h-px w-8 bg-wp-green" />
           </div>
 
           <h2 className="text-white mb-4"
-            style={{ fontFamily: "'Playfair Display', serif", fontWeight: 900, fontSize: 'clamp(1.6rem, 3vw, 2.4rem)' }}>
+            style={{ fontFamily: "'Lora', serif", fontWeight: 900, fontSize: 'clamp(1.6rem, 3vw, 2.4rem)' }}>
             A Subsidiary of <span className="italic" style={{ color: 'var(--wp-green)' }}>Bereso Group</span>
           </h2>
           <p className="text-ivory-300/50 max-w-2xl mx-auto text-sm leading-relaxed mb-10">
@@ -283,7 +283,7 @@ export default function AboutPage() {
           {/* Sibling brands */}
           <div className="flex flex-wrap justify-center gap-4">
             {['WELLife', 'Bereso Group', 'WELLPrint'].map((brand, i) => (
-              <div key={brand} className="px-6 py-3 bg-ink-900 border border-white/[0.08] rounded-sm font-mono text-xs tracking-widest uppercase"
+              <div key={brand} className="px-6 py-3 bg-ink-900 border border-white/[0.08] rounded-sm font-body text-xs tracking-widest uppercase"
                 style={{ color: i === 2 ? 'var(--wp-green)' : 'var(--ivory-300, #D8D8D8)', opacity: i === 2 ? 1 : 0.45 }}>
                 {brand}
               </div>
@@ -296,7 +296,7 @@ export default function AboutPage() {
       <section className="py-20 bg-ink-950 border-t border-white/[0.06]">
         <div className="max-w-3xl mx-auto px-6 text-center">
           <h2 className="text-white mb-4"
-            style={{ fontFamily: "'Playfair Display', serif", fontWeight: 900, fontSize: 'clamp(1.6rem, 3vw, 2.4rem)' }}>
+            style={{ fontFamily: "'Lora', serif", fontWeight: 900, fontSize: 'clamp(1.6rem, 3vw, 2.4rem)' }}>
             Ready to Work With Us?
           </h2>
           <p className="text-ivory-300/50 mb-8 text-sm">

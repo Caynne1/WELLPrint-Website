@@ -13,7 +13,7 @@ export default function PlaceholderPage({ title = 'Coming Soon', phase }) {
       <span className="badge badge-green mb-4">{phase || 'In Development'}</span>
       <h1
         className="text-ivory-50 text-4xl mb-4"
-        style={{ fontFamily: "'Playfair Display', serif", fontWeight: 900 }}
+        style={{ fontFamily: "'Lora', serif", fontWeight: 900 }}
       >
         {title}
       </h1>

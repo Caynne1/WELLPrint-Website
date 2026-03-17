@@ -36,31 +36,24 @@ export default function LoginPage() {
         className="absolute inset-0 pointer-events-none"
         style={{
           backgroundImage:
-            'linear-gradient(rgba(45,176,75,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(45,176,75,0.03) 1px, transparent 1px)',
+            'linear-gradient(rgba(19,161,80,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(19,161,80,0.03) 1px, transparent 1px)',
           backgroundSize: '48px 48px',
         }}
       />
       <div
         className="absolute top-1/4 left-1/2 -translate-x-1/2 w-96 h-96 rounded-full pointer-events-none"
-        style={{ background: 'radial-gradient(circle, rgba(45,176,75,0.06) 0%, transparent 70%)' }}
+        style={{ background: 'radial-gradient(circle, rgba(19,161,80,0.06) 0%, transparent 70%)' }}
       />
 
       <div className="relative w-full max-w-sm">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div
-            className="inline-flex items-center justify-center w-14 h-14 rounded-sm mb-4"
-            style={{ background: 'rgba(45,176,75,0.1)', border: '1px solid rgba(45,176,75,0.25)' }}
-          >
-            <Printer size={26} style={{ color: 'var(--wp-green)' }} />
-          </div>
-          <div
-            className="text-white font-bold text-lg tracking-wide"
-            style={{ fontFamily: "'DM Serif Display', serif" }}
-          >
-            WELLPrint
-          </div>
-          <p className="font-mono text-[9px] tracking-widest uppercase text-ivory-300/25 mt-1">
+          <img
+            src="/logos/vertical/main-dark.svg"
+            alt="WELLPrint"
+            className="h-24 w-auto object-contain mx-auto mb-2"
+          />
+          <p className="font-body text-[9px] tracking-widest uppercase text-ivory-300/25 mt-1">
             Staff Portal
           </p>
         </div>
@@ -69,11 +62,11 @@ export default function LoginPage() {
         <div className="flex items-center gap-2 mb-5">
           <div
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm flex-1 justify-center"
-            style={{ background: 'rgba(45,176,75,0.08)', border: '1px solid rgba(45,176,75,0.18)' }}
+            style={{ background: 'rgba(19,161,80,0.08)', border: '1px solid rgba(19,161,80,0.18)' }}
           >
             <User size={11} style={{ color: 'var(--wp-green)' }} />
             <span
-              className="font-mono text-[10px] tracking-widest uppercase"
+              className="font-body text-[10px] tracking-widest uppercase"
               style={{ color: 'var(--wp-green)' }}
             >
               Staff
@@ -84,10 +77,10 @@ export default function LoginPage() {
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm flex-1 justify-center"
             style={{ background: 'rgba(236,0,140,0.08)', border: '1px solid rgba(236,0,140,0.18)' }}
           >
-            <Shield size={11} style={{ color: '#EC008C' }} />
+            <Shield size={11} style={{ color: '#CD1B6E' }} />
             <span
-              className="font-mono text-[10px] tracking-widest uppercase"
-              style={{ color: '#EC008C' }}
+              className="font-body text-[10px] tracking-widest uppercase"
+              style={{ color: '#CD1B6E' }}
             >
               Admin
             </span>
@@ -106,18 +99,18 @@ export default function LoginPage() {
 
           <h1
             className="text-white text-xl font-bold mb-1"
-            style={{ fontFamily: "'DM Serif Display', serif" }}
+            style={{ fontFamily: "'Lora', serif" }}
           >
             Sign In
           </h1>
-          <p className="text-ivory-300/40 text-xs font-mono mb-7">
+          <p className="text-ivory-300/40 text-xs font-body mb-7">
             Your role is determined automatically
           </p>
 
           <form onSubmit={handleSubmit} noValidate className="space-y-5">
             {/* Identifier */}
             <div>
-              <label className="block font-mono text-[10px] tracking-widest uppercase mb-2 text-ivory-300/50">
+              <label className="block font-body text-[10px] tracking-widest uppercase mb-2 text-ivory-300/50">
                 Username or Email
               </label>
               <div className="relative">
@@ -146,7 +139,7 @@ export default function LoginPage() {
 
             {/* Password */}
             <div>
-              <label className="block font-mono text-[10px] tracking-widest uppercase mb-2 text-ivory-300/50">
+              <label className="block font-body text-[10px] tracking-widest uppercase mb-2 text-ivory-300/50">
                 Password
               </label>
               <div className="relative">
@@ -180,7 +173,7 @@ export default function LoginPage() {
                 style={{
                   background: 'rgba(236,0,140,0.08)',
                   border: '1px solid rgba(236,0,140,0.2)',
-                  color: '#EC008C',
+                  color: '#CD1B6E',
                 }}
               >
                 <Lock size={11} /> {error}
@@ -210,14 +203,14 @@ export default function LoginPage() {
           className="mt-4 px-4 py-3 rounded-sm"
           style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}
         >
-          <p className="text-[10px] font-mono text-ivory-300/25 text-center leading-relaxed">
+          <p className="text-[10px] font-body text-ivory-300/25 text-center leading-relaxed">
             One login for all staff. Your access level is set by your assigned role —{' '}
             <span style={{ color: 'var(--wp-green)' }}>Staff</span> or{' '}
-            <span style={{ color: '#EC008C' }}>Admin</span>.
+            <span style={{ color: '#CD1B6E' }}>Admin</span>.
           </p>
         </div>
 
-        <p className="text-center text-[10px] font-mono text-ivory-300/20 mt-4">
+        <p className="text-center text-[10px] font-body text-ivory-300/20 mt-4">
           © {new Date().getFullYear()} WELLPrint · Bereso Group
         </p>
       </div>

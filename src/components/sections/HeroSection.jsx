@@ -5,7 +5,7 @@ import { ArrowRight, Star } from 'lucide-react'
 // Animated decorative number/line element
 function PressMark({ children, className = '' }) {
   return (
-    <span className={`font-mono text-[10px] tracking-[0.2em] text-ivory-300/30 uppercase ${className}`}>
+    <span className={`font-body text-[10px] tracking-[0.2em] text-ivory-300/30 uppercase ${className}`}>
       {children}
     </span>
   )
@@ -52,7 +52,7 @@ export default function HeroSection() {
         <div className="absolute right-[-2%] top-[10%] opacity-[0.025] select-none pointer-events-none overflow-hidden">
           <span
             className="text-[38vw] font-black text-ivory-200 leading-none"
-            style={{ fontFamily: "'Playfair Display', serif" }}
+            style={{ fontFamily: "'Lora', serif" }}
           >
             W
           </span>
@@ -83,7 +83,7 @@ export default function HeroSection() {
                 {[...Array(5)].map((_, i) => (
                   <Star key={i} size={10} className="text-wp-green fill-wp-green" />
                 ))}
-                <span className="text-xs text-ivory-300/50 ml-1 font-mono">4.9 / 5</span>
+                <span className="text-xs text-ivory-300/50 ml-1 font-body">4.9 / 5</span>
               </div>
             </div>
 
@@ -91,7 +91,7 @@ export default function HeroSection() {
             <h1
               className="text-ivory-50 leading-[0.92] mb-8"
               style={{
-                fontFamily: "'Playfair Display', serif",
+                fontFamily: "'Lora', serif",
                 fontWeight: 900,
                 fontSize: 'clamp(3.5rem, 8vw, 7.5rem)',
                 animation: 'fadeUp 0.7s ease 0.2s both',
@@ -100,7 +100,7 @@ export default function HeroSection() {
               Print.{' '}
               <span
                 className="italic text-ivory-50"
-                style={{ fontFamily: "'Playfair Display', serif" }}
+                style={{ fontFamily: "'Lora', serif" }}
               >
                 Precisely.
               </span>
@@ -136,7 +136,7 @@ export default function HeroSection() {
             {/* Subheadline */}
             <p
               className="text-ivory-300/65 text-lg md:text-xl max-w-xl leading-relaxed mb-10"
-              style={{ animation: 'fadeUp 0.7s ease 0.35s both', fontFamily: "'DM Sans', sans-serif" }}
+              style={{ animation: 'fadeUp 0.7s ease 0.35s both', fontFamily: "'Montserrat', sans-serif" }}
             >
               From business cards to large-format banners — WELLPrint delivers
               studio-quality results with offset precision, digital speed, and
@@ -171,11 +171,11 @@ export default function HeroSection() {
                 <div key={label} className="flex flex-col">
                   <span
                     className="text-2xl font-black text-ivory-100 leading-none mb-0.5"
-                    style={{ fontFamily: "'Playfair Display', serif" }}
+                    style={{ fontFamily: "'Lora', serif" }}
                   >
                     {value}
                   </span>
-                  <span className="text-xs text-ivory-300/45 font-mono tracking-wide uppercase">
+                  <span className="text-xs text-ivory-300/45 font-body tracking-wide uppercase">
                     {label}
                   </span>
                 </div>
@@ -217,7 +217,7 @@ export default function HeroSection() {
                 </div>
               </div>
               <div className="border-t border-ivory-200/10 pt-4 flex items-center justify-between">
-                <span className="text-xs font-mono text-ivory-300/40 tracking-wider">OFFSET LITHO</span>
+                <span className="text-xs font-body text-ivory-300/40 tracking-wider">OFFSET LITHO</span>
                 <span className="badge badge-green">Ready</span>
               </div>
             </div>
@@ -225,17 +225,17 @@ export default function HeroSection() {
             {/* Floating card 2 — discount reminder */}
             <div className="w-3/4 bg-wp-green/10 border border-wp-green/20 p-5 flex items-center gap-4 self-start">
               <div className="w-10 h-10 bg-wp-green flex items-center justify-center flex-shrink-0">
-                <span className="text-ink-950 font-black text-sm font-mono">%</span>
+                <span className="text-ink-950 font-black text-sm font-body">%</span>
               </div>
               <div>
                 <p className="text-ivory-200 text-sm font-semibold leading-tight">10% off</p>
-                <p className="text-xs text-ivory-300/50 font-mono mt-0.5">Orders of 6+ items</p>
+                <p className="text-xs text-ivory-300/50 font-body mt-0.5">Orders of 6+ items</p>
               </div>
             </div>
 
             {/* Card 3 — file types */}
             <div className="w-full bg-ink-800 border border-ivory-200/10 p-5">
-              <p className="text-[10px] font-mono tracking-[0.15em] text-ivory-300/40 uppercase mb-3">
+              <p className="text-[10px] font-body tracking-[0.15em] text-ivory-300/40 uppercase mb-3">
                 Accepted File Formats
               </p>
               <div className="flex gap-2 flex-wrap">
@@ -243,7 +243,7 @@ export default function HeroSection() {
                   <span key={fmt} className="badge badge-ivory">{fmt}</span>
                 ))}
               </div>
-              <p className="text-[10px] font-mono text-ivory-300/30 mt-3">
+              <p className="text-[10px] font-body text-ivory-300/30 mt-3">
                 Up to 500 MB per file
               </p>
             </div>
@@ -258,7 +258,7 @@ export default function HeroSection() {
         aria-hidden="true"
       >
         <div className="flex flex-col items-center gap-2">
-          <span className="font-mono text-[9px] tracking-[0.2em] text-ivory-300/30 uppercase">Scroll</span>
+          <span className="font-body text-[9px] tracking-[0.2em] text-ivory-300/30 uppercase">Scroll</span>
           <div className="w-[1px] h-10 bg-gradient-to-b from-ivory-300/30 to-transparent" />
         </div>
       </div>

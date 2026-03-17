@@ -9,14 +9,14 @@ export default function PageHero({ label, title, titleAccent, subtitle, children
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         <div className="flex items-center gap-3 mb-5">
           <div className="h-px w-10 bg-wp-green" />
-          <span className="font-mono text-[10px] tracking-[0.25em] uppercase" style={{ color: 'var(--wp-green)' }}>
+          <span className="font-body text-[10px] tracking-[0.25em] uppercase" style={{ color: 'var(--wp-green)' }}>
             {label}
           </span>
         </div>
         <h1
           className="text-white mb-4 leading-tight"
           style={{
-            fontFamily: "'Playfair Display', serif",
+            fontFamily: "'Lora', serif",
             fontWeight: 900,
             fontSize: 'clamp(2.2rem, 5vw, 4rem)',
           }}

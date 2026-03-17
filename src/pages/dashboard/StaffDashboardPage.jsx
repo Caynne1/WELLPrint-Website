@@ -23,16 +23,16 @@ function PermissionBadge({ label, granted }) {
   return (
     <div className="flex items-center gap-2 px-3 py-2 rounded-sm"
       style={{
-        background: granted ? 'rgba(45,176,75,0.07)' : 'rgba(255,255,255,0.03)',
-        border: `1px solid ${granted ? 'rgba(45,176,75,0.2)' : 'rgba(255,255,255,0.06)'}`,
+        background: granted ? 'rgba(19,161,80,0.07)' : 'rgba(255,255,255,0.03)',
+        border: `1px solid ${granted ? 'rgba(19,161,80,0.2)' : 'rgba(255,255,255,0.06)'}`,
       }}>
       <div className="w-4 h-4 rounded-sm flex items-center justify-center shrink-0"
-        style={{ background: granted ? 'rgba(45,176,75,0.15)' : 'rgba(255,255,255,0.05)', border: `1px solid ${granted ? 'rgba(45,176,75,0.3)' : 'rgba(255,255,255,0.08)'}` }}>
+        style={{ background: granted ? 'rgba(19,161,80,0.15)' : 'rgba(255,255,255,0.05)', border: `1px solid ${granted ? 'rgba(19,161,80,0.3)' : 'rgba(255,255,255,0.08)'}` }}>
         {granted
-          ? <CheckCircle size={9} style={{ color: '#2DB04B' }} />
+          ? <CheckCircle size={9} style={{ color: '#13A150' }} />
           : <Lock size={9} className="text-ivory-300/25" />}
       </div>
-      <span className="font-mono text-[10px]"
+      <span className="font-body text-[10px]"
         style={{ color: granted ? 'rgba(216,216,216,0.7)' : 'rgba(216,216,216,0.2)' }}>
         {label}
       </span>
@@ -48,21 +48,21 @@ function TaskItem({ text, done = false, urgent = false }) {
         onClick={() => setChecked(v => !v)}
         className="w-4 h-4 rounded-sm border shrink-0 flex items-center justify-center transition-all"
         style={{
-          background: checked ? 'rgba(45,176,75,0.2)' : 'transparent',
+          background: checked ? 'rgba(19,161,80,0.2)' : 'transparent',
           borderColor: checked ? 'var(--wp-green)' : 'rgba(255,255,255,0.15)',
         }}>
-        {checked && <CheckSquare size={10} style={{ color: '#2DB04B' }} />}
+        {checked && <CheckSquare size={10} style={{ color: '#13A150' }} />}
       </button>
-      <span className="flex-1 text-xs font-mono"
+      <span className="flex-1 text-xs font-body"
         style={{
-          color: checked ? 'rgba(216,216,216,0.25)' : urgent ? '#FBB03B' : 'rgba(216,216,216,0.6)',
+          color: checked ? 'rgba(216,216,216,0.25)' : urgent ? '#FDC010' : 'rgba(216,216,216,0.6)',
           textDecoration: checked ? 'line-through' : 'none',
         }}>
         {text}
       </span>
       {urgent && !checked && (
-        <span className="font-mono text-[8px] px-1.5 py-0.5 rounded-sm"
-          style={{ background: 'rgba(251,176,59,0.12)', color: '#FBB03B' }}>URGENT</span>
+        <span className="font-body text-[8px] px-1.5 py-0.5 rounded-sm"
+          style={{ background: 'rgba(251,176,59,0.12)', color: '#FDC010' }}>URGENT</span>
       )}
     </div>
   )
@@ -112,10 +112,10 @@ export default function StaffDashboardPage() {
       {/* Header */}
       <div className="mb-8 flex items-start justify-between gap-4">
         <div>
-          <span className="font-mono text-[10px] tracking-widest uppercase text-ivory-300/30">
+          <span className="font-body text-[10px] tracking-widest uppercase text-ivory-300/30">
             {now.toLocaleDateString('en-PH', { weekday: 'long', month: 'long', day: 'numeric' })}
           </span>
-          <h1 className="text-white text-2xl font-bold mt-0.5" style={{ fontFamily: "'DM Serif Display', serif" }}>
+          <h1 className="text-white text-2xl font-bold mt-0.5" style={{ fontFamily: "'Lora', serif" }}>
             {greeting()}, <span style={{ color: 'var(--wp-green)' }}>{user?.name?.split(' ')[0]}</span>
           </h1>
           <p className="text-ivory-300/40 text-sm mt-0.5">
@@ -127,7 +127,7 @@ export default function StaffDashboardPage() {
             )}
           </p>
         </div>
-        <button onClick={refetch} className="flex items-center gap-2 px-3 py-2 rounded-sm text-xs font-mono border border-white/[0.08] text-ivory-300/40 hover:text-white hover:border-wp-green/40 transition-all">
+        <button onClick={refetch} className="flex items-center gap-2 px-3 py-2 rounded-sm text-xs font-body border border-white/[0.08] text-ivory-300/40 hover:text-white hover:border-wp-green/40 transition-all">
           <RefreshCw size={12} /> Refresh
         </button>
       </div>
@@ -137,12 +137,12 @@ export default function StaffDashboardPage() {
         <div className="mb-6 flex items-center justify-between px-5 py-3.5 rounded-sm border"
           style={{ background: 'rgba(236,0,140,0.07)', borderColor: 'rgba(236,0,140,0.25)' }}>
           <div className="flex items-center gap-3">
-            <AlertCircle size={15} style={{ color: '#EC008C' }} />
-            <span className="text-sm font-semibold" style={{ color: '#EC008C' }}>
+            <AlertCircle size={15} style={{ color: '#CD1B6E' }} />
+            <span className="text-sm font-semibold" style={{ color: '#CD1B6E' }}>
               {newOrders.length} new order {newOrders.length > 1 ? 'inquiries need' : 'inquiry needs'} attention
             </span>
           </div>
-          <Link to="/dashboard/orders?filter=new" className="flex items-center gap-1 text-xs font-mono hover:underline" style={{ color: '#EC008C' }}>
+          <Link to="/dashboard/orders?filter=new" className="flex items-center gap-1 text-xs font-body hover:underline" style={{ color: '#CD1B6E' }}>
             Review <ArrowRight size={11} />
           </Link>
         </div>
@@ -151,9 +151,9 @@ export default function StaffDashboardPage() {
       {/* KPI row */}
       <div className="grid grid-cols-3 gap-4 mb-6">
         {[
-          { label: 'Awaiting',   value: newOrders.length,    icon: Inbox,       color: '#EC008C', sub: 'New inquiries' },
-          { label: 'In Progress',value: activeOrders.length, icon: Clock,       color: '#FBB03B', sub: 'Active orders' },
-          { label: 'Handled',    value: handledOrders,       icon: CheckCircle, color: '#2DB04B', sub: 'Processed' },
+          { label: 'Awaiting',   value: newOrders.length,    icon: Inbox,       color: '#CD1B6E', sub: 'New inquiries' },
+          { label: 'In Progress',value: activeOrders.length, icon: Clock,       color: '#FDC010', sub: 'Active orders' },
+          { label: 'Handled',    value: handledOrders,       icon: CheckCircle, color: '#13A150', sub: 'Processed' },
         ].map(({ label, value, icon: Icon, color, sub }) => (
           <div key={label} className="bg-ink-800 border border-white/[0.07] rounded-sm p-5 hover:border-white/[0.12] transition-all">
             <div className="flex items-start justify-between mb-3">
@@ -161,9 +161,9 @@ export default function StaffDashboardPage() {
                 <Icon size={15} style={{ color }} />
               </div>
             </div>
-            <div className="text-white text-2xl font-black leading-none mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>{value}</div>
+            <div className="text-white text-2xl font-black leading-none mb-1" style={{ fontFamily: "'Lora', serif" }}>{value}</div>
             <div className="text-ivory-300/55 text-xs font-semibold">{label}</div>
-            <div className="text-ivory-300/25 text-[10px] font-mono">{sub}</div>
+            <div className="text-ivory-300/25 text-[10px] font-body">{sub}</div>
           </div>
         ))}
       </div>
@@ -174,13 +174,13 @@ export default function StaffDashboardPage() {
         {/* Orders queue — col-span 3 */}
         <div className="lg:col-span-3 bg-ink-800 border border-white/[0.07] rounded-sm overflow-hidden">
           <div className="px-5 py-4 border-b border-white/[0.06] flex items-center justify-between"
-            style={{ background: 'rgba(45,176,75,0.04)' }}>
+            style={{ background: 'rgba(19,161,80,0.04)' }}>
             <div className="flex items-center gap-2">
               <div className="w-1.5 h-1.5 rounded-full bg-wp-green" style={{ animation: 'pulse 2s infinite' }} />
-              <span className="font-mono text-[10px] tracking-widest uppercase text-wp-green">Your Queue</span>
+              <span className="font-body text-[10px] tracking-widest uppercase text-wp-green">Your Queue</span>
             </div>
             {canViewOrders && (
-              <Link to="/dashboard/orders" className="text-[10px] font-mono text-ivory-300/30 hover:text-wp-green transition-colors flex items-center gap-1">
+              <Link to="/dashboard/orders" className="text-[10px] font-body text-ivory-300/30 hover:text-wp-green transition-colors flex items-center gap-1">
                 All orders <ArrowRight size={10} />
               </Link>
             )}
@@ -189,12 +189,12 @@ export default function StaffDashboardPage() {
           {!canViewOrders ? (
             <div className="py-14 flex flex-col items-center justify-center gap-3">
               <Lock size={20} className="text-ivory-300/15" />
-              <p className="text-ivory-300/25 text-xs font-mono">You don't have permission to view orders</p>
+              <p className="text-ivory-300/25 text-xs font-body">You don't have permission to view orders</p>
             </div>
           ) : recentActivity.length === 0 ? (
             <div className="py-14 flex flex-col items-center justify-center gap-3">
               <Inbox size={22} style={{ color: 'var(--wp-green)', opacity: 0.3 }} />
-              <p className="text-ivory-300/30 text-xs font-mono">No orders yet</p>
+              <p className="text-ivory-300/30 text-xs font-body">No orders yet</p>
             </div>
           ) : (
             <div className="divide-y divide-white/[0.04]">
@@ -206,17 +206,17 @@ export default function StaffDashboardPage() {
                       style={{ background: st.color, boxShadow: order.status === 'new' ? `0 0 6px ${st.color}` : 'none' }} />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-0.5">
-                        <span className="text-white text-xs font-mono font-bold">{order.id}</span>
-                        <span className="text-[9px] font-mono px-1.5 py-0.5 rounded-sm"
+                        <span className="text-white text-xs font-body font-bold">{order.id}</span>
+                        <span className="text-[9px] font-body px-1.5 py-0.5 rounded-sm"
                           style={{ background: st.bg, color: st.color }}>{st.label}</span>
                         {order.status === 'new' && (
-                          <span className="text-[8px] font-mono px-1 py-0.5 rounded-sm" style={{ background: 'rgba(236,0,140,0.15)', color: '#EC008C' }}>NEW</span>
+                          <span className="text-[8px] font-body px-1 py-0.5 rounded-sm" style={{ background: 'rgba(236,0,140,0.15)', color: '#CD1B6E' }}>NEW</span>
                         )}
                       </div>
-                      <div className="text-ivory-300/40 text-[10px] font-mono truncate">{order.customer.name} · {timeAgo(order.createdAt)}</div>
+                      <div className="text-ivory-300/40 text-[10px] font-body truncate">{order.customer.name} · {timeAgo(order.createdAt)}</div>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
-                      <span className="text-white text-xs font-mono font-bold">{formatPHP(order.estimatedTotal)}</span>
+                      <span className="text-white text-xs font-body font-bold">{formatPHP(order.estimatedTotal)}</span>
                       {canManageOrders ? (
                         <Link to={`/dashboard/orders/${order.id}`}
                           className="w-7 h-7 rounded-sm flex items-center justify-center border border-white/[0.08] text-ivory-300/30 hover:text-wp-green hover:border-wp-green/30 transition-all">
@@ -243,8 +243,8 @@ export default function StaffDashboardPage() {
           <div className="bg-ink-800 border border-white/[0.07] rounded-sm overflow-hidden">
             <div className="px-5 py-3.5 border-b border-white/[0.06] flex items-center gap-2"
               style={{ background: 'rgba(251,176,59,0.04)' }}>
-              <ClipboardList size={11} style={{ color: '#FBB03B' }} />
-              <span className="font-mono text-[10px] tracking-widest uppercase" style={{ color: '#FBB03B' }}>Today's Tasks</span>
+              <ClipboardList size={11} style={{ color: '#FDC010' }} />
+              <span className="font-body text-[10px] tracking-widest uppercase" style={{ color: '#FDC010' }}>Today's Tasks</span>
             </div>
             <div className="px-4 py-2">
               {TASKS.map((t, i) => <TaskItem key={i} {...t} />)}
@@ -254,15 +254,15 @@ export default function StaffDashboardPage() {
           {/* Quick access (permission-gated) */}
           <div className="bg-ink-800 border border-white/[0.07] rounded-sm overflow-hidden">
             <div className="px-5 py-3.5 border-b border-white/[0.06] flex items-center gap-2"
-              style={{ background: 'rgba(45,176,75,0.04)' }}>
+              style={{ background: 'rgba(19,161,80,0.04)' }}>
               <Zap size={11} style={{ color: 'var(--wp-green)' }} />
-              <span className="font-mono text-[10px] tracking-widest uppercase text-wp-green">Quick Access</span>
+              <span className="font-body text-[10px] tracking-widest uppercase text-wp-green">Quick Access</span>
             </div>
             <div className="p-3 grid grid-cols-2 gap-2">
               {[
-                { label: 'Orders',    to: '/dashboard/orders',    icon: Package,    color: '#EC008C', perm: 'view_orders' },
-                { label: 'Products',  to: '/dashboard/products',  icon: ShoppingBag,color: '#FBB03B', perm: 'view_products' },
-                { label: 'Analytics', to: '/dashboard/analytics', icon: BarChart2,  color: '#29ABE2', perm: 'view_analytics' },
+                { label: 'Orders',    to: '/dashboard/orders',    icon: Package,    color: '#CD1B6E', perm: 'view_orders' },
+                { label: 'Products',  to: '/dashboard/products',  icon: ShoppingBag,color: '#FDC010', perm: 'view_products' },
+                { label: 'Analytics', to: '/dashboard/analytics', icon: BarChart2,  color: '#1993D2', perm: 'view_analytics' },
               ].map(({ label, to, icon: Icon, color, perm }) => {
                 const allowed = hasPermission(perm)
                 return allowed ? (
@@ -271,7 +271,7 @@ export default function StaffDashboardPage() {
                     <div className="w-8 h-8 rounded-sm flex items-center justify-center" style={{ background: `${color}12`, border: `1px solid ${color}22` }}>
                       <Icon size={15} style={{ color }} />
                     </div>
-                    <span className="text-[10px] font-mono text-ivory-300/40 group-hover:text-white transition-colors text-center">{label}</span>
+                    <span className="text-[10px] font-body text-ivory-300/40 group-hover:text-white transition-colors text-center">{label}</span>
                   </Link>
                 ) : (
                   <div key={to}
@@ -279,7 +279,7 @@ export default function StaffDashboardPage() {
                     <div className="w-8 h-8 rounded-sm flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
                       <Lock size={13} className="text-ivory-300/30" />
                     </div>
-                    <span className="text-[10px] font-mono text-ivory-300/25 text-center">{label}</span>
+                    <span className="text-[10px] font-body text-ivory-300/25 text-center">{label}</span>
                   </div>
                 )
               })}
@@ -288,7 +288,7 @@ export default function StaffDashboardPage() {
                 <div className="w-8 h-8 rounded-sm flex items-center justify-center" style={{ background: 'rgba(236,0,140,0.06)', border: '1px solid rgba(236,0,140,0.12)' }}>
                   <Lock size={13} style={{ color: 'rgba(236,0,140,0.4)' }} />
                 </div>
-                <span className="text-[10px] font-mono text-ivory-300/20 text-center">Staff Mgmt</span>
+                <span className="text-[10px] font-body text-ivory-300/20 text-center">Staff Mgmt</span>
               </div>
             </div>
           </div>
@@ -298,9 +298,9 @@ export default function StaffDashboardPage() {
       {/* My Permissions */}
       <div className="bg-ink-800 border border-white/[0.07] rounded-sm overflow-hidden">
         <div className="px-5 py-3.5 border-b border-white/[0.06] flex items-center gap-2"
-          style={{ background: 'rgba(41,171,226,0.04)' }}>
-          <User size={11} style={{ color: '#29ABE2' }} />
-          <span className="font-mono text-[10px] tracking-widest uppercase" style={{ color: '#29ABE2' }}>My Access Permissions</span>
+          style={{ background: 'rgba(25,147,210,0.04)' }}>
+          <User size={11} style={{ color: '#1993D2' }} />
+          <span className="font-body text-[10px] tracking-widest uppercase" style={{ color: '#1993D2' }}>My Access Permissions</span>
         </div>
         <div className="p-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
           {Object.entries(PERMISSION_LABELS_MAP).map(([key, label]) => (
@@ -308,7 +308,7 @@ export default function StaffDashboardPage() {
           ))}
         </div>
         <div className="px-5 py-3 border-t border-white/[0.04]">
-          <p className="text-[10px] font-mono text-ivory-300/25">
+          <p className="text-[10px] font-body text-ivory-300/25">
             Permissions are managed by your Admin. Contact them to request access changes.
           </p>
         </div>

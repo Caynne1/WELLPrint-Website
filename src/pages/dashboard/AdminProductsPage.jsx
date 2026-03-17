@@ -16,7 +16,7 @@ function Modal({ title, onClose, children }) {
         style={{ background: 'var(--ink-900,#111)' }}>
         <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.07] shrink-0"
           style={{ background: 'var(--ink-950,#0a0a0a)' }}>
-          <span className="font-mono text-[10px] tracking-widest uppercase text-wp-green">{title}</span>
+          <span className="font-body text-[10px] tracking-widest uppercase text-wp-green">{title}</span>
           <button onClick={onClose} className="text-ivory-300/30 hover:text-white transition-colors"><X size={16} /></button>
         </div>
         <div className="p-6 overflow-y-auto">{children}</div>
@@ -28,9 +28,9 @@ function Modal({ title, onClose, children }) {
 function Field({ label, error, children }) {
   return (
     <div className="mb-4">
-      <label className="block font-mono text-[10px] tracking-widest uppercase text-ivory-300/40 mb-2">{label}</label>
+      <label className="block font-body text-[10px] tracking-widest uppercase text-ivory-300/40 mb-2">{label}</label>
       {children}
-      {error && <p className="mt-1 text-[10px] font-mono" style={{ color: '#EC008C' }}>{error}</p>}
+      {error && <p className="mt-1 text-[10px] font-body" style={{ color: '#CD1B6E' }}>{error}</p>}
     </div>
   )
 }
@@ -66,7 +66,7 @@ function ImageUpload({ currentUrl, onUpload, uploading }) {
         className="relative rounded-sm border-2 border-dashed transition-all duration-200 overflow-hidden"
         style={{
           borderColor: dragOver ? 'var(--wp-green)' : 'rgba(255,255,255,0.12)',
-          background: dragOver ? 'rgba(45,176,75,0.05)' : 'rgba(255,255,255,0.02)',
+          background: dragOver ? 'rgba(19,161,80,0.05)' : 'rgba(255,255,255,0.02)',
           aspectRatio: '4/3',
         }}
         onDragOver={e => { e.preventDefault(); setDragOver(true) }}
@@ -80,7 +80,7 @@ function ImageUpload({ currentUrl, onUpload, uploading }) {
             <div className="absolute inset-0 bg-black/50 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
               <div className="flex flex-col items-center gap-2">
                 <Upload size={20} style={{ color: 'var(--wp-green)' }} />
-                <span className="text-xs font-mono text-white">Change image</span>
+                <span className="text-xs font-body text-white">Change image</span>
               </div>
             </div>
           </>
@@ -91,12 +91,12 @@ function ImageUpload({ currentUrl, onUpload, uploading }) {
             ) : (
               <>
                 <div className="w-12 h-12 rounded-sm flex items-center justify-center"
-                  style={{ background: 'rgba(45,176,75,0.1)', border: '1px solid rgba(45,176,75,0.25)' }}>
+                  style={{ background: 'rgba(19,161,80,0.1)', border: '1px solid rgba(19,161,80,0.25)' }}>
                   <ImagePlus size={20} style={{ color: 'var(--wp-green)' }} />
                 </div>
                 <div className="text-center">
                   <p className="text-ivory-300/50 text-xs">Click or drag to upload</p>
-                  <p className="text-ivory-300/25 text-[10px] font-mono mt-0.5">JPG, PNG, WEBP · Max 5MB</p>
+                  <p className="text-ivory-300/25 text-[10px] font-body mt-0.5">JPG, PNG, WEBP · Max 5MB</p>
                 </div>
               </>
             )}
@@ -113,7 +113,7 @@ function ImageUpload({ currentUrl, onUpload, uploading }) {
       {preview && (
         <button type="button"
           onClick={e => { e.stopPropagation(); setPreview(null); onUpload(null) }}
-          className="mt-2 text-[10px] font-mono text-ivory-300/30 hover:text-wp-magenta transition-colors flex items-center gap-1">
+          className="mt-2 text-[10px] font-body text-ivory-300/30 hover:text-wp-magenta transition-colors flex items-center gap-1">
           <X size={10} /> Remove image
         </button>
       )}
@@ -135,7 +135,7 @@ export default function AdminProductsPage() {
   const [saving, setSaving]           = useState(false)
   const [uploading, setUploading]     = useState(false)
 
-  const emptyForm = { name: '', slug: '', category_id: '', base_price: '', unit: 'pcs', min_qty: '1', short_description: '', status: 'active', thumbnail_url: '' }
+  const emptyForm = { name: '', slug: '', category_id: '', base_price: '', unit: 'pcs', min_qty: '1', turnaround_days: '', short_description: '', status: 'active', thumbnail_url: '' }
   const [form, setForm] = useState(emptyForm)
   const [errors, setErrors] = useState({})
 
@@ -143,7 +143,7 @@ export default function AdminProductsPage() {
     setLoading(true)
     const [{ data: prods }, { data: cats }] = await Promise.all([
       supabase.from('products')
-        .select('id, name, slug, short_description, base_price, thumbnail_url, status, sort_order, category_id, categories(id, name, slug)')
+        .select('id, name, slug, short_description, base_price, thumbnail_url, status, sort_order, category_id, min_qty, unit, turnaround_days, categories(id, name, slug)')
         .order('sort_order', { ascending: true }),
       supabase.from('categories').select('id, name, slug').order('sort_order', { ascending: true }),
     ])
@@ -168,8 +168,11 @@ export default function AdminProductsPage() {
     setEditTarget(p)
     setForm({
       name: p.name, slug: p.slug, category_id: p.category_id ?? '',
-      base_price: String(p.base_price ?? ''), unit: p.unit ?? 'pcs',
-      min_qty: String(p.min_qty ?? 1), short_description: p.short_description ?? '',
+      base_price: String(p.base_price ?? ''),
+      unit: p.unit ?? 'pcs',
+      min_qty: String(p.min_qty ?? 1),
+      turnaround_days: String(p.turnaround_days ?? ''),
+      short_description: p.short_description ?? '',
       status: p.status ?? 'active', thumbnail_url: p.thumbnail_url ?? '',
     })
     setErrors({})
@@ -206,6 +209,7 @@ export default function AdminProductsPage() {
     if (!form.slug.trim()) e.slug = 'Slug is required'
     if (!form.base_price || isNaN(Number(form.base_price)) || Number(form.base_price) <= 0) e.base_price = 'Valid price required'
     if (!form.min_qty || isNaN(Number(form.min_qty)) || Number(form.min_qty) < 1) e.min_qty = 'Min. quantity must be ≥ 1'
+    if (form.turnaround_days && (isNaN(Number(form.turnaround_days)) || Number(form.turnaround_days) < 1)) e.turnaround_days = 'Must be a positive number'
     return e
   }
 
@@ -216,8 +220,10 @@ export default function AdminProductsPage() {
     const payload = {
       name: form.name.trim(), slug: form.slug.trim(),
       category_id: form.category_id || null,
-      base_price: Number(form.base_price), unit: form.unit,
-      min_qty: Number(form.min_qty),
+      base_price: Number(form.base_price),
+      unit: form.unit || 'pcs',
+      min_qty: Number(form.min_qty) || 1,
+      turnaround_days: form.turnaround_days ? Number(form.turnaround_days) : null,
       short_description: form.short_description.trim(),
       status: form.status,
       thumbnail_url: form.thumbnail_url || null,
@@ -268,25 +274,25 @@ export default function AdminProductsPage() {
     <AdminLayout>
       <div className="mb-7 flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-white text-2xl font-bold mb-1" style={{ fontFamily: "'DM Serif Display', serif" }}>Products</h1>
+          <h1 className="text-white text-2xl font-bold mb-1" style={{ fontFamily: "'Lora', serif" }}>Products</h1>
           <p className="text-ivory-300/40 text-sm">{loading ? 'Loading…' : `${products.length} total · ${visibleCount} active`}</p>
         </div>
         <button onClick={openAdd}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-sm text-xs font-mono font-bold transition-all"
-          style={{ background: 'rgba(45,176,75,0.12)', border: '1px solid rgba(45,176,75,0.3)', color: 'var(--wp-green)' }}>
+          className="flex items-center gap-2 px-4 py-2.5 rounded-sm text-xs font-body font-bold transition-all"
+          style={{ background: 'rgba(19,161,80,0.12)', border: '1px solid rgba(19,161,80,0.3)', color: 'var(--wp-green)' }}>
           <Plus size={13} /> Add Product
         </button>
       </div>
 
       <div className="grid grid-cols-3 gap-4 mb-6">
         {[
-          { label: 'Total Products', value: products.length,              color: '#29ABE2' },
-          { label: 'Active',         value: visibleCount,                 color: '#2DB04B' },
+          { label: 'Total Products', value: products.length,              color: '#1993D2' },
+          { label: 'Active',         value: visibleCount,                 color: '#13A150' },
           { label: 'Archived',       value: products.length - visibleCount, color: '#888' },
         ].map(({ label, value, color }) => (
           <div key={label} className="bg-ink-800 border border-white/[0.07] rounded-sm p-4">
-            <div className="text-2xl font-black mb-0.5" style={{ fontFamily: "'Playfair Display', serif", color }}>{value}</div>
-            <div className="text-ivory-300/40 text-[10px] font-mono uppercase tracking-widest">{label}</div>
+            <div className="text-2xl font-black mb-0.5" style={{ fontFamily: "'Lora', serif", color }}>{value}</div>
+            <div className="text-ivory-300/40 text-[10px] font-body uppercase tracking-widest">{label}</div>
           </div>
         ))}
       </div>
@@ -299,14 +305,14 @@ export default function AdminProductsPage() {
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <button onClick={() => setCatFilter('all')}
-            className="text-[10px] font-mono px-3 py-1.5 rounded-sm border transition-all"
-            style={{ background: catFilter === 'all' ? 'rgba(41,171,226,0.1)' : 'transparent', color: catFilter === 'all' ? '#29ABE2' : 'rgba(216,216,216,0.35)', borderColor: catFilter === 'all' ? 'rgba(41,171,226,0.3)' : 'rgba(255,255,255,0.08)' }}>
+            className="text-[10px] font-body px-3 py-1.5 rounded-sm border transition-all"
+            style={{ background: catFilter === 'all' ? 'rgba(25,147,210,0.1)' : 'transparent', color: catFilter === 'all' ? '#1993D2' : 'rgba(216,216,216,0.35)', borderColor: catFilter === 'all' ? 'rgba(25,147,210,0.3)' : 'rgba(255,255,255,0.08)' }}>
             All
           </button>
           {categories.map(c => (
             <button key={c.id} onClick={() => setCatFilter(c.id)}
-              className="text-[10px] font-mono px-3 py-1.5 rounded-sm border transition-all"
-              style={{ background: catFilter === c.id ? 'rgba(41,171,226,0.1)' : 'transparent', color: catFilter === c.id ? '#29ABE2' : 'rgba(216,216,216,0.35)', borderColor: catFilter === c.id ? 'rgba(41,171,226,0.3)' : 'rgba(255,255,255,0.08)' }}>
+              className="text-[10px] font-body px-3 py-1.5 rounded-sm border transition-all"
+              style={{ background: catFilter === c.id ? 'rgba(25,147,210,0.1)' : 'transparent', color: catFilter === c.id ? '#1993D2' : 'rgba(216,216,216,0.35)', borderColor: catFilter === c.id ? 'rgba(25,147,210,0.3)' : 'rgba(255,255,255,0.08)' }}>
               {c.name}
             </button>
           ))}
@@ -319,7 +325,7 @@ export default function AdminProductsPage() {
             <Loader2 size={16} className="animate-spin" /> Loading products…
           </div>
         ) : filtered.length === 0 ? (
-          <div className="py-16 text-center text-ivory-300/30 font-mono text-sm">No products found</div>
+          <div className="py-16 text-center text-ivory-300/30 font-body text-sm">No products found</div>
         ) : (
           <div className="divide-y divide-white/[0.04]">
             {filtered.map(p => (
@@ -338,23 +344,26 @@ export default function AdminProductsPage() {
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-white text-sm font-semibold">{p.name}</span>
                     {p.categories?.name && (
-                      <span className="text-[9px] font-mono px-2 py-0.5 rounded-sm" style={{ background: 'rgba(41,171,226,0.1)', color: '#29ABE2' }}>{p.categories.name}</span>
+                      <span className="text-[9px] font-body px-2 py-0.5 rounded-sm" style={{ background: 'rgba(25,147,210,0.1)', color: '#1993D2' }}>{p.categories.name}</span>
                     )}
                     {p.status !== 'active' && (
-                      <span className="text-[9px] font-mono px-2 py-0.5 rounded-sm" style={{ background: 'rgba(136,136,136,0.1)', color: '#666' }}>Archived</span>
+                      <span className="text-[9px] font-body px-2 py-0.5 rounded-sm" style={{ background: 'rgba(136,136,136,0.1)', color: '#666' }}>Archived</span>
                     )}
                     {!p.thumbnail_url && (
-                      <span className="text-[9px] font-mono px-2 py-0.5 rounded-sm flex items-center gap-1" style={{ background: 'rgba(251,176,59,0.1)', color: '#FBB03B' }}>
+                      <span className="text-[9px] font-body px-2 py-0.5 rounded-sm flex items-center gap-1" style={{ background: 'rgba(251,176,59,0.1)', color: '#FDC010' }}>
                         <ImagePlus size={8} /> No image
                       </span>
                     )}
                   </div>
-                  <div className="text-ivory-300/35 text-[10px] font-mono mt-0.5 truncate">{p.short_description}</div>
+                  <div className="text-ivory-300/35 text-[10px] font-body mt-0.5 truncate">{p.short_description}</div>
                 </div>
 
                 <div className="hidden sm:block text-right shrink-0">
-                  <div className="text-white text-xs font-mono font-bold">{formatPHP(p.base_price)}</div>
-                  <div className="text-ivory-300/25 text-[10px] font-mono">/{p.unit ?? 'pcs'}</div>
+                  <div className="text-white text-xs font-body font-bold">{formatPHP(p.base_price)}</div>
+                  <div className="text-ivory-300/25 text-[10px] font-body">/{p.unit ?? 'pcs'}</div>
+                  {p.turnaround_days && (
+                    <div className="text-ivory-300/20 text-[9px] font-body mt-0.5">{p.turnaround_days}d turnaround</div>
+                  )}
                 </div>
 
                 <div className="relative shrink-0">
@@ -364,18 +373,18 @@ export default function AdminProductsPage() {
                   </button>
                   {openMenu === p.id && (
                     <div className="absolute right-0 top-8 z-20 w-48 rounded-sm border border-white/[0.10] overflow-hidden shadow-xl" style={{ background: 'var(--ink-950,#0a0a0a)' }}>
-                      <button onClick={() => openEdit(p)} className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-mono text-ivory-300/60 hover:text-white hover:bg-white/[0.04] transition-all text-left">
+                      <button onClick={() => openEdit(p)} className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-body text-ivory-300/60 hover:text-white hover:bg-white/[0.04] transition-all text-left">
                         <Edit2 size={12} /> Edit Product
                       </button>
-                      <button onClick={() => { openEdit(p) }} className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-mono text-ivory-300/60 hover:text-white hover:bg-white/[0.04] transition-all text-left">
+                      <button onClick={() => { openEdit(p) }} className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-body text-ivory-300/60 hover:text-white hover:bg-white/[0.04] transition-all text-left">
                         <ImagePlus size={12} /> Change Image
                       </button>
-                      <button onClick={() => toggleStatus(p)} className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-mono text-ivory-300/60 hover:text-white hover:bg-white/[0.04] transition-all text-left">
+                      <button onClick={() => toggleStatus(p)} className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-body text-ivory-300/60 hover:text-white hover:bg-white/[0.04] transition-all text-left">
                         {p.status === 'active' ? <><EyeOff size={12} /> Archive</> : <><Eye size={12} /> Restore</>}
                       </button>
                       <button onClick={() => { setDeleteConfirm(p); setOpenMenu(null) }}
-                        className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-mono transition-all text-left"
-                        style={{ color: '#EC008C' }}
+                        className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-body transition-all text-left"
+                        style={{ color: '#CD1B6E' }}
                         onMouseEnter={e => e.currentTarget.style.background = 'rgba(236,0,140,0.06)'}
                         onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                         <Trash2 size={12} /> Delete
@@ -417,14 +426,30 @@ export default function AdminProductsPage() {
               {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
           </Field>
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="Base Price (₱)" error={errors.base_price}>
-              <input className={inputClass} type="number" step="0.01" placeholder="0.00" value={form.base_price}
-                onChange={e => setForm(f => ({ ...f, base_price: e.target.value }))} />
-            </Field>
+          <Field label="Base Price (₱)" error={errors.base_price}>
+            <input className={inputClass} type="number" step="0.01" placeholder="0.00" value={form.base_price}
+              onChange={e => setForm(f => ({ ...f, base_price: e.target.value }))} />
+          </Field>
+          <div className="grid grid-cols-3 gap-3">
             <Field label="Min. Quantity" error={errors.min_qty}>
               <input className={inputClass} type="number" placeholder="1" value={form.min_qty}
                 onChange={e => setForm(f => ({ ...f, min_qty: e.target.value }))} />
+            </Field>
+            <Field label="Unit">
+              <select className={inputClass} value={form.unit}
+                onChange={e => setForm(f => ({ ...f, unit: e.target.value }))}
+                style={{ background: '#1a1a1a' }}>
+                <option value="pcs">pcs</option>
+                <option value="sheets">sheets</option>
+                <option value="sets">sets</option>
+                <option value="sq ft">sq ft</option>
+                <option value="meters">meters</option>
+                <option value="reams">reams</option>
+              </select>
+            </Field>
+            <Field label="Turnaround (days)" error={errors.turnaround_days}>
+              <input className={inputClass} type="number" placeholder="e.g. 3" value={form.turnaround_days}
+                onChange={e => setForm(f => ({ ...f, turnaround_days: e.target.value }))} />
             </Field>
           </div>
           <Field label="Short Description">
@@ -433,9 +458,9 @@ export default function AdminProductsPage() {
           </Field>
           <Field label="Status">
             <div className="flex gap-2">
-              {[{ v: 'active', label: 'Active', color: '#2DB04B' }, { v: 'archived', label: 'Archived', color: '#888' }].map(({ v, label, color }) => (
+              {[{ v: 'active', label: 'Active', color: '#13A150' }, { v: 'archived', label: 'Archived', color: '#888' }].map(({ v, label, color }) => (
                 <button key={v} type="button" onClick={() => setForm(f => ({ ...f, status: v }))}
-                  className="flex-1 py-2.5 rounded-sm text-xs font-mono border transition-all"
+                  className="flex-1 py-2.5 rounded-sm text-xs font-body border transition-all"
                   style={{ background: form.status === v ? `${color}14` : 'transparent', color: form.status === v ? color : 'rgba(216,216,216,0.35)', borderColor: form.status === v ? color + '40' : 'rgba(255,255,255,0.08)' }}>
                   {label}
                 </button>
@@ -444,12 +469,12 @@ export default function AdminProductsPage() {
           </Field>
           <div className="flex gap-3 mt-2">
             <button type="button" onClick={() => setShowModal(false)}
-              className="flex-1 py-2.5 rounded-sm text-xs font-mono border border-white/[0.08] text-ivory-300/40 hover:text-white transition-all">
+              className="flex-1 py-2.5 rounded-sm text-xs font-body border border-white/[0.08] text-ivory-300/40 hover:text-white transition-all">
               Cancel
             </button>
             <button type="button" onClick={handleSave} disabled={saving || uploading}
-              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-sm text-xs font-mono font-bold transition-all disabled:opacity-50"
-              style={{ background: 'rgba(45,176,75,0.15)', border: '1px solid rgba(45,176,75,0.3)', color: 'var(--wp-green)' }}>
+              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-sm text-xs font-body font-bold transition-all disabled:opacity-50"
+              style={{ background: 'rgba(19,161,80,0.15)', border: '1px solid rgba(19,161,80,0.3)', color: 'var(--wp-green)' }}>
               {saving ? <Loader2 size={12} className="animate-spin" /> : <Save size={12} />}
               {editTarget ? 'Save Changes' : 'Add Product'}
             </button>
@@ -460,13 +485,13 @@ export default function AdminProductsPage() {
       {deleteConfirm && (
         <Modal title="Delete Product" onClose={() => setDeleteConfirm(null)}>
           <p className="text-ivory-300/60 text-sm mb-1">Delete <span className="text-white font-semibold">{deleteConfirm.name}</span>?</p>
-          <p className="text-ivory-300/30 text-xs font-mono mb-6">This cannot be undone. Consider archiving instead.</p>
+          <p className="text-ivory-300/30 text-xs font-body mb-6">This cannot be undone. Consider archiving instead.</p>
           <div className="flex gap-3">
             <button type="button" onClick={() => setDeleteConfirm(null)}
-              className="flex-1 py-2.5 rounded-sm text-xs font-mono border border-white/[0.08] text-ivory-300/40 hover:text-white transition-all">Cancel</button>
+              className="flex-1 py-2.5 rounded-sm text-xs font-body border border-white/[0.08] text-ivory-300/40 hover:text-white transition-all">Cancel</button>
             <button type="button" onClick={() => deleteProduct(deleteConfirm)}
-              className="flex-1 py-2.5 rounded-sm text-xs font-mono font-bold"
-              style={{ background: 'rgba(236,0,140,0.12)', border: '1px solid rgba(236,0,140,0.3)', color: '#EC008C' }}>
+              className="flex-1 py-2.5 rounded-sm text-xs font-body font-bold"
+              style={{ background: 'rgba(236,0,140,0.12)', border: '1px solid rgba(236,0,140,0.3)', color: '#CD1B6E' }}>
               Delete
             </button>
           </div>
@@ -474,8 +499,8 @@ export default function AdminProductsPage() {
       )}
 
       {toast && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-sm border text-xs font-mono shadow-xl"
-          style={{ background: toast.ok ? 'rgba(45,176,75,0.15)' : 'rgba(236,0,140,0.15)', borderColor: toast.ok ? 'rgba(45,176,75,0.3)' : 'rgba(236,0,140,0.3)', color: toast.ok ? '#2DB04B' : '#EC008C' }}>
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-sm border text-xs font-body shadow-xl"
+          style={{ background: toast.ok ? 'rgba(19,161,80,0.15)' : 'rgba(236,0,140,0.15)', borderColor: toast.ok ? 'rgba(19,161,80,0.3)' : 'rgba(236,0,140,0.3)', color: toast.ok ? '#13A150' : '#CD1B6E' }}>
           {toast.ok ? <CheckCircle size={13} /> : <XCircle size={13} />} {toast.msg}
         </div>
       )}
