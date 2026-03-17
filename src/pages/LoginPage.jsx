@@ -211,7 +211,7 @@ export default function LoginPage() {
         </div>
 
         <p className="text-center text-[10px] font-body text-ivory-300/20 mt-4">
-          © {new Date().getFullYear()} WELLPrint · Bereso Group
+          © {new Date().getFullYear()} WELLPrint · Espiel-Bereso Group
         </p>
       </div>
     </div>

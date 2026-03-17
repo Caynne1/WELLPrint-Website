@@ -136,7 +136,7 @@ export default function Footer() {
         <hr className="section-rule mb-8" />
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-xs text-ivory-300/25 font-body tracking-wider">
-            © {year} WELLPrint · Bereso Group. All rights reserved.
+            © {year} WELLPrint · Espiel - Bereso Group. All rights reserved.
           </p>
           <div className="flex items-center gap-6">
             <span className="badge badge-green">ISO 9001 Certified</span>

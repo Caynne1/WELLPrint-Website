@@ -407,7 +407,7 @@ export default function CartPage() {
                     {[
                       { text: 'Color accuracy guaranteed',   color: 'var(--wp-green)' },
                       { text: 'Reprint if we make an error', color: 'var(--wp-green)' },
-                      { text: 'Backed by Bereso Group',      color: 'var(--wp-cyan)'  },
+                      { text: 'Backed by Espiel-Bereso Group',      color: 'var(--wp-cyan)'  },
                     ].map(({ text, color }) => (
                       <div key={text} className="flex items-center gap-2.5 text-xs text-ivory-300/45">
                         <CheckCircle size={12} style={{ color, flexShrink: 0 }} /> {text}

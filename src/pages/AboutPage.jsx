@@ -61,7 +61,7 @@ export default function AboutPage() {
         label="Who We Are"
         title="The Printing Arm of"
         titleAccent="Espiel-Bereso Group"
-        subtitle="WELLPRINT was established to serve the printing needs of WELLife and has since grown into a comprehensive printing service provider. As a subsidiary of Bereso Group of Companies, we combine institutional backing with agile, client-first service delivery."
+        subtitle="WELLPRINT was established to serve the printing needs of WELLife and has since grown into a comprehensive printing service provider. As a subsidiary of Espiel-Bereso Group of Companies, we combine institutional backing with agile, client-first service delivery."
       />
 
       {/* ── Stats strip ── */}
@@ -97,7 +97,7 @@ export default function AboutPage() {
             </p>
 
             <p ref={storyRef3} className="animate-on-scroll text-ivory-300/60 leading-relaxed mb-8">
-              Recognizing the opportunity to serve a broader market, Bereso Group invested in expanding
+              Recognizing the opportunity to serve a broader market, Espiel-Bereso Group invested in expanding
               WELLPRINT's capabilities — upgrading equipment, hiring skilled technicians, and adopting
               industry-leading color management systems. Today, we serve businesses across industries
               with the same precision and dedication that defined our earliest work.
@@ -174,7 +174,7 @@ export default function AboutPage() {
               body="From brief to finished product, our team stays in step with your timeline, your specs, and your vision."
               delay={100} />
             <ValueCard icon={Globe} title="Institutional Backing"
-              body="As part of Bereso Group of Companies, WELLPRINT brings the stability and infrastructure of a trusted conglomerate."
+              body="As part of Espiel-Bereso Group of Companies, WELLPRINT brings the stability and infrastructure of a trusted conglomerate."
               delay={200} />
           </div>
         </div>
@@ -213,7 +213,7 @@ export default function AboutPage() {
                   Chairman, WELLPRINT
                 </div>
                 <div className="text-ivory-300/30 text-xs font-body tracking-wider">
-                  Bereso Group of Companies
+                  Espiel-Bereso Group of Companies
                 </div>
               </div>
             </div>
@@ -238,7 +238,7 @@ export default function AboutPage() {
                   A craft that demands precision, care, and an unrelenting eye for detail.
                 </p>
                 <p>
-                  When Bereso Group made the decision to formalize and expand our printing operations,
+                  When Espiel-Bereso Group made the decision to formalize and expand our printing operations,
                   we did so with a clear mandate: to serve not just WELLife, but every business that
                   values quality communications. We invested in technology, in people, and in process —
                   because our clients deserve nothing less.
@@ -272,17 +272,17 @@ export default function AboutPage() {
 
           <h2 className="text-white mb-4"
             style={{ fontFamily: "'Lora', serif", fontWeight: 900, fontSize: 'clamp(1.6rem, 3vw, 2.4rem)' }}>
-            A Subsidiary of <span className="italic" style={{ color: 'var(--wp-green)' }}>Bereso Group</span>
+            A Subsidiary of <span className="italic" style={{ color: 'var(--wp-green)' }}>Espiel-Bereso Group</span>
           </h2>
           <p className="text-ivory-300/50 max-w-2xl mx-auto text-sm leading-relaxed mb-10">
-            Bereso Group of Companies is a diversified conglomerate with interests in healthcare,
+            Espiel-Bereso Group of Companies is a diversified conglomerate with interests in healthcare,
             retail, distribution, and services. WELLPRINT benefits from the group's infrastructure,
             financial strength, and shared commitment to operational excellence.
           </p>
 
           {/* Sibling brands */}
           <div className="flex flex-wrap justify-center gap-4">
-            {['WELLife', 'Bereso Group', 'WELLPrint'].map((brand, i) => (
+            {['WELLife', 'Espiel-Bereso Group', 'WELLPrint'].map((brand, i) => (
               <div key={brand} className="px-6 py-3 bg-ink-900 border border-white/[0.08] rounded-sm font-body text-xs tracking-widest uppercase"
                 style={{ color: i === 2 ? 'var(--wp-green)' : 'var(--ivory-300, #D8D8D8)', opacity: i === 2 ? 1 : 0.45 }}>
                 {brand}
