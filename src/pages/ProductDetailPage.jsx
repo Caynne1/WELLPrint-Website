@@ -347,15 +347,52 @@ function Gallery({ imageUrls = [], accent }) {
   // imageUrls is the combined list: [thumbnail, ...extra gallery images]
   const count = imageUrls.length || 1
   const [active, setActive] = useState(0)
+  const [lens, setLens] = useState(null) // { cursorX, cursorY, containerW, containerH }
+  const imgContainerRef = useRef(null)
 
   // Reset active index if images change (e.g. slug change)
   useEffect(() => { setActive(0) }, [imageUrls])
 
   const currentUrl = imageUrls[active] || null
 
+  const ZOOM = 2.5
+  const LENS_SIZE = 130 // px diameter
+
+  function handleMouseMove(e) {
+    if (!currentUrl || !imgContainerRef.current) return
+    const rect = imgContainerRef.current.getBoundingClientRect()
+    setLens({
+      cursorX: e.clientX - rect.left,   // px from left of container
+      cursorY: e.clientY - rect.top,    // px from top of container
+      containerW: rect.width,
+      containerH: rect.height,
+    })
+  }
+
+  function handleMouseLeave() {
+    setLens(null)
+  }
+
+  // Lens top-left position (clamp so lens stays inside container)
+  const half = LENS_SIZE / 2
+  const lensLeft = lens ? Math.min(Math.max(lens.cursorX - half, 0), lens.containerW - LENS_SIZE) : 0
+  const lensTop  = lens ? Math.min(Math.max(lens.cursorY - half, 0), lens.containerH - LENS_SIZE) : 0
+
+  // The background-position for the zoomed image inside the lens.
+  // We want the pixel under the cursor to be at the center of the lens.
+  // bgX/bgY = how far to shift the zoomed image (negative = shift left/up)
+  const bgX = lens ? -(lens.cursorX * ZOOM - half) : 0
+  const bgY = lens ? -(lens.cursorY * ZOOM - half) : 0
+
   return (
     <div className="flex flex-col gap-3">
-      <div className="relative bg-ink-700 border border-white/[0.08] rounded-sm overflow-hidden" style={{ aspectRatio: '1/1' }}>
+      <div
+        ref={imgContainerRef}
+        className="relative bg-ink-700 border border-white/[0.08] rounded-sm overflow-hidden"
+        style={{ aspectRatio: '1/1', cursor: lens ? 'crosshair' : 'default' }}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+      >
         {currentUrl ? (
           <img src={currentUrl} alt={`Product image ${active + 1}`} className="w-full h-full object-cover" />
         ) : (
@@ -366,6 +403,29 @@ function Gallery({ imageUrls = [], accent }) {
             </span>
           </div>
         )}
+
+        {/* Magnifying lens */}
+        {lens && currentUrl && (
+          <div
+            style={{
+              position: 'absolute',
+              left: lensLeft,
+              top: lensTop,
+              width: LENS_SIZE,
+              height: LENS_SIZE,
+              borderRadius: '50%',
+              border: `2px solid ${accent}`,
+              boxShadow: `0 0 0 1px ${accent}55, 0 8px 32px rgba(0,0,0,0.8)`,
+              backgroundImage: `url(${currentUrl})`,
+              backgroundRepeat: 'no-repeat',
+              backgroundSize: `${lens.containerW * ZOOM}px ${lens.containerH * ZOOM}px`,
+              backgroundPosition: `${bgX}px ${bgY}px`,
+              pointerEvents: 'none',
+              zIndex: 20,
+            }}
+          />
+        )}
+
         <div className="absolute top-4 left-4 w-6 h-6 border-t-2 border-l-2" style={{ borderColor: `${accent}40` }} />
         <div className="absolute bottom-4 right-4 w-6 h-6 border-b-2 border-r-2" style={{ borderColor: `${accent}40` }} />
         {count > 1 && (

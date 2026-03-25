@@ -34,7 +34,7 @@ function ProductCard({ product, view }) {
 
   if (view === 'list') {
     return (
-      <div className="card-press flex gap-5 p-5 group">
+      <Link to={`/products/${slug}`} className="card-press flex gap-5 p-5 group">
         <div className="w-20 h-20 rounded-sm overflow-hidden shrink-0 flex items-center justify-center"
           style={{ background: 'var(--surface-raised)', border: '1px solid var(--border-subtle)' }}>
           {thumbnail_url
@@ -71,17 +71,17 @@ function ProductCard({ product, view }) {
             </div>
             <div className="text-[10px] font-body" style={{ color: 'var(--text-faint)' }}>starting price</div>
           </div>
-          <Link to={`/products/${slug}`} className="btn-press text-xs py-2 px-4 whitespace-nowrap mt-3">Order Now</Link>
+          <span className="btn-press text-xs py-2 px-4 whitespace-nowrap mt-3">Order Now</span>
         </div>
-      </div>
+      </Link>
     )
   }
 
   return (
-    <div className="card-press flex flex-col overflow-hidden group">
+    <Link to={`/products/${slug}`} className="card-press flex flex-col overflow-hidden group cursor-pointer">
       <div className="relative" style={{ aspectRatio: '4/3', background: 'var(--surface-raised)', borderBottom: '1px solid var(--border-subtle)' }}>
         {thumbnail_url
-          ? <img src={thumbnail_url} alt={name} className="w-full h-full object-cover" />
+          ? <img src={thumbnail_url} alt={name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
           : (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
               <ImagePlus size={26} style={{ color: 'var(--text-faint)', opacity: 0.5 }} />
@@ -122,12 +122,12 @@ function ProductCard({ product, view }) {
             </div>
             <div className="text-[9px] font-body mt-0.5" style={{ color: 'var(--text-faint)' }}>starting price</div>
           </div>
-          <Link to={`/products/${slug}`} className="btn-press text-[10px] py-2 px-3 shrink-0">
+          <span className="btn-press text-[10px] py-2 px-3 shrink-0 flex items-center gap-1">
             Order <ArrowRight size={11} />
-          </Link>
+          </span>
         </div>
       </div>
-    </div>
+    </Link>
   )
 }
 

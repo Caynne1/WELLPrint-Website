@@ -51,7 +51,7 @@ function Sidebar({ mobile = false, onClose }) {
         <img src="/logos/icons/icon-white.svg" alt="WELLPrint" className="w-9 h-9 object-contain shrink-0" />
         <div className="flex-1 min-w-0">
           <div className="font-bold text-sm" style={{ fontFamily: "'Lora', serif", color: textPrimary }}>WELLPrint</div>
-          <div className="text-[9px] tracking-widest uppercase" style={{ fontFamily: "'Montserrat', sans-serif", color: textFaint }}>Staff Portal</div>
+          <div className="text-[9px] tracking-widest uppercase" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: textFaint }}>Staff Portal</div>
         </div>
         {mobile && (
           <button onClick={onClose} className="ml-auto transition-colors" style={{ color: textFaint }}>

@@ -15,7 +15,7 @@ export default function MarqueeStrip() {
           <span key={i} className="flex items-center gap-4 mr-4">
             <span
               className="text-sm font-bold text-wp-black uppercase tracking-widest whitespace-nowrap"
-              style={{ fontFamily: "'Montserrat', sans-serif" }}
+              style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
             >
               {item}
             </span>

@@ -290,7 +290,7 @@ html {
 body {
   background-color: var(--surface-page);
   color: var(--text-primary);
-  font-family: 'Montserrat', sans-serif;
+  font-family: 'Plus Jakarta Sans', sans-serif;
   font-size: 16px;
   line-height: 1.6;
   overflow-x: hidden;
@@ -305,8 +305,8 @@ body {
 /* Brand Book Typefaces: Lora Bold for headings, Montserrat for sub-headings & body */
 .font-display { font-family: 'Lora', Georgia, serif; }
 .font-heading { font-family: 'Lora', Georgia, serif; }
-.font-body    { font-family: 'Montserrat', sans-serif; }
-.font-mono    { font-family: 'Montserrat', sans-serif; }
+.font-body    { font-family: 'Plus Jakarta Sans', sans-serif; }
+.font-mono    { font-family: 'Plus Jakarta Sans', sans-serif; }
 
 .section-rule {
   border: none;
@@ -319,7 +319,7 @@ body {
   display: inline-flex; align-items: center; gap: 0.5rem;
   padding: 0.75rem 1.75rem;
   background: var(--wp-green); color: #fff;
-  font-family: 'Montserrat', sans-serif; font-weight: 700;
+  font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700;
   font-size: 0.875rem; letter-spacing: 0.04em; text-transform: uppercase;
   border: 2px solid var(--wp-green-dk);
   box-shadow: 4px 4px 0 var(--wp-green-dk);
@@ -333,7 +333,7 @@ body {
   display: inline-flex; align-items: center; gap: 0.5rem;
   padding: 0.75rem 1.75rem;
   background: transparent; color: var(--text-primary);
-  font-family: 'Montserrat', sans-serif; font-weight: 600;
+  font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 600;
   font-size: 0.875rem; letter-spacing: 0.04em; text-transform: uppercase;
   border: 2px solid var(--border-medium);
   cursor: pointer; text-decoration: none; border-radius: 2px;
@@ -345,7 +345,7 @@ body {
   display: inline-flex; align-items: center; gap: 0.5rem;
   padding: 0.75rem 1.75rem;
   background: transparent; color: var(--wp-green);
-  font-family: 'Montserrat', sans-serif; font-weight: 700;
+  font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700;
   font-size: 0.875rem; letter-spacing: 0.04em; text-transform: uppercase;
   border: 2px solid var(--wp-green);
   cursor: pointer; text-decoration: none; border-radius: 2px;
@@ -357,7 +357,7 @@ body {
 .badge {
   display: inline-block; padding: 0.2rem 0.65rem;
   font-size: 0.68rem; font-weight: 600; letter-spacing: 0.09em;
-  text-transform: uppercase; font-family: 'Montserrat', sans-serif; border-radius: 2px;
+  text-transform: uppercase; font-family: 'Plus Jakarta Sans', sans-serif; border-radius: 2px;
 }
 .badge-green   { background: rgba(19,161,80,0.12);   color: #7EB751; border: 1px solid rgba(19,161,80,0.3); }
 .badge-cyan    { background: rgba(25,147,210,0.12);  color: #00BAFF; border: 1px solid rgba(25,147,210,0.3); }
