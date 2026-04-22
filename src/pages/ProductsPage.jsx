@@ -317,6 +317,7 @@ function ProductCard({ product, view, onPreview }) {
 
   if (view === 'list') {
     return (
+<<<<<<< HEAD
       <div
         className="group rounded-[24px] border bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.06)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_46px_rgba(15,23,42,0.10)]"
         style={{ borderColor: 'rgba(15,23,42,0.08)' }}
@@ -356,6 +357,23 @@ function ProductCard({ product, view, onPreview }) {
                 }}
               >
                 {categoryName}
+=======
+      <Link to={`/products/${slug}`} className="card-press flex gap-5 p-5 group">
+        <div className="w-20 h-20 rounded-sm overflow-hidden shrink-0 flex items-center justify-center"
+          style={{ background: 'var(--surface-raised)', border: '1px solid var(--border-subtle)' }}>
+          {thumbnail_url
+            ? <img src={thumbnail_url} alt={name} className="w-full h-full object-cover" />
+            : <ImagePlus size={20} style={{ color: 'var(--text-faint)' }} />}
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1 flex-wrap">
+            <h3 className="text-sm font-semibold group-hover:text-wp-green transition-colors"
+              style={{ fontFamily: "'Lora', serif", color: 'var(--text-primary)' }}>{name}</h3>
+            {categories?.name && (
+              <span className="text-[9px] font-body px-2 py-0.5 rounded-sm"
+                style={{ background: 'rgba(25,147,210,0.10)', color: '#1993D2', border: '1px solid rgba(25,147,210,0.2)' }}>
+                {categories.name}
+>>>>>>> a5d91e36c677cee500593d29c92d9ae63d16399d
               </span>
             </div>
 
@@ -411,12 +429,17 @@ function ProductCard({ product, view, onPreview }) {
               </Link>
             </div>
           </div>
+<<<<<<< HEAD
+=======
+          <span className="btn-press text-xs py-2 px-4 whitespace-nowrap mt-3">Order Now</span>
+>>>>>>> a5d91e36c677cee500593d29c92d9ae63d16399d
         </div>
-      </div>
+      </Link>
     )
   }
 
   return (
+<<<<<<< HEAD
     <div
       className="group rounded-[24px] border bg-white overflow-hidden shadow-[0_10px_30px_rgba(15,23,42,0.06)] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_22px_56px_rgba(15,23,42,0.10)]"
       style={{ borderColor: 'rgba(15,23,42,0.08)' }}
@@ -447,6 +470,42 @@ function ProductCard({ product, view, onPreview }) {
             <ImagePlus size={26} style={{ color: '#94a3b8' }} />
             <span className="text-[10px] uppercase tracking-[0.2em] text-slate-300 font-semibold">
               Product Image
+=======
+    <Link to={`/products/${slug}`} className="card-press flex flex-col overflow-hidden group cursor-pointer">
+      <div className="relative" style={{ aspectRatio: '4/3', background: 'var(--surface-raised)', borderBottom: '1px solid var(--border-subtle)' }}>
+        {thumbnail_url
+          ? <img src={thumbnail_url} alt={name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+          : (
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+              <ImagePlus size={26} style={{ color: 'var(--text-faint)', opacity: 0.5 }} />
+              <span className="font-body text-[8px] tracking-widest uppercase" style={{ color: 'var(--text-faint)' }}>No Photo</span>
+            </div>
+          )}
+        {categories?.name && (
+          <div className="absolute top-3 left-3 px-2 py-0.5 text-[8px] font-body font-bold tracking-wider uppercase rounded-sm"
+            style={{ background: 'rgba(25,147,210,0.18)', color: '#1993D2', border: '1px solid rgba(25,147,210,0.3)', backdropFilter: 'blur(4px)' }}>
+            {categories.name}
+          </div>
+        )}
+        {turnaround_days && (
+          <div className="absolute top-3 right-3 px-2 py-0.5 text-[8px] font-body tracking-wide rounded-sm flex items-center gap-1"
+            style={{ background: 'rgba(0,0,0,0.55)', color: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(4px)' }}>
+            <Clock size={8} /> {turnaround_days}d
+          </div>
+        )}
+      </div>
+      <div className="p-5 flex flex-col flex-1">
+        <h3 className="text-sm font-semibold mb-1.5 leading-snug group-hover:text-wp-green transition-colors"
+          style={{ fontFamily: "'Lora', serif", color: 'var(--text-primary)' }}>{name}</h3>
+        <p className="text-xs leading-relaxed mb-4 line-clamp-2 flex-1" style={{ color: 'var(--text-muted)' }}>
+          {short_description || 'Premium quality printing service.'}
+        </p>
+        {min_qty && (
+          <div className="mb-4">
+            <span className="text-[9px] font-body px-2 py-0.5 rounded-sm"
+              style={{ background: 'var(--surface-raised)', color: 'var(--text-faint)', border: '1px solid var(--border-subtle)' }}>
+              Min. {min_qty} {unit ?? 'pcs'}
+>>>>>>> a5d91e36c677cee500593d29c92d9ae63d16399d
             </span>
           </div>
         )}
@@ -543,6 +602,7 @@ function ProductCard({ product, view, onPreview }) {
             </div>
             <div className="text-[9px] mt-0.5 text-slate-400">starting price</div>
           </div>
+<<<<<<< HEAD
 
           <Link
             to={`/products/${slug}`}
@@ -555,9 +615,14 @@ function ProductCard({ product, view, onPreview }) {
             Order
             <ArrowRight size={10} />
           </Link>
+=======
+          <span className="btn-press text-[10px] py-2 px-3 shrink-0 flex items-center gap-1">
+            Order <ArrowRight size={11} />
+          </span>
+>>>>>>> a5d91e36c677cee500593d29c92d9ae63d16399d
         </div>
       </div>
-    </div>
+    </Link>
   )
 }
 

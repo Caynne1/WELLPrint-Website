@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { useEffect, useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import {
@@ -109,6 +110,14 @@ function FeatureBar({ isDark }) {
     </div>
   )
 }
+=======
+import HeroSection              from '../components/sections/HeroSection'
+import MarqueeStrip             from '../components/sections/MarqueeStrip'
+import FeaturedProductsSection  from '../components/sections/FeaturedProductsSection'
+import ProcessSection           from '../components/sections/ProcessSection'
+import SocialProofSection       from '../components/sections/SocialProofSection'
+import CTASection               from '../components/sections/CTASection'
+>>>>>>> a5d91e36c677cee500593d29c92d9ae63d16399d
 
 export default function HomePage() {
   const { theme } = useTheme()
@@ -124,6 +133,7 @@ export default function HomePage() {
   }, [])
 
   return (
+<<<<<<< HEAD
     <main className={isDark ? 'bg-[#060c14]' : 'bg-[#f4f6f4]'}>
       {/* ── HERO ── */}
       <section className="relative overflow-hidden min-h-[760px] flex flex-col">
@@ -514,5 +524,15 @@ export default function HomePage() {
         </div>
       </section>
     </main>
+=======
+    <>
+      <HeroSection />
+      <MarqueeStrip />
+      <FeaturedProductsSection />
+      <ProcessSection />
+      <SocialProofSection />
+      <CTASection />
+    </>
+>>>>>>> a5d91e36c677cee500593d29c92d9ae63d16399d
   )
 }

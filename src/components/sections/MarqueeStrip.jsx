@@ -35,8 +35,13 @@ export default function MarqueeStrip() {
         <div className="marquee-track px-4">
           {ITEMS.map((item, i) => (
             <span
+<<<<<<< HEAD
               key={i}
               className="flex items-center gap-4 mr-8 flex-shrink-0"
+=======
+              className="text-sm font-bold text-wp-black uppercase tracking-widest whitespace-nowrap"
+              style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+>>>>>>> a5d91e36c677cee500593d29c92d9ae63d16399d
             >
               <span className="text-[11px] md:text-xs font-semibold text-emerald-700 uppercase tracking-[0.18em] whitespace-nowrap font-body">
                 {item}
