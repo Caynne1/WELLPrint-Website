@@ -1,751 +1,988 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
-import AdminLayout from '../../components/admin/AdminLayout'
+import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../../lib/supabase'
+import AdminLayout from '../../components/admin/AdminLayout'
+import { useTheme } from '../../context/ThemeContext'
 import {
-  Package, Plus, Edit2, Trash2, Search, X, Save, Eye, EyeOff,
-  CheckCircle, XCircle, MoreVertical, Loader2, ImagePlus, Upload,
-  Image, Grid, List, ChevronDown, Clock, Tag,
+  Search,
+  Plus,
+  MoreVertical,
+  Pencil,
+  Trash2,
+  Eye,
+  EyeOff,
+  LayoutGrid,
+  List,
+  Loader2,
+  Tag,
+  Package,
+  Archive,
+  X,
+  Save,
+  RefreshCw,
+  ChevronDown,
 } from 'lucide-react'
 
-function formatPHP(n) { return '₱' + Number(n).toLocaleString('en-PH', { minimumFractionDigits: 2 }) }
-
-/* ── Modal ── */
-function Modal({ title, onClose, children }) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(4px)' }}>
-      <div className="w-full max-w-lg rounded-sm border border-white/[0.10] overflow-hidden max-h-[90vh] flex flex-col"
-        style={{ background: 'var(--ink-900,#111)' }}>
-        <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.07] shrink-0"
-          style={{ background: 'var(--ink-950,#0a0a0a)' }}>
-          <span className="font-body text-[10px] tracking-widest uppercase text-wp-green">{title}</span>
-          <button onClick={onClose} className="text-ivory-300/30 hover:text-white transition-colors"><X size={16} /></button>
-        </div>
-        <div className="p-6 overflow-y-auto">{children}</div>
-      </div>
-    </div>
-  )
+function formatPeso(value) {
+  return `₱${Number(value || 0).toLocaleString('en-PH', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`
 }
 
-/* ── Field ── */
-function Field({ label, error, children }) {
-  return (
-    <div className="mb-4">
-      <label className="block font-body text-[10px] tracking-widest uppercase text-ivory-300/40 mb-2">{label}</label>
-      {children}
-      {error && <p className="mt-1 text-[10px] font-body" style={{ color: '#CD1B6E' }}>{error}</p>}
-    </div>
-  )
+function slugify(value) {
+  return String(value || '')
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)+/g, '')
 }
 
-const inputClass = "w-full bg-ink-800 border border-white/[0.10] rounded-sm px-3 py-2.5 text-sm text-ivory-200 placeholder-ivory-300/20 outline-none focus:border-wp-green/60 transition-all"
-
-/* ── Image Upload ── */
-function ImageUpload({ currentUrl, onUpload, uploading }) {
-  const fileRef = useRef()
-  const [preview, setPreview] = useState(currentUrl || null)
-  const [dragOver, setDragOver] = useState(false)
-
-  useEffect(() => { setPreview(currentUrl || null) }, [currentUrl])
-
-  async function handleFile(file) {
-    if (!file || !file.type.startsWith('image/')) return
-    const reader = new FileReader()
-    reader.onload = e => setPreview(e.target.result)
-    reader.readAsDataURL(file)
-    await onUpload(file)
+function emptyForm() {
+  return {
+    id: null,
+    name: '',
+    description: '',
+    price: '',
+    unit: '',
+    turnaround_time: '',
+    category: '',
+    image_url: '',
+    is_active: true,
   }
-
-  function onDrop(e) {
-    e.preventDefault(); setDragOver(false)
-    handleFile(e.dataTransfer.files[0])
-  }
-
-  return (
-    <div>
-      <div
-        className="relative rounded-sm border-2 border-dashed transition-all duration-200 overflow-hidden"
-        style={{
-          borderColor: dragOver ? 'var(--wp-green)' : 'rgba(255,255,255,0.12)',
-          background: dragOver ? 'rgba(19,161,80,0.05)' : 'rgba(255,255,255,0.02)',
-          aspectRatio: '4/3',
-        }}
-        onDragOver={e => { e.preventDefault(); setDragOver(true) }}
-        onDragLeave={() => setDragOver(false)}
-        onDrop={onDrop}
-        onClick={() => fileRef.current?.click()}
-      >
-        {preview ? (
-          <>
-            <img src={preview} alt="Product" className="w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-black/50 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
-              <div className="flex flex-col items-center gap-2">
-                <Upload size={20} style={{ color: 'var(--wp-green)' }} />
-                <span className="text-xs font-body text-white">Change image</span>
-              </div>
-            </div>
-          </>
-        ) : (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 cursor-pointer">
-            {uploading ? (
-              <Loader2 size={24} className="animate-spin" style={{ color: 'var(--wp-green)' }} />
-            ) : (
-              <>
-                <div className="w-12 h-12 rounded-sm flex items-center justify-center"
-                  style={{ background: 'rgba(19,161,80,0.1)', border: '1px solid rgba(19,161,80,0.25)' }}>
-                  <ImagePlus size={20} style={{ color: 'var(--wp-green)' }} />
-                </div>
-                <div className="text-center">
-                  <p className="text-ivory-300/50 text-xs">Click or drag to upload</p>
-                  <p className="text-ivory-300/25 text-[10px] font-body mt-0.5">JPG, PNG, WEBP · Max 5MB</p>
-                </div>
-              </>
-            )}
-          </div>
-        )}
-        {uploading && preview && (
-          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-            <Loader2 size={24} className="animate-spin text-white" />
-          </div>
-        )}
-      </div>
-      <input ref={fileRef} type="file" className="hidden" accept="image/*"
-        onChange={e => handleFile(e.target.files[0])} />
-      {preview && (
-        <button type="button"
-          onClick={e => { e.stopPropagation(); setPreview(null); onUpload(null) }}
-          className="mt-2 text-[10px] font-body text-ivory-300/30 hover:text-wp-magenta transition-colors flex items-center gap-1">
-          <X size={10} /> Remove image
-        </button>
-      )}
-    </div>
-  )
 }
 
-/* ── Category Dropdown ── */
-function CategoryDropdown({ categories, value, onChange }) {
-  const [open, setOpen] = useState(false)
-  const ref = useRef()
-
-  useEffect(() => {
-    function handleClick(e) { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
-    document.addEventListener('mousedown', handleClick)
-    return () => document.removeEventListener('mousedown', handleClick)
-  }, [])
-
-  const selected = value === 'all'
-    ? 'All Categories'
-    : categories.find(c => c.id === value)?.name ?? 'All Categories'
-
+function SummaryCard({ title, value, icon: Icon, color, isLight }) {
   return (
-    <div className="relative" ref={ref}>
-      <button onClick={() => setOpen(o => !o)}
-        className="flex items-center gap-2 px-3 py-2.5 rounded-sm border text-xs font-body transition-all min-w-[170px]"
-        style={{
-          background: value !== 'all' ? 'rgba(25,147,210,0.08)' : 'rgba(255,255,255,0.03)',
-          borderColor: value !== 'all' ? 'rgba(25,147,210,0.35)' : 'rgba(255,255,255,0.10)',
-          color: value !== 'all' ? '#1993D2' : 'rgba(216,216,216,0.5)',
-        }}>
-        <Tag size={11} />
-        <span className="flex-1 text-left truncate">{selected}</span>
-        <ChevronDown size={11} className="shrink-0 transition-transform duration-200"
-          style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }} />
-      </button>
-
-      {open && (
-        <div className="absolute left-0 top-full mt-1 z-30 w-60 rounded-sm border border-white/[0.10] shadow-2xl overflow-hidden"
-          style={{ background: '#0d0d0d' }}>
-          {/* All */}
-          <button onClick={() => { onChange('all'); setOpen(false) }}
-            className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs font-body transition-all text-left"
-            style={{ color: value === 'all' ? 'var(--wp-green)' : 'rgba(216,216,216,0.55)', background: value === 'all' ? 'rgba(19,161,80,0.08)' : 'transparent' }}
-            onMouseEnter={e => { if (value !== 'all') e.currentTarget.style.background = 'rgba(255,255,255,0.04)' }}
-            onMouseLeave={e => { if (value !== 'all') e.currentTarget.style.background = 'transparent' }}>
-            <div className="w-1.5 h-1.5 rounded-full shrink-0"
-              style={{ background: value === 'all' ? 'var(--wp-green)' : 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.15)' }} />
-            All Categories
-            {value === 'all' && <CheckCircle size={10} className="ml-auto" style={{ color: 'var(--wp-green)' }} />}
-          </button>
-
-          {categories.length > 0 && <div className="border-t border-white/[0.06]" />}
-
-          {categories.map(c => (
-            <button key={c.id} onClick={() => { onChange(c.id); setOpen(false) }}
-              className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs font-body transition-all text-left"
-              style={{ color: value === c.id ? '#1993D2' : 'rgba(216,216,216,0.55)', background: value === c.id ? 'rgba(25,147,210,0.08)' : 'transparent' }}
-              onMouseEnter={e => { if (value !== c.id) e.currentTarget.style.background = 'rgba(255,255,255,0.04)' }}
-              onMouseLeave={e => { if (value !== c.id) e.currentTarget.style.background = 'transparent' }}>
-              <div className="w-1.5 h-1.5 rounded-full shrink-0"
-                style={{ background: value === c.id ? '#1993D2' : 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.15)' }} />
-              {c.name}
-              {value === c.id && <CheckCircle size={10} className="ml-auto" style={{ color: '#1993D2' }} />}
-            </button>
-          ))}
+    <div
+      className="rounded-[24px] border p-5"
+      style={{
+        background: isLight ? '#FFFFFF' : 'rgba(9, 25, 53, 0.92)',
+        borderColor: isLight ? 'rgba(15,23,42,0.08)' : 'rgba(255,255,255,0.06)',
+        boxShadow: isLight
+          ? '0 10px 30px rgba(15,23,42,0.05)'
+          : '0 10px 30px rgba(0,0,0,0.24)',
+      }}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p
+            className="text-xs uppercase tracking-[0.18em] mb-2"
+            style={{ color: isLight ? '#94a3b8' : 'rgba(148,163,184,0.88)' }}
+          >
+            {title}
+          </p>
+          <h3
+            className="text-2xl font-bold"
+            style={{ color: isLight ? '#0f172a' : '#f8fafc' }}
+          >
+            {value}
+          </h3>
         </div>
-      )}
-    </div>
-  )
-}
 
-/* ── Grid Card ── */
-function ProductGridCard({ p, onEdit, onToggleStatus, onDelete, openMenu, setOpenMenu }) {
-  return (
-    <div className="rounded-sm border border-white/[0.07] overflow-hidden flex flex-col transition-all hover:border-white/[0.14]"
-      style={{ background: 'rgba(255,255,255,0.025)' }}>
-      <div className="relative" style={{ aspectRatio: '4/3', background: 'rgba(255,255,255,0.03)' }}>
-        {p.thumbnail_url
-          ? <img src={p.thumbnail_url} alt={p.name} className="w-full h-full object-cover" />
-          : (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5">
-              <Image size={20} style={{ color: 'rgba(216,216,216,0.1)' }} />
-              <span className="text-[7px] font-body tracking-widest uppercase" style={{ color: 'rgba(216,216,216,0.12)' }}>No Photo</span>
-            </div>
-          )}
-        {p.status !== 'active' && (
-          <div className="absolute top-2 left-2 px-1.5 py-0.5 rounded-sm text-[7px] font-body font-bold tracking-wider uppercase"
-            style={{ background: 'rgba(100,100,100,0.85)', color: '#fff' }}>Archived</div>
-        )}
-        {p.categories?.name && (
-          <div className="absolute bottom-2 left-2 px-1.5 py-0.5 rounded-sm text-[7px] font-body font-bold"
-            style={{ background: 'rgba(25,147,210,0.85)', color: '#fff', backdropFilter: 'blur(4px)' }}>
-            {p.categories.name}
-          </div>
-        )}
-        <div className="absolute top-2 right-2" onClick={e => e.stopPropagation()}>
-          <button onClick={() => setOpenMenu(openMenu === p.id ? null : p.id)}
-            className="w-6 h-6 rounded-sm flex items-center justify-center text-white/70 hover:text-white transition-all"
-            style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}>
-            <MoreVertical size={11} />
-          </button>
-          {openMenu === p.id && (
-            <div className="absolute right-0 top-7 z-20 w-44 rounded-sm border border-white/[0.10] overflow-hidden shadow-xl" style={{ background: '#0a0a0a' }}>
-              <button onClick={() => onEdit(p)} className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-body text-ivory-300/60 hover:text-white hover:bg-white/[0.04] transition-all text-left">
-                <Edit2 size={12} /> Edit Product
-              </button>
-              <button onClick={() => onToggleStatus(p)} className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-body text-ivory-300/60 hover:text-white hover:bg-white/[0.04] transition-all text-left">
-                {p.status === 'active' ? <><EyeOff size={12} /> Archive</> : <><Eye size={12} /> Restore</>}
-              </button>
-              <button onClick={() => onDelete(p)}
-                className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-body transition-all text-left"
-                style={{ color: '#CD1B6E' }}
-                onMouseEnter={e => e.currentTarget.style.background = 'rgba(236,0,140,0.06)'}
-                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                <Trash2 size={12} /> Delete
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-      <div className="p-3 flex flex-col flex-1">
-        <p className="text-white text-xs font-semibold leading-snug mb-1 line-clamp-2" style={{ fontFamily: "'Lora', serif" }}>{p.name}</p>
-        <p className="text-ivory-300/30 text-[10px] font-body line-clamp-1 flex-1 mb-2">{p.short_description || '—'}</p>
-        <div className="flex items-center justify-between">
-          <span className="text-white text-xs font-bold">{formatPHP(p.base_price)}</span>
-          {p.turnaround_days && (
-            <span className="flex items-center gap-1 text-ivory-300/25 text-[9px] font-body">
-              <Clock size={8} /> {p.turnaround_days}d
-            </span>
-          )}
+        <div
+          className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0"
+          style={{
+            background: `${color}14`,
+            border: `1px solid ${color}24`,
+            color,
+          }}
+        >
+          <Icon size={18} />
         </div>
       </div>
     </div>
   )
 }
 
-/* ── List Row ── */
-function ProductListRow({ p, onEdit, onToggleStatus, onDelete, openMenu, setOpenMenu }) {
-  return (
-    <div className="flex items-center gap-4 px-5 py-4 hover:bg-white/[0.02] transition-colors">
-      <div className="w-12 h-12 rounded-sm overflow-hidden shrink-0 flex items-center justify-center"
-        style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
-        {p.thumbnail_url
-          ? <img src={p.thumbnail_url} alt={p.name} className="w-full h-full object-cover" />
-          : <Image size={16} style={{ color: 'rgba(216,216,216,0.2)' }} />}
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-white text-sm font-semibold">{p.name}</span>
-          {p.categories?.name && (
-            <span className="text-[9px] font-body px-2 py-0.5 rounded-sm" style={{ background: 'rgba(25,147,210,0.1)', color: '#1993D2' }}>{p.categories.name}</span>
-          )}
-          {p.status !== 'active' && (
-            <span className="text-[9px] font-body px-2 py-0.5 rounded-sm" style={{ background: 'rgba(136,136,136,0.1)', color: '#666' }}>Archived</span>
-          )}
-          {!p.thumbnail_url && (
-            <span className="text-[9px] font-body px-2 py-0.5 rounded-sm flex items-center gap-1" style={{ background: 'rgba(251,176,59,0.1)', color: '#FDC010' }}>
-              <ImagePlus size={8} /> No image
-            </span>
-          )}
-        </div>
-        <div className="text-ivory-300/35 text-[10px] font-body mt-0.5 truncate">{p.short_description}</div>
-      </div>
-      <div className="hidden sm:block text-right shrink-0">
-        <div className="text-white text-xs font-body font-bold">{formatPHP(p.base_price)}</div>
-        <div className="text-ivory-300/25 text-[10px] font-body">/{p.unit ?? 'pcs'}</div>
-        {p.turnaround_days && (
-          <div className="text-ivory-300/20 text-[9px] font-body mt-0.5">{p.turnaround_days}d turnaround</div>
-        )}
-      </div>
-      <div className="relative shrink-0" onClick={e => e.stopPropagation()}>
-        <button onClick={() => setOpenMenu(openMenu === p.id ? null : p.id)}
-          className="w-7 h-7 rounded-sm flex items-center justify-center text-ivory-300/30 hover:text-white hover:bg-white/[0.06] transition-all">
-          <MoreVertical size={14} />
-        </button>
-        {openMenu === p.id && (
-          <div className="absolute right-0 top-8 z-50 w-48 rounded-sm border border-white/[0.10] shadow-xl" style={{ background: '#0a0a0a' }}>
-            <button onClick={() => onEdit(p)} className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-body text-ivory-300/60 hover:text-white hover:bg-white/[0.04] transition-all text-left">
-              <Edit2 size={12} /> Edit Product
-            </button>
-            <button onClick={() => onToggleStatus(p)} className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-body text-ivory-300/60 hover:text-white hover:bg-white/[0.04] transition-all text-left">
-              {p.status === 'active' ? <><EyeOff size={12} /> Archive</> : <><Eye size={12} /> Restore</>}
-            </button>
-            <button onClick={() => onDelete(p)}
-              className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-body transition-all text-left"
-              style={{ color: '#CD1B6E' }}
-              onMouseEnter={e => e.currentTarget.style.background = 'rgba(236,0,140,0.06)'}
-              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-              <Trash2 size={12} /> Delete
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
-  )
-}
-
-/* ══ Main Page ══ */
 export default function AdminProductsPage() {
-  const [products, setProducts]       = useState([])
-  const [categories, setCategories]   = useState([])
-  const [loading, setLoading]         = useState(true)
-  const [search, setSearch]           = useState('')
-  const [catFilter, setCatFilter]     = useState('all')
-  const [view, setView]               = useState('list')
-  const [showModal, setShowModal]     = useState(false)
-  const [editTarget, setEditTarget]   = useState(null)
-  const [openMenu, setOpenMenu]       = useState(null)
-  const [deleteConfirm, setDeleteConfirm] = useState(null)
-  const [toast, setToast]             = useState(null)
-  const [saving, setSaving]           = useState(false)
-  const [uploading, setUploading]     = useState(false)
-  const [uploadingExtra, setUploadingExtra] = useState(false)
+  const { theme } = useTheme()
+  const isLight = theme === 'light'
 
-  const emptyForm = {
-    name: '', slug: '', category_id: '', base_price: '', unit: 'pcs',
-    min_qty: '1', turnaround_days: '', short_description: '',
-    status: 'active', thumbnail_url: '', images: [],
-  }
-  const [form, setForm]     = useState(emptyForm)
-  const [errors, setErrors] = useState({})
+  const [products, setProducts] = useState([])
+  const [categories, setCategories] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [deletingId, setDeletingId] = useState(null)
 
-  const fetchAll = useCallback(async () => {
-    setLoading(true)
-    const [{ data: prods }, { data: cats }] = await Promise.all([
-      supabase.from('products')
-        .select('id, name, slug, short_description, base_price, thumbnail_url, images, status, sort_order, category_id, min_qty, unit, turnaround_days, categories(id, name, slug)')
-        .order('sort_order', { ascending: true }),
-      supabase.from('categories').select('id, name, slug').order('sort_order', { ascending: true }),
-    ])
-    setProducts(prods ?? [])
-    setCategories(cats ?? [])
-    setLoading(false)
-  }, [])
+  const [search, setSearch] = useState('')
+  const [categoryFilter, setCategoryFilter] = useState('all')
+  const [viewMode, setViewMode] = useState('list')
 
-  useEffect(() => { fetchAll() }, [fetchAll])
+  const [menuOpenId, setMenuOpenId] = useState(null)
+  const [showModal, setShowModal] = useState(false)
+  const [form, setForm] = useState(emptyForm())
 
-  // Close menus on outside click
   useEffect(() => {
-    function handler() { setOpenMenu(null) }
-    document.addEventListener('click', handler)
-    return () => document.removeEventListener('click', handler)
+    fetchData()
   }, [])
 
-  function showToast(msg, ok = true) { setToast({ msg, ok }); setTimeout(() => setToast(null), 3000) }
-  function toSlug(str) { return str.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') }
+  async function fetchData() {
+    setLoading(true)
 
-  function openAdd() {
-    setEditTarget(null)
-    setForm({ ...emptyForm, category_id: categories[0]?.id ?? '' })
-    setErrors({})
+    const [{ data: productsData, error: productsError }, { data: categoriesData }] =
+      await Promise.all([
+        supabase.from('products').select('*').order('created_at', { ascending: false }),
+        supabase.from('categories').select('*').order('name', { ascending: true }),
+      ])
+
+    if (productsError) {
+      console.error('Failed to fetch products:', productsError)
+      setProducts([])
+    } else {
+      setProducts(productsData || [])
+    }
+
+    setCategories(categoriesData || [])
+    setLoading(false)
+  }
+
+  function openAddModal() {
+    setForm(emptyForm())
     setShowModal(true)
   }
 
-  function openEdit(p) {
-    setEditTarget(p)
+  function openEditModal(product) {
     setForm({
-      name: p.name, slug: p.slug, category_id: p.category_id ?? '',
-      base_price: String(p.base_price ?? ''),
-      unit: p.unit ?? 'pcs',
-      min_qty: String(p.min_qty ?? 1),
-      turnaround_days: String(p.turnaround_days ?? ''),
-      short_description: p.short_description ?? '',
-      status: p.status ?? 'active',
-      thumbnail_url: p.thumbnail_url ?? '',
-      images: Array.isArray(p.images) ? p.images : [],
+      id: product.id,
+      name: product.name || '',
+      description: product.description || '',
+      price: product.price ?? '',
+      unit: product.unit || '',
+      turnaround_time: product.turnaround_time || '',
+      category: product.category || '',
+      image_url: product.image_url || '',
+      is_active: !!product.is_active,
     })
-    setErrors({})
     setShowModal(true)
-    setOpenMenu(null)
+    setMenuOpenId(null)
   }
 
-  async function handleImageUpload(file) {
-    if (!file) { setForm(f => ({ ...f, thumbnail_url: '' })); return }
-    setUploading(true)
-    try {
-      const ext = file.name.split('.').pop()
-      const path = `products/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
-      const { error: upErr } = await supabase.storage.from('product-images').upload(path, file, { upsert: true })
-      if (upErr) throw upErr
-      const { data: { publicUrl } } = supabase.storage.from('product-images').getPublicUrl(path)
-      setForm(f => ({ ...f, thumbnail_url: publicUrl }))
-      showToast('Image uploaded.')
-    } catch (err) {
-      showToast('Image upload failed: ' + (err.message || 'Unknown error'), false)
-    } finally {
-      setUploading(false)
-    }
+  function closeModal() {
+    setShowModal(false)
+    setForm(emptyForm())
   }
 
-  async function handleExtraImageUpload(file) {
-    if (!file) return
-    setUploadingExtra(true)
-    try {
-      const ext = file.name.split('.').pop()
-      const path = `products/gallery/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
-      const { error: upErr } = await supabase.storage.from('product-images').upload(path, file, { upsert: true })
-      if (upErr) throw upErr
-      const { data: { publicUrl } } = supabase.storage.from('product-images').getPublicUrl(path)
-      setForm(f => ({ ...f, images: [...(f.images || []), publicUrl] }))
-      showToast('Gallery image added.')
-    } catch (err) {
-      showToast('Upload failed: ' + (err.message || 'Unknown error'), false)
-    } finally {
-      setUploadingExtra(false)
-    }
-  }
-
-  function removeExtraImage(url) {
-    setForm(f => ({ ...f, images: (f.images || []).filter(u => u !== url) }))
-  }
-
-  function validate() {
-    const e = {}
-    if (!form.name.trim()) e.name = 'Product name is required'
-    if (!form.slug.trim()) e.slug = 'Slug is required'
-    if (!form.base_price || isNaN(Number(form.base_price)) || Number(form.base_price) <= 0) e.base_price = 'Valid price required'
-    if (!form.min_qty || isNaN(Number(form.min_qty)) || Number(form.min_qty) < 1) e.min_qty = 'Min. quantity must be ≥ 1'
-    if (form.turnaround_days && (isNaN(Number(form.turnaround_days)) || Number(form.turnaround_days) < 1)) e.turnaround_days = 'Must be a positive number'
-    return e
-  }
-
-  async function handleSave() {
-    const e = validate()
-    if (Object.keys(e).length) { setErrors(e); return }
+  async function handleSave(e) {
+    e.preventDefault()
     setSaving(true)
+
     const payload = {
-      name: form.name.trim(), slug: form.slug.trim(),
-      category_id: form.category_id || null,
-      base_price: Number(form.base_price),
-      unit: form.unit || 'pcs',
-      min_qty: Number(form.min_qty) || 1,
-      turnaround_days: form.turnaround_days ? Number(form.turnaround_days) : null,
-      short_description: form.short_description.trim(),
-      status: form.status,
-      thumbnail_url: form.thumbnail_url || null,
-      images: form.images || [],
+      name: form.name.trim(),
+      slug: slugify(form.name),
+      description: form.description.trim() || null,
+      price: Number(form.price || 0),
+      unit: form.unit.trim() || null,
+      turnaround_time: form.turnaround_time.trim() || null,
+      category: form.category || null,
+      image_url: form.image_url.trim() || null,
+      is_active: !!form.is_active,
     }
-    try {
-      if (editTarget) {
-        const { error } = await supabase.from('products').update(payload).eq('id', editTarget.id)
-        if (error) throw error
-        showToast('Product updated.')
-      } else {
-        const { error } = await supabase.from('products').insert(payload)
-        if (error) throw error
-        showToast('Product added.')
-      }
-      await fetchAll()
-      setShowModal(false)
-    } catch (err) {
-      showToast(err.message || 'Something went wrong.', false)
-    } finally {
+
+    if (!payload.name) {
       setSaving(false)
+      return
     }
+
+    let error = null
+
+    if (form.id) {
+      const result = await supabase
+        .from('products')
+        .update(payload)
+        .eq('id', form.id)
+
+      error = result.error
+    } else {
+      const result = await supabase.from('products').insert([payload])
+      error = result.error
+    }
+
+    if (error) {
+      console.error('Save product error:', error)
+      setSaving(false)
+      return
+    }
+
+    closeModal()
+    await fetchData()
+    setSaving(false)
   }
 
-  async function toggleStatus(p) {
-    const newStatus = p.status === 'active' ? 'archived' : 'active'
-    const { error } = await supabase.from('products').update({ status: newStatus }).eq('id', p.id)
-    if (error) { showToast('Failed to update visibility.', false); return }
-    setProducts(prev => prev.map(x => x.id === p.id ? { ...x, status: newStatus } : x))
-    setOpenMenu(null)
-    showToast('Visibility updated.')
+  async function toggleProductStatus(product) {
+    const { error } = await supabase
+      .from('products')
+      .update({ is_active: !product.is_active })
+      .eq('id', product.id)
+
+    if (error) {
+      console.error('Toggle product status error:', error)
+      return
+    }
+
+    setMenuOpenId(null)
+    fetchData()
   }
 
-  async function deleteProduct(p) {
-    const { error } = await supabase.from('products').delete().eq('id', p.id)
-    if (error) { showToast('Failed to delete product.', false); return }
-    setProducts(prev => prev.filter(x => x.id !== p.id))
-    setDeleteConfirm(null)
-    showToast('Product deleted.')
+  async function deleteProduct(productId) {
+    const confirmed = window.confirm('Are you sure you want to delete this product?')
+    if (!confirmed) return
+
+    setDeletingId(productId)
+
+    const { error } = await supabase.from('products').delete().eq('id', productId)
+
+    if (error) {
+      console.error('Delete product error:', error)
+      setDeletingId(null)
+      return
+    }
+
+    setMenuOpenId(null)
+    setDeletingId(null)
+    fetchData()
   }
 
-  const filtered = products
-    .filter(p => catFilter === 'all' || p.category_id === catFilter)
-    .filter(p => !search || p.name.toLowerCase().includes(search.toLowerCase()) || p.short_description?.toLowerCase().includes(search.toLowerCase()))
+  const filteredProducts = useMemo(() => {
+    let result = [...products]
 
-  const visibleCount = products.filter(p => p.status === 'active').length
+    if (categoryFilter !== 'all') {
+      result = result.filter((p) => p.category === categoryFilter)
+    }
+
+    if (search.trim()) {
+      const keyword = search.trim().toLowerCase()
+      result = result.filter((p) => {
+        const name = (p.name || '').toLowerCase()
+        const description = (p.description || '').toLowerCase()
+        const category = (p.category || '').toLowerCase()
+        return (
+          name.includes(keyword) ||
+          description.includes(keyword) ||
+          category.includes(keyword)
+        )
+      })
+    }
+
+    return result
+  }, [products, categoryFilter, search])
+
+  const summary = useMemo(() => {
+    return {
+      total: products.length,
+      active: products.filter((p) => p.is_active).length,
+      archived: products.filter((p) => !p.is_active).length,
+    }
+  }, [products])
+
+  const sectionBg = isLight ? '#FFFFFF' : 'rgba(9, 25, 53, 0.92)'
+  const sectionBorder = isLight ? 'rgba(15,23,42,0.08)' : 'rgba(255,255,255,0.06)'
+  const sectionShadow = isLight
+    ? '0 10px 30px rgba(15,23,42,0.05)'
+    : '0 10px 30px rgba(0,0,0,0.24)'
+  const heading = isLight ? '#0f172a' : '#f8fafc'
+  const subText = isLight ? '#64748b' : 'rgba(226,232,240,0.78)'
+  const muted = isLight ? '#94a3b8' : 'rgba(148,163,184,0.82)'
+  const softBg = isLight ? '#f8fafc' : 'rgba(255,255,255,0.03)'
+  const softBorder = isLight ? 'rgba(15,23,42,0.08)' : 'rgba(255,255,255,0.06)'
+  const divider = isLight ? 'rgba(15,23,42,0.08)' : 'rgba(255,255,255,0.06)'
+  const listRowHover = isLight ? 'rgba(248,250,252,0.70)' : 'rgba(255,255,255,0.03)'
 
   return (
     <AdminLayout>
-      {/* Header */}
-      <div className="mb-7 flex items-start justify-between gap-4">
+      <div className="mb-8 flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-white text-2xl font-bold mb-1" style={{ fontFamily: "'Lora', serif" }}>Products</h1>
-          <p className="text-ivory-300/40 text-sm">{loading ? 'Loading…' : `${products.length} total · ${visibleCount} active`}</p>
+          <div className="inline-flex items-center gap-2 mb-3">
+            <div
+              className="w-8 h-8 rounded-2xl flex items-center justify-center"
+              style={{
+                background: 'rgba(19,161,80,0.10)',
+                border: '1px solid rgba(19,161,80,0.20)',
+              }}
+            >
+              <Package size={15} style={{ color: '#13A150' }} />
+            </div>
+            <span
+              className="text-[10px] font-semibold tracking-[0.22em] uppercase"
+              style={{ color: muted }}
+            >
+              Product Management
+            </span>
+          </div>
+
+          <h1
+            className="text-[2rem] font-bold mb-1 leading-none"
+            style={{ color: heading }}
+          >
+            Products
+          </h1>
+          <p className="text-sm" style={{ color: subText }}>
+            {products.length} total · {summary.active} active
+          </p>
         </div>
-        <button onClick={openAdd}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-sm text-xs font-body font-bold transition-all"
-          style={{ background: 'rgba(19,161,80,0.12)', border: '1px solid rgba(19,161,80,0.3)', color: 'var(--wp-green)' }}>
-          <Plus size={13} /> Add Product
+
+        <button
+          onClick={openAddModal}
+          className="inline-flex items-center gap-2 px-5 py-3 rounded-[16px] text-sm font-semibold transition-all hover:scale-[1.01]"
+          style={{
+            background: 'rgba(19,161,80,0.10)',
+            border: '1px solid rgba(19,161,80,0.20)',
+            color: '#13A150',
+          }}
+        >
+          <Plus size={14} />
+          Add Product
         </button>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
-        {[
-          { label: 'Total Products', value: products.length,                color: '#1993D2' },
-          { label: 'Active',         value: visibleCount,                   color: '#13A150' },
-          { label: 'Archived',       value: products.length - visibleCount, color: '#888'    },
-        ].map(({ label, value, color }) => (
-          <div key={label} className="bg-ink-800 border border-white/[0.07] rounded-sm p-4">
-            <div className="text-2xl font-black mb-0.5" style={{ fontFamily: "'Lora', serif", color }}>{value}</div>
-            <div className="text-ivory-300/40 text-[10px] font-body uppercase tracking-widest">{label}</div>
+      <div className="grid md:grid-cols-3 gap-4 mb-7">
+        <SummaryCard title="Total Products" value={summary.total} icon={Package} color="#1993D2" isLight={isLight} />
+        <SummaryCard title="Active" value={summary.active} icon={Eye} color="#13A150" isLight={isLight} />
+        <SummaryCard title="Archived" value={summary.archived} icon={Archive} color="#94a3b8" isLight={isLight} />
+      </div>
+
+      <div
+        className="rounded-[24px] border p-5 mb-7"
+        style={{
+          background: sectionBg,
+          borderColor: sectionBorder,
+          boxShadow: sectionShadow,
+        }}
+      >
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <div className="flex gap-3 flex-wrap">
+            <div className="relative min-w-[280px]">
+              <Search
+                size={14}
+                className="absolute left-3 top-1/2 -translate-y-1/2"
+                style={{ color: muted }}
+              />
+              <input
+                type="text"
+                placeholder="Search products..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full rounded-[16px] border pl-9 pr-4 py-3 text-sm outline-none"
+                style={{
+                  background: softBg,
+                  borderColor: softBorder,
+                  color: heading,
+                }}
+              />
+            </div>
+
+            <div className="relative min-w-[230px]">
+              <Tag
+                size={14}
+                className="absolute left-3 top-1/2 -translate-y-1/2"
+                style={{ color: '#13A150' }}
+              />
+              <select
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+                className="appearance-none rounded-[16px] border pl-9 pr-10 py-3 text-sm outline-none w-full"
+                style={{
+                  background: softBg,
+                  borderColor: softBorder,
+                  color: heading,
+                }}
+              >
+                <option value="all">All Categories</option>
+                {categories.map((cat) => (
+                  <option key={cat.id || cat.name} value={cat.name}>
+                    {cat.name}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown
+                size={14}
+                className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"
+                style={{ color: muted }}
+              />
+            </div>
           </div>
-        ))}
-      </div>
 
-      {/* Toolbar */}
-      <div className="flex items-center gap-3 mb-4 flex-wrap">
-        {/* Search */}
-        <div className="relative flex-1 min-w-[160px] max-w-xs">
-          <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-ivory-300/25 pointer-events-none" />
-          <input type="text" placeholder="Search products…" value={search} onChange={e => setSearch(e.target.value)}
-            className="w-full bg-ink-800 border border-white/[0.10] rounded-sm pl-9 pr-8 py-2.5 text-sm text-ivory-200 placeholder-ivory-300/20 outline-none focus:border-wp-green/60 transition-all" />
-          {search && (
-            <button onClick={() => setSearch('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-ivory-300/25 hover:text-white transition-colors">
-              <X size={12} />
-            </button>
-          )}
-        </div>
-
-        {/* Category dropdown */}
-        <CategoryDropdown categories={categories} value={catFilter} onChange={setCatFilter} />
-
-        <div className="flex-1" />
-
-        {/* View toggle: List | Grid */}
-        <div className="flex items-center rounded-sm border overflow-hidden" style={{ borderColor: 'rgba(255,255,255,0.10)' }}>
-          {[
-            { v: 'list', Icon: List, label: 'List' },
-            { v: 'grid', Icon: Grid, label: 'Grid' },
-          ].map(({ v, Icon, label }) => (
-            <button key={v} onClick={() => setView(v)}
-              className="flex items-center gap-1.5 px-3 py-2.5 text-[10px] font-body transition-all"
+          <div
+            className="rounded-[16px] border flex overflow-hidden"
+            style={{
+              background: softBg,
+              borderColor: softBorder,
+            }}
+          >
+            <button
+              onClick={() => setViewMode('list')}
+              className="inline-flex items-center gap-2 px-4 py-3 text-sm font-semibold transition-all"
               style={{
-                background: view === v ? 'rgba(19,161,80,0.12)' : 'rgba(255,255,255,0.02)',
-                color: view === v ? 'var(--wp-green)' : 'rgba(216,216,216,0.35)',
-                borderRight: v === 'list' ? '1px solid rgba(255,255,255,0.08)' : 'none',
-              }}>
-              <Icon size={13} />
-              <span className="hidden sm:inline">{label}</span>
+                background: viewMode === 'list' ? 'rgba(19,161,80,0.10)' : 'transparent',
+                color: viewMode === 'list' ? '#13A150' : subText,
+              }}
+            >
+              <List size={14} />
+              List
             </button>
-          ))}
+            <button
+              onClick={() => setViewMode('grid')}
+              className="inline-flex items-center gap-2 px-4 py-3 text-sm font-semibold transition-all"
+              style={{
+                background: viewMode === 'grid' ? 'rgba(19,161,80,0.10)' : 'transparent',
+                color: viewMode === 'grid' ? '#13A150' : subText,
+              }}
+            >
+              <LayoutGrid size={14} />
+              Grid
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Result count */}
-      <p className="text-[10px] font-body mb-3" style={{ color: 'rgba(216,216,216,0.22)' }}>
-        {loading ? '' : `${filtered.length} product${filtered.length !== 1 ? 's' : ''}${catFilter !== 'all' ? ` in ${categories.find(c => c.id === catFilter)?.name ?? ''}` : ''}`}
-      </p>
-
-      {/* Content */}
       {loading ? (
-        <div className="py-16 flex items-center justify-center gap-2 text-ivory-300/30 bg-ink-800 border border-white/[0.07] rounded-sm">
-          <Loader2 size={16} className="animate-spin" /> Loading products…
+        <div
+          className="rounded-[24px] border py-20 text-center"
+          style={{
+            background: sectionBg,
+            borderColor: sectionBorder,
+            boxShadow: sectionShadow,
+          }}
+        >
+          <div className="inline-flex items-center gap-2" style={{ color: subText }}>
+            <Loader2 size={16} className="animate-spin" />
+            Loading products...
+          </div>
         </div>
-      ) : filtered.length === 0 ? (
-        <div className="py-20 text-center bg-ink-800 border border-white/[0.07] rounded-sm">
-          <Package size={28} className="mx-auto mb-3" style={{ color: 'rgba(216,216,216,0.12)' }} />
-          <p className="text-ivory-300/30 font-body text-sm">No products found</p>
-          {(search || catFilter !== 'all') && (
-            <button onClick={() => { setSearch(''); setCatFilter('all') }}
-              className="mt-3 text-[10px] font-body text-ivory-300/30 hover:text-wp-green transition-colors inline-flex items-center gap-1">
-              <X size={10} /> Clear filters
-            </button>
-          )}
+      ) : filteredProducts.length === 0 ? (
+        <div
+          className="rounded-[24px] border py-20 text-center"
+          style={{
+            background: sectionBg,
+            borderColor: sectionBorder,
+            boxShadow: sectionShadow,
+          }}
+        >
+          <Package size={30} className="mx-auto mb-3" style={{ color: muted }} />
+          <p className="text-sm" style={{ color: subText }}>No products found.</p>
         </div>
-      ) : view === 'grid' ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-          {filtered.map(p => (
-            <ProductGridCard key={p.id} p={p}
-              onEdit={openEdit}
-              onToggleStatus={toggleStatus}
-              onDelete={prod => { setDeleteConfirm(prod); setOpenMenu(null) }}
-              openMenu={openMenu}
-              setOpenMenu={setOpenMenu}
-            />
-          ))}
+      ) : viewMode === 'list' ? (
+        <div
+          className="rounded-[24px] border overflow-hidden"
+          style={{
+            background: sectionBg,
+            borderColor: sectionBorder,
+            boxShadow: sectionShadow,
+          }}
+        >
+          <div className="px-6 py-5 border-b" style={{ borderColor: divider }}>
+            <p className="text-sm font-semibold" style={{ color: heading }}>
+              {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''}
+            </p>
+          </div>
+
+          <div>
+            {filteredProducts.map((product) => (
+              <div
+                key={product.id}
+                className="grid grid-cols-[72px_1fr_auto_auto] gap-4 items-center px-6 py-5 relative"
+                style={{ borderTop: `1px solid ${divider}` }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = listRowHover
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'transparent'
+                }}
+              >
+                <div
+                  className="w-[72px] h-[72px] rounded-[18px] overflow-hidden border flex items-center justify-center"
+                  style={{
+                    borderColor: softBorder,
+                    background: softBg,
+                  }}
+                >
+                  {product.image_url ? (
+                    <img
+                      src={product.image_url}
+                      alt={product.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <Package size={20} style={{ color: muted }} />
+                  )}
+                </div>
+
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="text-xl font-semibold truncate" style={{ color: heading }}>
+                      {product.name}
+                    </p>
+
+                    {product.category && (
+                      <span
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px]"
+                        style={{
+                          background: 'rgba(25,147,210,0.08)',
+                          color: '#1993D2',
+                          border: '1px solid rgba(25,147,210,0.14)',
+                        }}
+                      >
+                        {product.category}
+                      </span>
+                    )}
+                  </div>
+
+                  <p className="text-sm mt-1 truncate" style={{ color: muted }}>
+                    {product.description || 'No description'}
+                  </p>
+                </div>
+
+                <div className="text-right">
+                  <p className="text-xl font-bold" style={{ color: heading }}>
+                    {formatPeso(product.price)}
+                  </p>
+                  <p className="text-sm" style={{ color: muted }}>
+                    /{product.unit || 'unit'}
+                  </p>
+                  <p className="text-xs mt-1" style={{ color: muted }}>
+                    {product.turnaround_time || '—'}
+                  </p>
+                </div>
+
+                <div className="relative">
+                  <button
+                    onClick={() =>
+                      setMenuOpenId((prev) => (prev === product.id ? null : product.id))
+                    }
+                    className="w-10 h-10 rounded-xl flex items-center justify-center transition-all"
+                    style={{
+                      background: softBg,
+                      border: `1px solid ${softBorder}`,
+                      color: subText,
+                    }}
+                  >
+                    <MoreVertical size={16} />
+                  </button>
+
+                  {menuOpenId === product.id && (
+                    <div
+                      className="absolute right-0 top-12 w-48 rounded-[18px] border p-2 z-20"
+                      style={{
+                        background: isLight ? '#FFFFFF' : 'rgba(9, 25, 53, 0.98)',
+                        borderColor: sectionBorder,
+                        boxShadow: isLight
+                          ? '0 20px 50px rgba(15,23,42,0.10)'
+                          : '0 20px 50px rgba(0,0,0,0.35)',
+                      }}
+                    >
+                      <button
+                        onClick={() => openEditModal(product)}
+                        className="w-full flex items-center gap-2 px-3 py-2.5 rounded-[12px] text-sm transition-all"
+                        style={{ color: heading }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = softBg
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = 'transparent'
+                        }}
+                      >
+                        <Pencil size={14} />
+                        Edit
+                      </button>
+
+                      <button
+                        onClick={() => toggleProductStatus(product)}
+                        className="w-full flex items-center gap-2 px-3 py-2.5 rounded-[12px] text-sm transition-all"
+                        style={{ color: heading }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = softBg
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = 'transparent'
+                        }}
+                      >
+                        {product.is_active ? <EyeOff size={14} /> : <Eye size={14} />}
+                        {product.is_active ? 'Archive' : 'Activate'}
+                      </button>
+
+                      <button
+                        onClick={() => deleteProduct(product.id)}
+                        disabled={deletingId === product.id}
+                        className="w-full flex items-center gap-2 px-3 py-2.5 rounded-[12px] text-sm transition-all"
+                        style={{ color: '#dc2626' }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = 'rgba(220,38,38,0.08)'
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = 'transparent'
+                        }}
+                      >
+                        {deletingId === product.id ? (
+                          <Loader2 size={14} className="animate-spin" />
+                        ) : (
+                          <Trash2 size={14} />
+                        )}
+                        Delete
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       ) : (
-        <div className="bg-ink-800 border border-white/[0.07] rounded-sm divide-y divide-white/[0.04]">
-          {filtered.map(p => (
-            <ProductListRow key={p.id} p={p}
-              onEdit={openEdit}
-              onToggleStatus={toggleStatus}
-              onDelete={prod => { setDeleteConfirm(prod); setOpenMenu(null) }}
-              openMenu={openMenu}
-              setOpenMenu={setOpenMenu}
-            />
+        <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-5">
+          {filteredProducts.map((product) => (
+            <div
+              key={product.id}
+              className="rounded-[24px] border overflow-hidden"
+              style={{
+                background: sectionBg,
+                borderColor: sectionBorder,
+                boxShadow: sectionShadow,
+              }}
+            >
+              <div
+                className="h-48 border-b flex items-center justify-center overflow-hidden"
+                style={{
+                  background: softBg,
+                  borderColor: divider,
+                }}
+              >
+                {product.image_url ? (
+                  <img
+                    src={product.image_url}
+                    alt={product.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <Package size={28} style={{ color: muted }} />
+                )}
+              </div>
+
+              <div className="p-5">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <h3 className="text-lg font-bold truncate" style={{ color: heading }}>
+                      {product.name}
+                    </h3>
+                    <p className="text-sm mt-1 line-clamp-2" style={{ color: muted }}>
+                      {product.description || 'No description'}
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={() =>
+                      setMenuOpenId((prev) => (prev === product.id ? null : product.id))
+                    }
+                    className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+                    style={{
+                      background: softBg,
+                      border: `1px solid ${softBorder}`,
+                      color: subText,
+                    }}
+                  >
+                    <MoreVertical size={15} />
+                  </button>
+                </div>
+
+                <div className="flex items-center gap-2 flex-wrap mt-4">
+                  {product.category && (
+                    <span
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px]"
+                      style={{
+                        background: 'rgba(25,147,210,0.08)',
+                        color: '#1993D2',
+                        border: '1px solid rgba(25,147,210,0.14)',
+                      }}
+                    >
+                      {product.category}
+                    </span>
+                  )}
+
+                  <span
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px]"
+                    style={{
+                      background: product.is_active
+                        ? 'rgba(19,161,80,0.08)'
+                        : 'rgba(100,116,139,0.10)',
+                      color: product.is_active ? '#13A150' : '#64748b',
+                      border: product.is_active
+                        ? '1px solid rgba(19,161,80,0.14)'
+                        : '1px solid rgba(100,116,139,0.14)',
+                    }}
+                  >
+                    {product.is_active ? 'Active' : 'Archived'}
+                  </span>
+                </div>
+
+                <div className="mt-5 flex items-end justify-between">
+                  <div>
+                    <p className="text-2xl font-black" style={{ color: heading }}>
+                      {formatPeso(product.price)}
+                    </p>
+                    <p className="text-sm" style={{ color: muted }}>
+                      /{product.unit || 'unit'}
+                    </p>
+                  </div>
+
+                  <p className="text-xs" style={{ color: muted }}>
+                    {product.turnaround_time || '—'}
+                  </p>
+                </div>
+
+                {menuOpenId === product.id && (
+                  <div
+                    className="mt-4 rounded-[18px] border p-2"
+                    style={{
+                      background: softBg,
+                      borderColor: softBorder,
+                    }}
+                  >
+                    <button
+                      onClick={() => openEditModal(product)}
+                      className="w-full flex items-center gap-2 px-3 py-2.5 rounded-[12px] text-sm transition-all"
+                      style={{ color: heading }}
+                    >
+                      <Pencil size={14} />
+                      Edit
+                    </button>
+
+                    <button
+                      onClick={() => toggleProductStatus(product)}
+                      className="w-full flex items-center gap-2 px-3 py-2.5 rounded-[12px] text-sm transition-all"
+                      style={{ color: heading }}
+                    >
+                      {product.is_active ? <EyeOff size={14} /> : <Eye size={14} />}
+                      {product.is_active ? 'Archive' : 'Activate'}
+                    </button>
+
+                    <button
+                      onClick={() => deleteProduct(product.id)}
+                      disabled={deletingId === product.id}
+                      className="w-full flex items-center gap-2 px-3 py-2.5 rounded-[12px] text-sm transition-all"
+                      style={{ color: '#dc2626' }}
+                    >
+                      {deletingId === product.id ? (
+                        <Loader2 size={14} className="animate-spin" />
+                      ) : (
+                        <Trash2 size={14} />
+                      )}
+                      Delete
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
           ))}
         </div>
       )}
 
-      {/* Add/Edit Modal */}
       {showModal && (
-        <Modal title={editTarget ? 'Edit Product' : 'Add Product'} onClose={() => setShowModal(false)}>
-          <Field label="Product Image (Main / Thumbnail)">
-            <ImageUpload currentUrl={form.thumbnail_url} onUpload={handleImageUpload} uploading={uploading} />
-          </Field>
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+          <div
+            className="w-full max-w-2xl rounded-[28px] border p-6"
+            style={{
+              background: isLight ? '#FFFFFF' : 'rgba(9, 25, 53, 0.98)',
+              borderColor: sectionBorder,
+              boxShadow: isLight
+                ? '0 25px 80px rgba(15,23,42,0.18)'
+                : '0 25px 80px rgba(0,0,0,0.45)',
+            }}
+          >
+            <div className="flex items-start justify-between gap-3 mb-6">
+              <div>
+                <h2 className="text-2xl font-bold" style={{ color: heading }}>
+                  {form.id ? 'Edit Product' : 'Add Product'}
+                </h2>
+                <p className="text-sm mt-1" style={{ color: subText }}>
+                  Fill in the product details below.
+                </p>
+              </div>
 
-          <Field label={`Gallery Images (${(form.images || []).length} added — carousel on detail page)`}>
-            <div className="space-y-3">
-              {(form.images || []).length > 0 && (
-                <div className="grid grid-cols-3 gap-2">
-                  {(form.images || []).map((url, i) => (
-                    <div key={url} className="relative group rounded-sm overflow-hidden"
-                      style={{ aspectRatio: '1/1', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
-                      <img src={url} alt={`Gallery ${i + 1}`} className="w-full h-full object-cover" />
-                      <button type="button" onClick={() => removeExtraImage(url)}
-                        className="absolute top-1 right-1 w-5 h-5 rounded-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                        style={{ background: 'rgba(205,27,110,0.85)' }}>
-                        <X size={10} color="white" />
-                      </button>
-                      <div className="absolute bottom-1 left-1 text-[8px] font-body px-1 rounded-sm"
-                        style={{ background: 'rgba(0,0,0,0.6)', color: 'rgba(255,255,255,0.5)' }}>{i + 1}</div>
-                    </div>
-                  ))}
+              <button
+                onClick={closeModal}
+                className="w-10 h-10 rounded-xl flex items-center justify-center"
+                style={{
+                  background: softBg,
+                  border: `1px solid ${softBorder}`,
+                  color: subText,
+                }}
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSave} className="space-y-4">
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-semibold mb-2" style={{ color: muted }}>
+                    Product Name
+                  </label>
+                  <input
+                    type="text"
+                    value={form.name}
+                    onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
+                    className="w-full rounded-[16px] border px-4 py-3 text-sm outline-none"
+                    style={{
+                      background: softBg,
+                      borderColor: softBorder,
+                      color: heading,
+                    }}
+                    required
+                  />
                 </div>
-              )}
-              <label className="flex items-center gap-2 cursor-pointer px-3 py-2.5 rounded-sm border border-dashed transition-all hover:border-wp-green/50"
-                style={{ borderColor: 'rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.02)' }}>
-                {uploadingExtra
-                  ? <Loader2 size={13} className="animate-spin" style={{ color: 'var(--wp-green)' }} />
-                  : <ImagePlus size={13} style={{ color: 'var(--wp-green)' }} />}
-                <span className="text-xs font-body" style={{ color: 'rgba(216,216,216,0.4)' }}>
-                  {uploadingExtra ? 'Uploading…' : 'Add gallery image'}
-                </span>
-                <input type="file" className="hidden" accept="image/*" disabled={uploadingExtra}
-                  onChange={e => { if (e.target.files[0]) { handleExtraImageUpload(e.target.files[0]); e.target.value = '' } }} />
-              </label>
-              <p className="text-[9px] font-body" style={{ color: 'rgba(216,216,216,0.2)' }}>
-                These extra images appear in the carousel on the product detail page.
-              </p>
-            </div>
-          </Field>
 
-          <Field label="Product Name" error={errors.name}>
-            <input className={inputClass} placeholder="e.g. Flyers A5" value={form.name}
-              onChange={e => setForm(f => ({ ...f, name: e.target.value, slug: editTarget ? f.slug : toSlug(e.target.value) }))} />
-          </Field>
-          <Field label="Slug (URL)" error={errors.slug}>
-            <input className={inputClass} placeholder="e.g. flyers-a5" value={form.slug}
-              onChange={e => setForm(f => ({ ...f, slug: toSlug(e.target.value) }))} />
-          </Field>
-          <Field label="Category">
-            <select className={inputClass} value={form.category_id}
-              onChange={e => setForm(f => ({ ...f, category_id: e.target.value }))} style={{ background: '#1a1a1a' }}>
-              <option value="">No category</option>
-              {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-            </select>
-          </Field>
-          <Field label="Base Price (₱)" error={errors.base_price}>
-            <input className={inputClass} type="number" step="0.01" placeholder="0.00" value={form.base_price}
-              onChange={e => setForm(f => ({ ...f, base_price: e.target.value }))} />
-          </Field>
-          <div className="grid grid-cols-3 gap-3">
-            <Field label="Min. Quantity" error={errors.min_qty}>
-              <input className={inputClass} type="number" placeholder="1" value={form.min_qty}
-                onChange={e => setForm(f => ({ ...f, min_qty: e.target.value }))} />
-            </Field>
-            <Field label="Unit">
-              <select className={inputClass} value={form.unit}
-                onChange={e => setForm(f => ({ ...f, unit: e.target.value }))} style={{ background: '#1a1a1a' }}>
-                <option value="pcs">pcs</option>
-                <option value="sheets">sheets</option>
-                <option value="sets">sets</option>
-                <option value="sq ft">sq ft</option>
-                <option value="meters">meters</option>
-                <option value="reams">reams</option>
-              </select>
-            </Field>
-            <Field label="Turnaround (days)" error={errors.turnaround_days}>
-              <input className={inputClass} type="number" placeholder="e.g. 3" value={form.turnaround_days}
-                onChange={e => setForm(f => ({ ...f, turnaround_days: e.target.value }))} />
-            </Field>
-          </div>
-          <Field label="Short Description">
-            <textarea className={inputClass} rows={3} placeholder="Brief product description…" value={form.short_description}
-              onChange={e => setForm(f => ({ ...f, short_description: e.target.value }))} style={{ resize: 'none' }} />
-          </Field>
-          <Field label="Status">
-            <div className="flex gap-2">
-              {[{ v: 'active', label: 'Active', color: '#13A150' }, { v: 'archived', label: 'Archived', color: '#888' }].map(({ v, label, color }) => (
-                <button key={v} type="button" onClick={() => setForm(f => ({ ...f, status: v }))}
-                  className="flex-1 py-2.5 rounded-sm text-xs font-body border transition-all"
-                  style={{ background: form.status === v ? `${color}14` : 'transparent', color: form.status === v ? color : 'rgba(216,216,216,0.35)', borderColor: form.status === v ? color + '40' : 'rgba(255,255,255,0.08)' }}>
-                  {label}
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-semibold mb-2" style={{ color: muted }}>
+                    Description
+                  </label>
+                  <textarea
+                    rows={4}
+                    value={form.description}
+                    onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
+                    className="w-full rounded-[16px] border px-4 py-3 text-sm outline-none resize-none"
+                    style={{
+                      background: softBg,
+                      borderColor: softBorder,
+                      color: heading,
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold mb-2" style={{ color: muted }}>
+                    Price
+                  </label>
+                  <input
+                    type="number"
+                    value={form.price}
+                    onChange={(e) => setForm((prev) => ({ ...prev, price: e.target.value }))}
+                    className="w-full rounded-[16px] border px-4 py-3 text-sm outline-none"
+                    style={{
+                      background: softBg,
+                      borderColor: softBorder,
+                      color: heading,
+                    }}
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold mb-2" style={{ color: muted }}>
+                    Unit
+                  </label>
+                  <input
+                    type="text"
+                    value={form.unit}
+                    onChange={(e) => setForm((prev) => ({ ...prev, unit: e.target.value }))}
+                    placeholder="e.g. pcs, sheets, sets"
+                    className="w-full rounded-[16px] border px-4 py-3 text-sm outline-none"
+                    style={{
+                      background: softBg,
+                      borderColor: softBorder,
+                      color: heading,
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold mb-2" style={{ color: muted }}>
+                    Turnaround Time
+                  </label>
+                  <input
+                    type="text"
+                    value={form.turnaround_time}
+                    onChange={(e) =>
+                      setForm((prev) => ({ ...prev, turnaround_time: e.target.value }))
+                    }
+                    placeholder="e.g. 2d turnaround"
+                    className="w-full rounded-[16px] border px-4 py-3 text-sm outline-none"
+                    style={{
+                      background: softBg,
+                      borderColor: softBorder,
+                      color: heading,
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold mb-2" style={{ color: muted }}>
+                    Category
+                  </label>
+                  <select
+                    value={form.category}
+                    onChange={(e) => setForm((prev) => ({ ...prev, category: e.target.value }))}
+                    className="w-full rounded-[16px] border px-4 py-3 text-sm outline-none"
+                    style={{
+                      background: softBg,
+                      borderColor: softBorder,
+                      color: heading,
+                    }}
+                  >
+                    <option value="">Select category</option>
+                    {categories.map((cat) => (
+                      <option key={cat.id || cat.name} value={cat.name}>
+                        {cat.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-semibold mb-2" style={{ color: muted }}>
+                    Image URL
+                  </label>
+                  <input
+                    type="text"
+                    value={form.image_url}
+                    onChange={(e) => setForm((prev) => ({ ...prev, image_url: e.target.value }))}
+                    className="w-full rounded-[16px] border px-4 py-3 text-sm outline-none"
+                    style={{
+                      background: softBg,
+                      borderColor: softBorder,
+                      color: heading,
+                    }}
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className="inline-flex items-center gap-2 text-sm" style={{ color: heading }}>
+                    <input
+                      type="checkbox"
+                      checked={form.is_active}
+                      onChange={(e) => setForm((prev) => ({ ...prev, is_active: e.target.checked }))}
+                    />
+                    Active Product
+                  </label>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={closeModal}
+                  className="px-4 py-3 rounded-[16px] text-sm font-semibold"
+                  style={{
+                    background: softBg,
+                    border: `1px solid ${softBorder}`,
+                    color: subText,
+                  }}
+                >
+                  Cancel
                 </button>
-              ))}
-            </div>
-          </Field>
-          <div className="flex gap-3 mt-2">
-            <button type="button" onClick={() => setShowModal(false)}
-              className="flex-1 py-2.5 rounded-sm text-xs font-body border border-white/[0.08] text-ivory-300/40 hover:text-white transition-all">
-              Cancel
-            </button>
-            <button type="button" onClick={handleSave} disabled={saving || uploading}
-              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-sm text-xs font-body font-bold transition-all disabled:opacity-50"
-              style={{ background: 'rgba(19,161,80,0.15)', border: '1px solid rgba(19,161,80,0.3)', color: 'var(--wp-green)' }}>
-              {saving ? <Loader2 size={12} className="animate-spin" /> : <Save size={12} />}
-              {editTarget ? 'Save Changes' : 'Add Product'}
-            </button>
-          </div>
-        </Modal>
-      )}
 
-      {/* Delete confirm */}
-      {deleteConfirm && (
-        <Modal title="Delete Product" onClose={() => setDeleteConfirm(null)}>
-          <p className="text-ivory-300/60 text-sm mb-1">Delete <span className="text-white font-semibold">{deleteConfirm.name}</span>?</p>
-          <p className="text-ivory-300/30 text-xs font-body mb-6">This cannot be undone. Consider archiving instead.</p>
-          <div className="flex gap-3">
-            <button type="button" onClick={() => setDeleteConfirm(null)}
-              className="flex-1 py-2.5 rounded-sm text-xs font-body border border-white/[0.08] text-ivory-300/40 hover:text-white transition-all">Cancel</button>
-            <button type="button" onClick={() => deleteProduct(deleteConfirm)}
-              className="flex-1 py-2.5 rounded-sm text-xs font-body font-bold"
-              style={{ background: 'rgba(236,0,140,0.12)', border: '1px solid rgba(236,0,140,0.3)', color: '#CD1B6E' }}>
-              Delete
-            </button>
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="inline-flex items-center gap-2 px-5 py-3 rounded-[16px] text-sm font-semibold transition-all"
+                  style={{
+                    background: 'rgba(19,161,80,0.10)',
+                    border: '1px solid rgba(19,161,80,0.20)',
+                    color: '#13A150',
+                  }}
+                >
+                  {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+                  Save Product
+                </button>
+              </div>
+            </form>
           </div>
-        </Modal>
-      )}
-
-      {/* Toast */}
-      {toast && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-sm border text-xs font-body shadow-xl"
-          style={{ background: toast.ok ? 'rgba(19,161,80,0.15)' : 'rgba(236,0,140,0.15)', borderColor: toast.ok ? 'rgba(19,161,80,0.3)' : 'rgba(236,0,140,0.3)', color: toast.ok ? '#13A150' : '#CD1B6E' }}>
-          {toast.ok ? <CheckCircle size={13} /> : <XCircle size={13} />} {toast.msg}
         </div>
       )}
     </AdminLayout>

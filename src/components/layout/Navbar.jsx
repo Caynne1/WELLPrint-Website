@@ -1,36 +1,59 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { Menu, X, ShoppingCart, Sun, Moon, LogIn, LogOut, LayoutDashboard, ChevronDown, User } from 'lucide-react'
+import {
+  Menu,
+  X,
+  ShoppingCart,
+  LogIn,
+  LogOut,
+  LayoutDashboard,
+  ChevronDown,
+  User,
+  Search,
+} from 'lucide-react'
 import clsx from 'clsx'
 import { useCart } from '../../context/CartContext'
-import { useTheme } from '../../context/ThemeContext'
 import { useAuth } from '../../context/AuthContext'
+import { useTheme } from '../../context/ThemeContext'
 
 const NAV_LINKS = [
-  { label: 'About',    href: '/about' },
+  { label: 'About', href: '/about' },
   { label: 'Services', href: '/services' },
   { label: 'Products', href: '/products' },
-  { label: 'Contact',  href: '/contact' },
+  { label: 'Contact', href: '/contact' },
 ]
+
+const COLORS = {
+  green: '#006318',
+  navy: '#002C5F',
+  blue: '#1993D2',
+}
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
   const { pathname } = useLocation()
   const navigate = useNavigate()
   const { totalItems } = useCart()
-  const { theme, toggleTheme } = useTheme()
   const { user, logout } = useAuth()
+  const { theme } = useTheme()
   const userMenuRef = useRef(null)
 
+  const isDark = theme === 'dark'
+  const isHome = pathname === '/'
+
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20)
+    const onScroll = () => setScrolled(window.scrollY > 24)
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  useEffect(() => { setMenuOpen(false); setUserMenuOpen(false) }, [pathname])
+  useEffect(() => {
+    setMenuOpen(false)
+    setUserMenuOpen(false)
+  }, [pathname])
 
   useEffect(() => {
     function handleClickOutside(e) {
@@ -42,111 +65,256 @@ export default function Navbar() {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
+  const handleSearchSubmit = (e) => {
+    e.preventDefault()
+    const trimmed = searchQuery.trim()
+
+    if (!trimmed) {
+      navigate('/products')
+      return
+    }
+
+    navigate(`/products?search=${encodeURIComponent(trimmed)}`)
+  }
+
+  const transparentHeroMode = isHome && !scrolled
+
+  const headerClass = clsx(
+    'w-full transition-all duration-300 z-50',
+    transparentHeroMode ? 'fixed top-0 left-0 right-0 py-4' : 'sticky top-0 py-2'
+  )
+
+  const headerStyle = transparentHeroMode
+    ? {
+        background: 'transparent',
+        borderBottom: '1px solid transparent',
+        boxShadow: 'none',
+        backdropFilter: 'none',
+      }
+    : {
+        background: isDark ? 'rgba(7, 11, 16, 0.78)' : 'rgba(255, 255, 255, 0.82)',
+        borderBottom: isDark
+          ? '1px solid rgba(255,255,255,0.08)'
+          : '1px solid rgba(0,44,95,0.08)',
+        boxShadow: isDark
+          ? '0 12px 30px rgba(0,0,0,0.22)'
+          : '0 10px 30px rgba(15,23,42,0.08)',
+        backdropFilter: 'blur(14px)',
+      }
+
+  const desktopTextColor = transparentHeroMode
+    ? '#ffffff'
+    : isDark
+      ? '#ffffff'
+      : '#0f172a'
+
+  const mutedTextColor = transparentHeroMode
+    ? 'rgba(255,255,255,0.78)'
+    : isDark
+      ? 'rgba(255,255,255,0.70)'
+      : '#475569'
+
+  const searchBg = transparentHeroMode
+    ? 'rgba(255,255,255,0.10)'
+    : isDark
+      ? 'rgba(255,255,255,0.06)'
+      : 'rgba(255,255,255,0.96)'
+
+  const searchBorder = transparentHeroMode
+    ? 'rgba(255,255,255,0.16)'
+    : isDark
+      ? 'rgba(255,255,255,0.10)'
+      : 'rgba(0,44,95,0.10)'
+
+  const searchText = transparentHeroMode
+    ? '#ffffff'
+    : isDark
+      ? '#ffffff'
+      : '#0f172a'
+
+  const searchPlaceholder = transparentHeroMode
+    ? 'rgba(255,255,255,0.58)'
+    : isDark
+      ? 'rgba(255,255,255,0.45)'
+      : '#94a3b8'
+
   return (
     <>
-      <header
-        className={clsx(
-          'fixed top-0 left-0 right-0 z-50 transition-all duration-300',
-          scrolled
-            ? 'bg-ink-900/96 backdrop-blur-md border-b border-white/[0.08] py-2'
-            : 'bg-transparent py-4'
-        )}
-      >
-        <nav className="max-w-7xl mx-auto px-6 flex items-center justify-between">
-
-          {/* Logo */}
-          <Link to="/" className="flex items-center group" aria-label="WELLPrint Home">
-            <img
-              src={theme === 'dark' ? '/logos/horizontal/main-dark.svg' : '/logos/horizontal/main-light.svg'}
-              alt="WELLPrint"
-              className="h-9 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
-            />
-          </Link>
-
-          {/* Desktop Nav */}
-          <ul className="hidden md:flex items-center gap-1">
-            {NAV_LINKS.map((link) => (
-              <li key={link.href}>
-                <Link
-                  to={link.href}
-                  className={clsx(
-                    'green-underline px-4 py-2 text-sm font-medium tracking-wide transition-colors duration-200',
-                    pathname === link.href ? 'text-white' : 'text-ivory-300 hover:text-white'
-                  )}
-                >
-                  {link.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-
-          {/* Desktop CTA */}
-          <div className="hidden md:flex items-center gap-3">
-            {/* Theme toggle */}
-            <button
-              onClick={toggleTheme}
-              aria-label="Toggle light/dark mode"
-              className="relative p-2 rounded-sm border transition-all duration-200 group"
-              style={{
-                borderColor: 'var(--border-subtle)',
-                color: 'var(--text-secondary)',
-                background: 'transparent',
-              }}
-              onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--wp-green)'}
-              onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border-subtle)'}
-            >
-              <span
-                className="absolute inset-0 rounded-sm opacity-0 group-hover:opacity-100 transition-opacity"
-                style={{ background: 'rgba(19,161,80,0.07)' }}
+      <header className={headerClass} style={headerStyle}>
+        <nav className="max-w-7xl mx-auto px-6 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4 min-w-0 flex-1">
+            <Link to="/" className="flex items-center group shrink-0" aria-label="WELLPrint Home">
+              <img
+                src={
+                  transparentHeroMode || isDark
+                    ? '/logos/horizontal/main-dark.svg'
+                    : '/logos/horizontal/main-light.svg'
+                }
+                alt="WELLPrint"
+                className="h-9 w-auto object-contain transition-transform duration-300 group-hover:scale-[1.02]"
               />
-              {theme === 'dark'
-                ? <Sun size={16} style={{ color: 'var(--wp-yellow)' }} />
-                : <Moon size={16} style={{ color: 'var(--wp-cyan)' }} />
-              }
-            </button>
-
-            <Link to="/cart" className="relative p-2 text-ivory-300 hover:text-white transition-colors" aria-label="Cart">
-              <ShoppingCart size={20} />
-              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full text-[9px] font-bold text-white flex items-center justify-center font-body"
-                style={{ background: 'var(--wp-green)' }}>{totalItems}</span>
             </Link>
 
-            {/* Login / User dropdown */}
+            <form
+              onSubmit={handleSearchSubmit}
+              className="hidden lg:flex items-center flex-1 max-w-md"
+            >
+              <div className="relative w-full">
+                <Search
+                  size={16}
+                  className="absolute left-4 top-1/2 -translate-y-1/2"
+                  style={{ color: searchPlaceholder }}
+                />
+                <input
+                  type="text"
+                  placeholder="Search products"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full h-11 rounded-full pl-11 pr-4 text-sm shadow-sm transition-all duration-300 focus:outline-none"
+                  style={{
+                    border: `1px solid ${searchBorder}`,
+                    background: searchBg,
+                    color: searchText,
+                  }}
+                />
+              </div>
+            </form>
+          </div>
+
+          <ul className="hidden md:flex items-center gap-1">
+            {NAV_LINKS.map((link) => {
+              const active = pathname === link.href
+              return (
+                <li key={link.href}>
+                  <Link
+                    to={link.href}
+                    className="px-4 py-2 text-sm font-medium tracking-wide transition-colors duration-200"
+                    style={{
+                      color: active ? COLORS.green : desktopTextColor,
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!active) e.currentTarget.style.color = COLORS.green
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!active) e.currentTarget.style.color = desktopTextColor
+                    }}
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              )
+            })}
+          </ul>
+
+          <div className="hidden md:flex items-center gap-3 shrink-0">
+            <Link
+              to="/cart"
+              className="relative p-2 transition-colors"
+              aria-label="Cart"
+              style={{ color: mutedTextColor }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = COLORS.green
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = mutedTextColor
+              }}
+            >
+              <ShoppingCart size={20} />
+              <span
+                className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full text-[9px] font-bold text-white flex items-center justify-center font-body"
+                style={{ background: COLORS.green }}
+              >
+                {totalItems}
+              </span>
+            </Link>
+
             {user ? (
               <div className="relative" ref={userMenuRef}>
                 <button
-                  onClick={() => setUserMenuOpen(v => !v)}
-                  className="flex items-center gap-2 px-3 py-2 rounded-sm border transition-all duration-200 text-sm font-medium"
+                  onClick={() => setUserMenuOpen((v) => !v)}
+                  className="flex items-center gap-2 px-3 py-2 rounded-full border transition-all duration-200 text-sm font-medium"
                   style={{
-                    borderColor: 'var(--wp-green)',
-                    color: 'var(--wp-green)',
-                    background: 'rgba(19,161,80,0.08)',
+                    borderColor: transparentHeroMode
+                      ? 'rgba(255,255,255,0.14)'
+                      : isDark
+                        ? 'rgba(255,255,255,0.10)'
+                        : 'rgba(0,44,95,0.10)',
+                    color: transparentHeroMode || isDark ? '#ffffff' : '#0f172a',
+                    background: transparentHeroMode
+                      ? 'rgba(255,255,255,0.08)'
+                      : isDark
+                        ? 'rgba(255,255,255,0.05)'
+                        : 'rgba(255,255,255,0.75)',
+                    backdropFilter: 'blur(10px)',
                   }}
                 >
                   <User size={14} />
                   <span className="max-w-[96px] truncate">{user.name}</span>
-                  <span className="text-[9px] font-body uppercase px-1.5 py-0.5 rounded"
-                    style={{ background: 'rgba(19,161,80,0.15)', color: 'var(--wp-green)' }}>
+                  <span
+                    className="text-[9px] font-body uppercase px-1.5 py-0.5 rounded-full"
+                    style={{
+                      background: transparentHeroMode || isDark
+                        ? 'rgba(25,147,210,0.16)'
+                        : 'rgba(0,99,24,0.10)',
+                      color: transparentHeroMode || isDark ? COLORS.blue : COLORS.green,
+                    }}
+                  >
                     {user.role}
                   </span>
-                  <ChevronDown size={13} className={clsx('transition-transform duration-200', userMenuOpen && 'rotate-180')} />
+                  <ChevronDown
+                    size={13}
+                    className={clsx('transition-transform duration-200', userMenuOpen && 'rotate-180')}
+                  />
                 </button>
 
-                {/* Dropdown */}
                 {userMenuOpen && (
-                  <div className="absolute right-0 top-full mt-2 w-48 rounded-sm border shadow-xl z-50 overflow-hidden"
-                    style={{ background: 'var(--surface-elevated, #1a1a1a)', borderColor: 'var(--border-subtle)' }}>
-                    <Link to="/admin/dashboard"
-                      className="flex items-center gap-2.5 px-4 py-3 text-sm transition-colors hover:bg-white/5"
-                      style={{ color: 'var(--text-secondary)' }}>
-                      <LayoutDashboard size={14} style={{ color: 'var(--wp-green)' }} />
+                  <div
+                    className="absolute right-0 top-full mt-2 w-52 rounded-2xl border shadow-xl z-50 overflow-hidden"
+                    style={{
+                      background: isDark ? '#0f172a' : '#ffffff',
+                      borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,44,95,0.08)',
+                      boxShadow: isDark
+                        ? '0 20px 50px rgba(0,0,0,0.34)'
+                        : '0 20px 50px rgba(15,23,42,0.12)',
+                    }}
+                  >
+                    <Link
+                      to="/admin/dashboard"
+                      className="flex items-center gap-2.5 px-4 py-3 text-sm transition-colors"
+                      style={{ color: isDark ? '#ffffff' : '#334155' }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.05)' : '#f8fafc'
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = 'transparent'
+                      }}
+                    >
+                      <LayoutDashboard size={14} style={{ color: COLORS.green }} />
                       Dashboard
                     </Link>
-                    <div style={{ height: '1px', background: 'var(--border-subtle)' }} />
+
+                    <div
+                      style={{
+                        height: '1px',
+                        background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,44,95,0.08)',
+                      }}
+                    />
+
                     <button
-                      onClick={() => { logout(); setUserMenuOpen(false); navigate('/') }}
-                      className="w-full flex items-center gap-2.5 px-4 py-3 text-sm transition-colors hover:bg-white/5"
-                      style={{ color: '#CD1B6E' }}>
+                      onClick={() => {
+                        logout()
+                        setUserMenuOpen(false)
+                        navigate('/')
+                      }}
+                      className="w-full flex items-center gap-2.5 px-4 py-3 text-sm transition-colors"
+                      style={{ color: '#CD1B6E' }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.05)' : '#f8fafc'
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = 'transparent'
+                      }}
+                    >
                       <LogOut size={14} />
                       Sign Out
                     </button>
@@ -156,103 +324,208 @@ export default function Navbar() {
             ) : (
               <Link
                 to="/admin/login"
-                className="flex items-center gap-1.5 px-4 py-2 rounded-sm border text-sm font-medium transition-all duration-200"
+                className="flex items-center gap-1.5 px-4 py-2 rounded-full border text-sm font-medium transition-all duration-200"
                 style={{
-                  borderColor: 'var(--border-subtle)',
-                  color: 'var(--text-secondary)',
-                  background: 'transparent',
+                  borderColor: transparentHeroMode
+                    ? 'rgba(255,255,255,0.16)'
+                    : isDark
+                      ? 'rgba(255,255,255,0.10)'
+                      : 'rgba(0,44,95,0.10)',
+                  color: transparentHeroMode || isDark ? '#ffffff' : '#0f172a',
+                  background: transparentHeroMode
+                    ? 'rgba(255,255,255,0.08)'
+                    : isDark
+                      ? 'rgba(255,255,255,0.05)'
+                      : 'rgba(255,255,255,0.82)',
+                  backdropFilter: 'blur(10px)',
                 }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.borderColor = 'var(--wp-green)'
-                  e.currentTarget.style.color = 'var(--wp-green)'
-                  e.currentTarget.style.background = 'rgba(19,161,80,0.07)'
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = COLORS.green
+                  e.currentTarget.style.color = COLORS.green
+                  e.currentTarget.style.background = transparentHeroMode
+                    ? 'rgba(0,99,24,0.10)'
+                    : isDark
+                      ? 'rgba(0,99,24,0.10)'
+                      : 'rgba(0,99,24,0.06)'
                 }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.borderColor = 'var(--border-subtle)'
-                  e.currentTarget.style.color = 'var(--text-secondary)'
-                  e.currentTarget.style.background = 'transparent'
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = transparentHeroMode
+                    ? 'rgba(255,255,255,0.16)'
+                    : isDark
+                      ? 'rgba(255,255,255,0.10)'
+                      : 'rgba(0,44,95,0.10)'
+                  e.currentTarget.style.color = transparentHeroMode || isDark ? '#ffffff' : '#0f172a'
+                  e.currentTarget.style.background = transparentHeroMode
+                    ? 'rgba(255,255,255,0.08)'
+                    : isDark
+                      ? 'rgba(255,255,255,0.05)'
+                      : 'rgba(255,255,255,0.82)'
                 }}
               >
                 <LogIn size={14} />
                 Login
               </Link>
             )}
-
-            <Link to="/products" className="btn-press text-xs py-2.5 px-5">Order Now</Link>
           </div>
 
-          {/* Mobile */}
-          <div className="flex md:hidden items-center gap-2">
-            <button
-              onClick={toggleTheme}
-              aria-label="Toggle light/dark mode"
-              className="p-2 transition-colors"
-              style={{ color: theme === 'dark' ? 'var(--wp-yellow)' : 'var(--wp-cyan)' }}
+          <div className="flex md:hidden items-center gap-2 shrink-0">
+            <Link
+              to="/cart"
+              className="relative p-2 transition-colors"
+              style={{ color: desktopTextColor }}
             >
-              {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
-            </button>
-            <Link to="/cart" className="relative p-2 text-ivory-300 hover:text-white">
               <ShoppingCart size={20} />
-              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full text-[9px] font-bold text-white flex items-center justify-center font-body"
-                style={{ background: 'var(--wp-green)' }}>{totalItems}</span>
+              <span
+                className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full text-[9px] font-bold text-white flex items-center justify-center font-body"
+                style={{ background: COLORS.green }}
+              >
+                {totalItems}
+              </span>
             </Link>
-            <button onClick={() => setMenuOpen(v => !v)} className="p-2 text-ivory-300 hover:text-white"
-              aria-label="Toggle menu" aria-expanded={menuOpen}>
+
+            <button
+              onClick={() => setMenuOpen((v) => !v)}
+              className="p-2 transition-colors"
+              style={{ color: desktopTextColor }}
+              aria-label="Toggle menu"
+              aria-expanded={menuOpen}
+            >
               {menuOpen ? <X size={22} /> : <Menu size={22} />}
             </button>
           </div>
         </nav>
-        {scrolled && <div className="cmyk-bar" />}
+
+        <div className="lg:hidden max-w-7xl mx-auto px-6 pt-3 pb-1">
+          <form onSubmit={handleSearchSubmit} className="relative">
+            <Search
+              size={16}
+              className="absolute left-4 top-1/2 -translate-y-1/2"
+              style={{ color: searchPlaceholder }}
+            />
+            <input
+              type="text"
+              placeholder="Search products"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full h-11 rounded-full pl-11 pr-4 text-sm transition-all duration-300 focus:outline-none"
+              style={{
+                border: `1px solid ${searchBorder}`,
+                background: searchBg,
+                color: searchText,
+              }}
+            />
+          </form>
+        </div>
       </header>
 
-      {/* Mobile Drawer */}
-      <div className={clsx('fixed inset-0 z-40 md:hidden', menuOpen ? 'pointer-events-auto' : 'pointer-events-none')}>
-        <div className={clsx('absolute inset-0 bg-black/70 backdrop-blur-sm transition-opacity duration-300', menuOpen ? 'opacity-100' : 'opacity-0')}
-          onClick={() => setMenuOpen(false)} />
-        <nav className={clsx(
-          'absolute top-0 right-0 h-full w-72 border-l flex flex-col pt-20 pb-10 px-6 transition-transform duration-300',
-          menuOpen ? 'translate-x-0' : 'translate-x-full'
+      <div
+        className={clsx(
+          'fixed inset-0 z-50 md:hidden',
+          menuOpen ? 'pointer-events-auto' : 'pointer-events-none'
         )}
-          style={{ background: 'var(--surface-page)', borderColor: 'var(--border-subtle)' }}
+      >
+        <div
+          className={clsx(
+            'absolute inset-0 bg-black/45 backdrop-blur-sm transition-opacity duration-300',
+            menuOpen ? 'opacity-100' : 'opacity-0'
+          )}
+          onClick={() => setMenuOpen(false)}
+        />
+
+        <nav
+          className={clsx(
+            'absolute top-0 right-0 h-full w-72 border-l flex flex-col pt-20 pb-10 px-6 transition-transform duration-300',
+            menuOpen ? 'translate-x-0' : 'translate-x-full'
+          )}
+          style={{
+            background: isDark ? '#08111f' : '#ffffff',
+            borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,44,95,0.08)',
+          }}
         >
           <div className="mb-8 flex justify-center">
-            <img src="/logos/vertical/main-dark.svg" alt="WELLPrint" className="h-20 w-auto object-contain" />
+            <img
+              src={isDark ? '/logos/vertical/main-dark.svg' : '/logos/vertical/main-light.svg'}
+              alt="WELLPrint"
+              className="h-20 w-auto object-contain"
+            />
           </div>
+
           <ul className="flex flex-col gap-1 mb-8">
             {NAV_LINKS.map((link) => (
               <li key={link.href}>
-                <Link to={link.href}
-                  className={clsx('block px-4 py-3 text-base font-medium transition-colors',
-                    pathname === link.href ? 'text-wp-green' : 'hover:text-wp-green')}
-                  style={{ borderBottom: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}>
+                <Link
+                  to={link.href}
+                  className="block px-4 py-3 text-base font-medium transition-colors"
+                  style={{
+                    borderBottom: isDark
+                      ? '1px solid rgba(255,255,255,0.08)'
+                      : '1px solid rgba(0,44,95,0.08)',
+                    color: pathname === link.href
+                      ? COLORS.green
+                      : isDark
+                        ? '#ffffff'
+                        : '#334155',
+                  }}
+                >
                   {link.label}
                 </Link>
               </li>
             ))}
           </ul>
-          <Link to="/products" className="btn-press justify-center text-center">Order Now</Link>
 
-          {/* Mobile login/logout */}
-          <div className="mt-4">
+          <div className="mt-2">
             {user ? (
               <div className="space-y-2">
-                <div className="flex items-center gap-2 px-4 py-3 rounded-sm"
-                  style={{ background: 'rgba(19,161,80,0.08)', border: '1px solid rgba(19,161,80,0.2)' }}>
-                  <User size={14} style={{ color: 'var(--wp-green)' }} />
-                  <span className="text-sm font-medium text-white flex-1 truncate">{user.name}</span>
-                  <span className="text-[9px] font-body uppercase px-1.5 py-0.5 rounded"
-                    style={{ background: 'rgba(19,161,80,0.2)', color: 'var(--wp-green)' }}>{user.role}</span>
+                <div
+                  className="flex items-center gap-2 px-4 py-3 rounded-2xl"
+                  style={{
+                    background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,99,24,0.05)',
+                    border: isDark
+                      ? '1px solid rgba(255,255,255,0.10)'
+                      : '1px solid rgba(0,99,24,0.12)',
+                  }}
+                >
+                  <User size={14} style={{ color: COLORS.green }} />
+                  <span className={`text-sm font-medium flex-1 truncate ${isDark ? 'text-white' : 'text-slate-800'}`}>
+                    {user.name}
+                  </span>
+                  <span
+                    className="text-[9px] font-body uppercase px-1.5 py-0.5 rounded-full"
+                    style={{
+                      background: isDark ? 'rgba(25,147,210,0.14)' : 'rgba(0,99,24,0.10)',
+                      color: isDark ? COLORS.blue : COLORS.green,
+                    }}
+                  >
+                    {user.role}
+                  </span>
                 </div>
-                <Link to="/admin/dashboard"
-                  className="flex items-center gap-2 px-4 py-3 rounded-sm text-sm transition-colors"
-                  style={{ border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}>
-                  <LayoutDashboard size={14} style={{ color: 'var(--wp-green)' }} />
+
+                <Link
+                  to="/admin/dashboard"
+                  className="flex items-center gap-2 px-4 py-3 rounded-2xl text-sm transition-colors"
+                  style={{
+                    border: isDark
+                      ? '1px solid rgba(255,255,255,0.08)'
+                      : '1px solid rgba(0,44,95,0.08)',
+                    color: isDark ? '#ffffff' : '#334155',
+                  }}
+                >
+                  <LayoutDashboard size={14} style={{ color: COLORS.green }} />
                   Go to Dashboard
                 </Link>
+
                 <button
-                  onClick={() => { logout(); navigate('/') }}
-                  className="w-full flex items-center gap-2 px-4 py-3 rounded-sm text-sm transition-colors"
-                  style={{ border: '1px solid rgba(236,0,140,0.25)', color: '#CD1B6E', background: 'rgba(236,0,140,0.06)' }}>
+                  onClick={() => {
+                    logout()
+                    navigate('/')
+                  }}
+                  className="w-full flex items-center gap-2 px-4 py-3 rounded-2xl text-sm transition-colors"
+                  style={{
+                    border: '1px solid rgba(236,0,140,0.20)',
+                    color: '#CD1B6E',
+                    background: 'rgba(236,0,140,0.04)',
+                  }}
+                >
                   <LogOut size={14} />
                   Sign Out
                 </button>
@@ -260,17 +533,33 @@ export default function Navbar() {
             ) : (
               <Link
                 to="/admin/login"
-                className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-sm text-sm font-medium transition-colors"
-                style={{ border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)', background: 'transparent' }}>
+                className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-2xl text-sm font-medium transition-colors"
+                style={{
+                  border: isDark
+                    ? '1px solid rgba(255,255,255,0.08)'
+                    : '1px solid rgba(0,44,95,0.08)',
+                  background: 'transparent',
+                  color: isDark ? '#ffffff' : '#334155',
+                }}
+              >
                 <LogIn size={14} />
                 Login
               </Link>
             )}
           </div>
+
           <div className="mt-auto">
-            <div className="cmyk-bar rounded-full" />
-            <p className="text-center text-xs font-body mt-3 tracking-wider" style={{ color: 'var(--text-faint)' }}>
-              Premium Printing Since 2010
+            <div
+              className="rounded-full h-[3px]"
+              style={{
+                background: `linear-gradient(90deg, ${COLORS.green} 0%, ${COLORS.blue} 60%, ${COLORS.navy} 100%)`,
+              }}
+            />
+            <p
+              className="text-center text-xs font-body mt-3 tracking-wider"
+              style={{ color: isDark ? 'rgba(255,255,255,0.45)' : '#64748b' }}
+            >
+              Premium Printing Since 2019
             </p>
           </div>
         </nav>

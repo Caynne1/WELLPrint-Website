@@ -14,19 +14,19 @@ export const ALL_PERMISSIONS = [
 ]
 
 export const PERMISSION_LABELS = {
-  view_orders:       'View Orders',
-  manage_orders:     'Manage Orders (update status)',
-  view_products:     'View Products',
-  manage_products:   'Manage Products (add / edit / delete)',
+  view_orders: 'View Orders',
+  manage_orders: 'Manage Orders (update status)',
+  view_products: 'View Products',
+  manage_products: 'Manage Products (add / edit / delete)',
   manage_categories: 'Manage Categories (add / edit / delete)',
-  view_analytics:    'View Analytics',
+  view_analytics: 'View Analytics',
 }
 
 // ─── Provider ──────────────────────────────────────────────────────────────
 export function AuthProvider({ children }) {
-  const [user,    setUser]    = useState(null)
+  const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [error,   setError]   = useState(null)
+  const [error, setError] = useState(null)
 
   const hydrateUser = useCallback(async (authUser) => {
     const { data: profile } = await supabase
@@ -35,19 +35,19 @@ export function AuthProvider({ children }) {
       .eq('id', authUser.id)
       .single()
 
-    const role        = profile?.role ?? 'staff'
+    const role = profile?.role ?? 'staff'
     const permissions = role === 'admin'
       ? ALL_PERMISSIONS
       : (profile?.permissions ?? [])
 
     setUser({
-      id:          authUser.id,
-      email:       authUser.email,
-      username:    profile?.username ?? authUser.email,
-      name:        profile?.name     ?? authUser.email,
+      id: authUser.id,
+      email: authUser.email,
+      username: profile?.username ?? authUser.email,
+      name: profile?.name ?? authUser.email,
       role,
       permissions,
-      loginAt:     new Date().toISOString(),
+      loginAt: new Date().toISOString(),
     })
   }, [])
 
@@ -71,9 +71,11 @@ export function AuthProvider({ children }) {
   async function login(identifier, password) {
     setLoading(true)
     setError(null)
+
     try {
       let email = identifier.trim()
 
+      // allow login via username or email
       if (!email.includes('@')) {
         const { data: profile, error: profileErr } = await supabase
           .from('staff_profiles')
@@ -86,10 +88,14 @@ export function AuthProvider({ children }) {
           setLoading(false)
           return { ok: false }
         }
+
         email = profile.email
       }
 
-      const { error: authErr } = await supabase.auth.signInWithPassword({ email, password })
+      const { error: authErr } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
 
       if (authErr) {
         setError('Invalid credentials. Please try again.')
@@ -128,12 +134,19 @@ export function AuthProvider({ children }) {
   const isStaff = user?.role === 'staff'
 
   return (
-    <AuthContext.Provider value={{
-      user, loading, error,
-      login, logout,
-      hasPermission, hasRole,
-      isAdmin, isStaff,
-    }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        error,
+        login,
+        logout,
+        hasPermission,
+        hasRole,
+        isAdmin,
+        isStaff,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   )

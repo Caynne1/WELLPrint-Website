@@ -10,13 +10,14 @@
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.43.4",
+    "clsx": "^2.1.1",
+    "framer-motion": "^11.2.10",
+    "jspdf": "^4.2.1",
+    "lucide-react": "^0.395.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-router-dom": "^6.23.1",
-    "@supabase/supabase-js": "^2.43.4",
-    "lucide-react": "^0.395.0",
-    "clsx": "^2.1.1",
-    "framer-motion": "^11.2.10"
+    "react-router-dom": "^6.23.1"
   },
   "devDependencies": {
     "@types/react": "^18.3.3",

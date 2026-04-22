@@ -1,316 +1,997 @@
-import { useState } from 'react'
-import { useParams, Link, useNavigate } from 'react-router-dom'
-import { useOrders, ORDER_STATUSES } from '../../context/OrdersContext'
-import { useAuth } from '../../context/AuthContext'
+import { useEffect, useMemo, useState } from 'react'
+import { useParams } from 'react-router-dom'
 import AdminLayout from '../../components/admin/AdminLayout'
+import { supabase } from '../../lib/supabase'
+import { useTheme } from '../../context/ThemeContext'
 import {
-  ArrowLeft, Mail, Send, ChevronDown, CheckCircle,
-  Phone, User, Building2, Package, AlertCircle, Loader2
+  CheckCircle,
+  Circle,
+  Loader2,
+  Clock3,
+  Package,
+  FileText,
+  Save,
+  Printer,
+  User,
+  MapPin,
+  Phone,
+  Mail,
+  StickyNote,
+  Link as LinkIcon,
+  Image as ImageIcon,
+  ExternalLink,
+  RefreshCw,
+  Download,
 } from 'lucide-react'
 
-function formatPHP(n) { return '\u20B1' + Number(n).toLocaleString('en-PH', { minimumFractionDigits: 2 }) }
-function formatDate(iso) {
-  return new Date(iso).toLocaleString('en-PH', { dateStyle: 'medium', timeStyle: 'short' })
+const STATUS_FLOW = ['pending', 'processing', 'printing', 'ready', 'completed']
+
+const STATUS_LABELS = {
+  pending: 'Pending',
+  processing: 'Processing',
+  printing: 'Printing',
+  ready: 'Ready',
+  completed: 'Completed',
+  cancelled: 'Cancelled',
 }
 
-const EMAIL_TEMPLATES = {
-  quote: (order) => ({
-    subject: `Quote for your WELLPrint order ${order.id}`,
-    body: `Hi ${order.customer.name.split(' ')[0]},\n\nThank you for your inquiry! We're happy to help with your printing needs.\n\nHere is your quote for order ${order.id}:\n\n${order.items.map(i => `• ${i.name} — ${i.qty} ${i.unit} @ ${formatPHP(i.unitPrice)} each = ${formatPHP(i.qty * i.unitPrice)}`).join('\n')}\n\nEstimated Total: ${formatPHP(order.estimatedTotal)}\n(Final price may vary based on artwork and specifications)\n\nTo proceed, please:\n1. Reply to confirm you'd like to move forward\n2. Send your print-ready artwork files (PDF/AI/EPS, 300dpi, CMYK, 3mm bleed)\n3. We will then confirm payment details\n\nBest regards,\nWELLPrint Team\nhello@wellprint.com.ph`,
-  }),
-  artwork: (order) => ({
-    subject: `Artwork needed — WELLPrint order ${order.id}`,
-    body: `Hi ${order.customer.name.split(' ')[0]},\n\nThank you for confirming your order ${order.id}!\n\nTo get started on printing, we need your print-ready artwork files:\n\n• File types: PDF, AI, or EPS (preferred)\n• Resolution: 300dpi minimum\n• Color mode: CMYK\n• Bleed: 3mm on all sides\n• Fonts: Outlined/embedded\n\nYou can reply to this email with your files attached, or use a file-sharing link (WeTransfer, Google Drive, Dropbox).\n\nBest regards,\nWELLPrint Team`,
-  }),
-  printing: (order) => ({
-    subject: `Your order ${order.id} is now printing!`,
-    body: `Hi ${order.customer.name.split(' ')[0]},\n\nGreat news! Your artwork has been approved and your order ${order.id} is now in production.\n\nOrder details:\n${order.items.map(i => `• ${i.name} — ${i.qty} ${i.unit}`).join('\n')}\n\nWe'll notify you as soon as your order is ready.\n\nBest regards,\nWELLPrint Team`,
-  }),
-  completed: (order) => ({
-    subject: `Your order ${order.id} is ready! 🎉`,
-    body: `Hi ${order.customer.name.split(' ')[0]},\n\nYour order ${order.id} is complete and ready for pickup!\n\n${order.items.map(i => `• ${i.name} — ${i.qty} ${i.unit}`).join('\n')}\n\nThank you for choosing WELLPrint!\n\nBest regards,\nWELLPrint Team\nhello@wellprint.com.ph`,
-  }),
-  custom: () => ({ subject: '', body: '' }),
+const COLORS = {
+  green: '#16a34a',
+  cyan: '#1993D2',
+  amber: '#f59e0b',
+  magenta: '#CD1B6E',
+  slate: '#64748b',
+  violet: '#8b5cf6',
+  red: '#dc2626',
 }
 
-const STATUS_ACTIONS = [
-  { key: 'quoted',          label: 'Mark as Quoted',    template: 'quote',    color: '#FDC010' },
-  { key: 'artwork_pending', label: 'Request Artwork',   template: 'artwork',  color: '#1993D2' },
-  { key: 'printing',        label: 'Mark as Printing',  template: 'printing', color: '#13A150' },
-  { key: 'completed',       label: 'Mark as Completed', template: 'completed',color: '#13A150' },
-  { key: 'cancelled',       label: 'Cancel Order',      template: 'custom',   color: '#666'   },
-]
+function getStepColor(status, isActive) {
+  if (!isActive) return '#cbd5e1'
+
+  switch (status) {
+    case 'pending':
+      return COLORS.cyan
+    case 'processing':
+      return COLORS.amber
+    case 'printing':
+      return COLORS.violet
+    case 'ready':
+      return COLORS.cyan
+    case 'completed':
+      return COLORS.green
+    default:
+      return COLORS.slate
+  }
+}
+
+function formatPeso(value) {
+  return `₱${Number(value || 0).toLocaleString('en-PH', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`
+}
+
+function formatDateTime(value) {
+  if (!value) return '—'
+  try {
+    return new Date(value).toLocaleString()
+  } catch {
+    return '—'
+  }
+}
+
+function formatDate(value) {
+  if (!value) return '—'
+  try {
+    return new Date(value).toLocaleDateString()
+  } catch {
+    return '—'
+  }
+}
+
+function isImageFile(url = '') {
+  return /\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i.test(url)
+}
+
+function SectionCard({ title, icon: Icon, children, subtitle, isLight }) {
+  return (
+    <div
+      className="rounded-[24px] border p-6"
+      style={{
+        background: isLight ? '#FFFFFF' : 'rgba(9, 25, 53, 0.92)',
+        borderColor: isLight ? 'rgba(15,23,42,0.08)' : 'rgba(255,255,255,0.06)',
+        boxShadow: isLight
+          ? '0 10px 30px rgba(15,23,42,0.05)'
+          : '0 10px 30px rgba(0,0,0,0.24)',
+      }}
+    >
+      <div className="flex items-start gap-3 mb-5">
+        <div
+          className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0"
+          style={{
+            background: 'rgba(25,147,210,0.10)',
+            border: '1px solid rgba(25,147,210,0.18)',
+          }}
+        >
+          <Icon size={16} style={{ color: COLORS.cyan }} />
+        </div>
+
+        <div>
+          <div
+            className="text-base font-semibold"
+            style={{ color: isLight ? '#0f172a' : '#f8fafc' }}
+          >
+            {title}
+          </div>
+          {subtitle && (
+            <div
+              className="text-sm mt-0.5"
+              style={{ color: isLight ? '#94a3b8' : 'rgba(148,163,184,0.88)' }}
+            >
+              {subtitle}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {children}
+    </div>
+  )
+}
 
 export default function AdminOrderDetailPage() {
   const { id } = useParams()
-  const { orders, loading, updateStatus, addEmailToThread } = useOrders()
-  const { user } = useAuth()
+  const { theme } = useTheme()
+  const isLight = theme === 'light'
 
-  const order = orders.find(o => o.id === id)
+  const [order, setOrder] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [updating, setUpdating] = useState(false)
+  const [notes, setNotes] = useState('')
+  const [toast, setToast] = useState(null)
+  const [savingNotes, setSavingNotes] = useState(false)
 
-  const [composing, setComposing] = useState(false)
-  const [subject,   setSubject]   = useState('')
-  const [body,      setBody]      = useState('')
-  const [sending,   setSending]   = useState(false)
-  const [sent,      setSent]      = useState(false)
-  const [statusDD,  setStatusDD]  = useState(false)
+  useEffect(() => {
+    fetchOrder()
+  }, [id])
 
-  if (loading) return (
-    <AdminLayout>
-      <div className="py-20 flex items-center justify-center gap-2 text-ivory-300/30">
-        <Loader2 size={20} className="animate-spin" /> Loading order…
-      </div>
-    </AdminLayout>
-  )
-
-  if (!order) return (
-    <AdminLayout>
-      <div className="text-center py-20 text-ivory-300/40">
-        <AlertCircle size={32} className="mx-auto mb-4" />
-        <p>Order not found.</p>
-        <Link to="/dashboard/orders" className="text-wp-green mt-4 inline-block text-sm">← Back to orders</Link>
-      </div>
-    </AdminLayout>
-  )
-
-  const st = ORDER_STATUSES[order.status] ?? ORDER_STATUSES.new
-
-  function openTemplate(templateKey) {
-    const tmpl = EMAIL_TEMPLATES[templateKey]?.(order) ?? { subject: '', body: '' }
-    setSubject(tmpl.subject)
-    setBody(tmpl.body)
-    setComposing(true)
-    setSent(false)
+  function showToast(msg, ok = true) {
+    setToast({ msg, ok })
+    setTimeout(() => setToast(null), 2500)
   }
 
-  function handleStatusChange(action) {
-    setStatusDD(false)
-    updateStatus(order.id, action.key)
-    openTemplate(action.template)
+  async function fetchOrder() {
+    setLoading(true)
+
+    const { data, error } = await supabase
+      .from('orders')
+      .select('*')
+      .eq('id', id)
+      .single()
+
+    if (!error && data) {
+      setOrder(data)
+      setNotes(data.notes || '')
+    }
+
+    setLoading(false)
   }
 
-  async function handleSendEmail(e) {
-    e.preventDefault()
-    if (!subject.trim() || !body.trim()) return
-    setSending(true)
-    await addEmailToThread(order.id, {
-      from:    'staff',
-      by:      user?.name ?? user?.email,
-      at:      new Date().toISOString(),
-      subject,
-      body,
-    })
-    setSending(false)
-    setSent(true)
-    setComposing(false)
-    setSubject('')
-    setBody('')
+  async function updateStatus(newStatus) {
+    if (!order) return
+
+    setUpdating(true)
+
+    try {
+      const timestamps = order.status_timestamps || {}
+      timestamps[newStatus] = new Date().toISOString()
+
+      const { data, error } = await supabase
+        .from('orders')
+        .update({
+          status: newStatus,
+          status_timestamps: timestamps,
+        })
+        .eq('id', order.id)
+        .select()
+        .single()
+
+      if (error) {
+        console.error('Update status error:', error)
+        showToast(error.message || 'Failed to update status.', false)
+        setUpdating(false)
+        return
+      }
+
+      setOrder(data)
+      showToast(`Order marked as ${STATUS_LABELS[newStatus]}.`)
+    } catch (err) {
+      console.error('Unexpected update error:', err)
+      showToast('Something went wrong while updating status.', false)
+    }
+
+    setUpdating(false)
+  }
+
+  async function saveNotes() {
+    if (!order) return
+
+    setSavingNotes(true)
+
+    const { error } = await supabase
+      .from('orders')
+      .update({ notes })
+      .eq('id', order.id)
+
+    if (!error) {
+      setOrder((prev) => ({ ...prev, notes }))
+      showToast('Notes saved')
+    } else {
+      showToast('Failed to save notes', false)
+    }
+
+    setSavingNotes(false)
+  }
+
+  function printInvoice() {
+    window.print()
+  }
+
+  const currentIndex = useMemo(
+    () => STATUS_FLOW.indexOf(order?.status),
+    [order?.status]
+  )
+
+  const items = useMemo(() => {
+    if (!order?.items) return []
+    if (Array.isArray(order.items)) return order.items
+    try {
+      return typeof order.items === 'string' ? JSON.parse(order.items) : []
+    } catch {
+      return []
+    }
+  }, [order?.items])
+
+  const designInfo = useMemo(() => {
+    const firstItemWithDesign = items.find(
+      (item) => item?.design_option || item?.design_file_name || item?.layout_request
+    )
+
+    return {
+      option: firstItemWithDesign?.design_option || null,
+      fileName: firstItemWithDesign?.design_file_name || null,
+      layoutRequest: !!firstItemWithDesign?.layout_request,
+      deliveryMethod: firstItemWithDesign?.delivery_method || null,
+      deliveryFee: firstItemWithDesign?.delivery_fee || 0,
+    }
+  }, [items])
+
+  const panelBg = isLight ? '#FFFFFF' : 'rgba(9, 25, 53, 0.92)'
+  const panelBorder = isLight ? 'rgba(15,23,42,0.08)' : 'rgba(255,255,255,0.06)'
+  const panelShadow = isLight
+    ? '0 10px 30px rgba(15,23,42,0.05)'
+    : '0 10px 30px rgba(0,0,0,0.24)'
+  const heading = isLight ? '#0f172a' : '#f8fafc'
+  const subText = isLight ? '#64748b' : 'rgba(226,232,240,0.78)'
+  const muted = isLight ? '#94a3b8' : 'rgba(148,163,184,0.82)'
+  const softBg = isLight ? '#f8fafc' : 'rgba(255,255,255,0.03)'
+  const softBorder = isLight ? 'rgba(15,23,42,0.08)' : 'rgba(255,255,255,0.06)'
+
+  if (loading) {
+    return (
+      <AdminLayout>
+        <div
+          className="py-20 text-center rounded-[24px] border"
+          style={{
+            background: panelBg,
+            borderColor: panelBorder,
+            boxShadow: panelShadow,
+          }}
+        >
+          <div className="inline-flex items-center gap-2" style={{ color: subText }}>
+            <Loader2 size={16} className="animate-spin" />
+            Loading order...
+          </div>
+        </div>
+      </AdminLayout>
+    )
+  }
+
+  if (!order) {
+    return (
+      <AdminLayout>
+        <div
+          className="py-20 text-center rounded-[24px] border"
+          style={{
+            background: panelBg,
+            borderColor: panelBorder,
+            boxShadow: panelShadow,
+          }}
+        >
+          <p style={{ color: subText }}>Order not found</p>
+        </div>
+      </AdminLayout>
+    )
   }
 
   return (
     <AdminLayout>
-      <div className="flex items-start justify-between gap-4 mb-7 flex-wrap">
+      <div className="mb-8 flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <Link to="/dashboard/orders" className="inline-flex items-center gap-1.5 text-xs font-body text-ivory-300/35 hover:text-white transition-colors mb-3">
-            <ArrowLeft size={12} /> All Orders
-          </Link>
-          <div className="flex items-center gap-3 flex-wrap">
-            <h1 className="text-white text-2xl font-bold" style={{ fontFamily: "'Lora', serif" }}>{order.id}</h1>
-            <span className="text-xs font-body px-3 py-1 rounded-sm"
-              style={{ background: st.bg, color: st.color, border: `1px solid ${st.color}30` }}>
-              {st.label}
+          <div className="inline-flex items-center gap-2 mb-3">
+            <div
+              className="w-8 h-8 rounded-2xl flex items-center justify-center"
+              style={{
+                background: 'rgba(25,147,210,0.10)',
+                border: '1px solid rgba(25,147,210,0.20)',
+              }}
+            >
+              <Package size={15} style={{ color: COLORS.cyan }} />
+            </div>
+            <span
+              className="text-[10px] font-semibold tracking-[0.22em] uppercase"
+              style={{ color: muted }}
+            >
+              Order Detail
             </span>
           </div>
-          <p className="text-ivory-300/35 text-xs font-body mt-1">{formatDate(order.createdAt)}</p>
+
+          <h1
+            className="text-[2rem] font-bold mb-1 leading-none"
+            style={{ color: heading }}
+          >
+            Order #{String(order.id)}
+          </h1>
+
+          <p className="text-sm" style={{ color: subText }}>
+            Track and manage order progress
+          </p>
         </div>
 
-        <div className="relative">
-          <button onClick={() => setStatusDD(v => !v)}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-sm text-sm font-body border transition-all"
-            style={{ background: 'rgba(19,161,80,0.08)', borderColor: 'rgba(19,161,80,0.25)', color: 'var(--wp-green)' }}>
-            Update Status <ChevronDown size={13} style={{ transform: statusDD ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+        <div className="flex items-center gap-2 flex-wrap">
+          <button
+            onClick={fetchOrder}
+            className="inline-flex items-center gap-2 px-4 py-3 rounded-[16px] text-sm font-semibold transition-all hover:scale-[1.01]"
+            style={{
+              background: panelBg,
+              border: `1px solid ${panelBorder}`,
+              color: subText,
+              boxShadow: panelShadow,
+            }}
+          >
+            <RefreshCw size={14} />
+            Refresh
           </button>
-          {statusDD && (
-            <div className="absolute right-0 top-full mt-1 z-20 w-56 bg-ink-800 border border-white/[0.1] rounded-sm shadow-xl overflow-hidden">
-              {STATUS_ACTIONS.map(action => (
-                <button key={action.key} onClick={() => handleStatusChange(action)}
-                  className="w-full text-left px-4 py-3 text-xs font-body hover:bg-white/[0.04] transition-colors flex items-center gap-2"
-                  style={{ color: action.color }}>
-                  <div className="w-2 h-2 rounded-full shrink-0" style={{ background: action.color }} />
-                  {action.label}
-                </button>
-              ))}
-            </div>
-          )}
+
+          <button
+            onClick={printInvoice}
+            className="inline-flex items-center gap-2 px-5 py-3 rounded-[16px] text-sm font-semibold transition-all hover:scale-[1.01]"
+            style={{
+              background: 'rgba(25,147,210,0.10)',
+              border: '1px solid rgba(25,147,210,0.20)',
+              color: COLORS.cyan,
+            }}
+          >
+            <Printer size={14} />
+            Print Invoice
+          </button>
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-6">
-        {/* LEFT */}
-        <div className="lg:col-span-1 space-y-5">
-          <div className="bg-ink-800 border border-white/[0.07] rounded-sm p-5">
-            <div className="font-body text-[10px] tracking-widest uppercase text-ivory-300/30 mb-4">Customer</div>
-            <div className="space-y-3">
-              <div className="flex items-start gap-3">
-                <User size={13} className="mt-0.5 shrink-0" style={{ color: 'var(--wp-green)' }} />
-                <div>
-                  <div className="text-white text-sm font-semibold">{order.customer.name}</div>
-                  {order.customer.company && <div className="text-ivory-300/40 text-xs">{order.customer.company}</div>}
-                </div>
-              </div>
-              <a href={`mailto:${order.customer.email}`}
-                className="flex items-center gap-3 text-xs hover:text-wp-cyan transition-colors"
-                style={{ color: 'var(--wp-cyan)' }}>
-                <Mail size={13} className="shrink-0" /> {order.customer.email}
-              </a>
-              {order.customer.phone && (
-                <a href={`tel:${order.customer.phone}`}
-                  className="flex items-center gap-3 text-xs text-ivory-300/50 hover:text-white transition-colors">
-                  <Phone size={13} className="shrink-0" /> {order.customer.phone}
-                </a>
-              )}
-            </div>
-          </div>
-
-          <div className="bg-ink-800 border border-white/[0.07] rounded-sm p-5">
-            <div className="font-body text-[10px] tracking-widest uppercase text-ivory-300/30 mb-4">Items Ordered</div>
-            <div className="space-y-3">
-              {order.items.length === 0 ? (
-                <p className="text-ivory-300/25 text-xs font-body">No items recorded</p>
-              ) : order.items.map((item, i) => (
-                <div key={i} className="flex items-start justify-between gap-3 text-xs pb-3 border-b border-white/[0.05] last:border-0 last:pb-0">
-                  <div>
-                    <div className="text-white font-semibold">{item.name}</div>
-                    <div className="text-ivory-300/35 font-body">{item.qty} {item.unit} × {formatPHP(item.unitPrice)}</div>
-                  </div>
-                  <div className="text-ivory-300/70 font-body shrink-0">{formatPHP(item.qty * item.unitPrice)}</div>
-                </div>
-              ))}
-              <div className="flex justify-between pt-2">
-                <span className="text-ivory-300/40 text-xs font-body">Est. Total</span>
-                <span className="text-white font-black text-base" style={{ fontFamily: "'Lora', serif" }}>
-                  {formatPHP(order.estimatedTotal)}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {order.notes && (
-            <div className="bg-ink-800 border border-white/[0.07] rounded-sm p-5">
-              <div className="font-body text-[10px] tracking-widest uppercase text-ivory-300/30 mb-3">Customer Notes</div>
-              <p className="text-ivory-300/60 text-xs leading-relaxed">{order.notes}</p>
-            </div>
-          )}
+      <div
+        className="rounded-[24px] border p-6 mb-7"
+        style={{
+          background: panelBg,
+          borderColor: panelBorder,
+          boxShadow: panelShadow,
+        }}
+      >
+        <div className="flex items-center gap-2 mb-6">
+          <Clock3 size={16} style={{ color: COLORS.cyan }} />
+          <span
+            className="text-[10px] font-semibold tracking-[0.22em] uppercase"
+            style={{ color: muted }}
+          >
+            Order Progress
+          </span>
         </div>
 
-        {/* RIGHT */}
-        <div className="lg:col-span-2 space-y-5">
-          {sent && (
-            <div className="flex items-center gap-3 px-4 py-3 rounded-sm text-sm"
-              style={{ background: 'rgba(19,161,80,0.08)', border: '1px solid rgba(19,161,80,0.25)', color: 'var(--wp-green)' }}>
-              <CheckCircle size={15} /> Email saved to thread for {order.customer.email}
-            </div>
-          )}
+        <div className="relative overflow-x-auto">
+          <div className="min-w-[720px] relative px-2 pt-1">
+            <div
+              className="absolute top-4 left-4 right-4 h-[3px] rounded-full"
+              style={{ background: isLight ? '#e2e8f0' : 'rgba(255,255,255,0.10)' }}
+            />
 
-          {!composing && (
-            <div className="bg-ink-800 border border-white/[0.07] rounded-sm p-5">
-              <div className="font-body text-[10px] tracking-widest uppercase text-ivory-300/30 mb-4">Quick Email Actions</div>
-              <div className="flex flex-wrap gap-2">
-                {[
-                  { label: 'Send Quote',      template: 'quote',    color: '#FDC010' },
-                  { label: 'Request Artwork', template: 'artwork',  color: '#1993D2' },
-                  { label: 'Order Printing',  template: 'printing', color: '#13A150' },
-                  { label: 'Order Complete',  template: 'completed',color: '#13A150' },
-                  { label: 'Custom Email',    template: 'custom',   color: '#888'    },
-                ].map(btn => (
-                  <button key={btn.template} onClick={() => openTemplate(btn.template)}
-                    className="flex items-center gap-2 px-4 py-2 rounded-sm text-xs font-body border transition-all hover:opacity-90"
-                    style={{ background: `${btn.color}10`, borderColor: `${btn.color}30`, color: btn.color }}>
-                    <Mail size={11} /> {btn.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
+            <div
+              className="absolute top-4 left-4 h-[3px] rounded-full transition-all duration-700"
+              style={{
+                background: COLORS.green,
+                width: `${currentIndex <= 0 ? 0 : (currentIndex / (STATUS_FLOW.length - 1)) * 100}%`,
+              }}
+            />
 
-          {composing && (
-            <form onSubmit={handleSendEmail}
-              className="bg-ink-800 border border-wp-green/20 rounded-sm overflow-hidden"
-              style={{ boxShadow: '0 0 0 1px rgba(19,161,80,0.1)' }}>
-              <div className="px-5 py-3.5 border-b border-white/[0.06] flex items-center justify-between"
-                style={{ background: 'rgba(19,161,80,0.06)' }}>
-                <div className="flex items-center gap-2">
-                  <Mail size={13} style={{ color: 'var(--wp-green)' }} />
-                  <span className="font-body text-[10px] tracking-widest uppercase text-wp-green">New Email</span>
-                </div>
-                <button type="button" onClick={() => setComposing(false)}
-                  className="text-[10px] font-body text-ivory-300/30 hover:text-white transition-colors">
-                  Discard
-                </button>
-              </div>
-              <div className="p-5 space-y-4">
-                <div className="flex items-center gap-3 pb-3 border-b border-white/[0.06]">
-                  <span className="font-body text-[10px] tracking-widest uppercase text-ivory-300/30 w-12">To</span>
-                  <span className="text-ivory-300/70 text-sm">{order.customer.email}</span>
-                </div>
-                <div className="flex items-center gap-3 pb-3 border-b border-white/[0.06]">
-                  <span className="font-body text-[10px] tracking-widest uppercase text-ivory-300/30 w-12">Subject</span>
-                  <input type="text" value={subject} onChange={e => setSubject(e.target.value)} required
-                    className="flex-1 bg-transparent text-sm text-white placeholder-ivory-300/20 outline-none"
-                    placeholder="Email subject…" />
-                </div>
-                <textarea value={body} onChange={e => setBody(e.target.value)} required rows={16}
-                  className="w-full bg-transparent text-sm text-ivory-200 placeholder-ivory-300/20 outline-none resize-none font-body leading-relaxed"
-                  placeholder="Write your message…" />
-              </div>
-              <div className="px-5 py-4 border-t border-white/[0.06] flex items-center justify-between">
-                <p className="text-[10px] font-body text-ivory-300/25">From: hello@wellprint.com.ph</p>
-                <button type="submit" disabled={sending}
-                  className="btn-press flex items-center gap-2 text-sm disabled:opacity-60">
-                  {sending
-                    ? <><Loader2 size={13} className="animate-spin" /> Saving…</>
-                    : <><Send size={13} /> Save to Thread</>}
-                </button>
-              </div>
-            </form>
-          )}
+            <div className="grid grid-cols-5 gap-4 relative z-10">
+              {STATUS_FLOW.map((status, index) => {
+                const active = index <= currentIndex
+                const color = getStepColor(status, active)
+                const time = order.status_timestamps?.[status]
 
-          <div className="bg-ink-800 border border-white/[0.07] rounded-sm overflow-hidden">
-            <div className="px-5 py-4 border-b border-white/[0.06]" style={{ background: 'rgba(25,147,210,0.04)' }}>
-              <span className="font-body text-[10px] tracking-widest uppercase" style={{ color: 'var(--wp-cyan)' }}>
-                Email Thread ({order.emailThread.length})
-              </span>
-            </div>
-            {order.emailThread.length === 0 ? (
-              <div className="py-12 text-center">
-                <Mail size={24} className="mx-auto mb-3 text-ivory-300/15" />
-                <p className="text-ivory-300/30 text-xs font-body">No emails sent yet</p>
-              </div>
-            ) : (
-              <div className="divide-y divide-white/[0.04]">
-                {[...order.emailThread].reverse().map((email, i) => (
-                  <div key={i} className="p-5">
-                    <div className="flex items-center justify-between mb-3 gap-3">
-                      <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 rounded-sm flex items-center justify-center shrink-0"
-                          style={{ background: 'rgba(25,147,210,0.1)', border: '1px solid rgba(25,147,210,0.2)' }}>
-                          <Mail size={11} style={{ color: 'var(--wp-cyan)' }} />
-                        </div>
-                        <span className="text-white text-xs font-semibold">{email.subject}</span>
-                      </div>
-                      <span className="text-ivory-300/25 text-[10px] font-body shrink-0">{formatDate(email.at)}</span>
+                return (
+                  <div key={status} className="text-center">
+                    <div
+                      className="w-9 h-9 rounded-full flex items-center justify-center mx-auto border transition-all duration-500"
+                      style={{
+                        background: active ? color : (isLight ? '#FFFFFF' : '#081225'),
+                        borderColor: active ? color : (isLight ? '#cbd5e1' : 'rgba(255,255,255,0.12)'),
+                        color: active ? '#FFFFFF' : '#94a3b8',
+                      }}
+                    >
+                      {active ? <CheckCircle size={14} /> : <Circle size={12} />}
                     </div>
-                    {email.by && <p className="text-ivory-300/30 text-[10px] font-body mb-2">Sent by {email.by}</p>}
-                    <pre className="text-ivory-300/50 text-xs leading-relaxed whitespace-pre-wrap font-body bg-ink-900 rounded-sm p-4 border border-white/[0.05] overflow-auto max-h-48">
-                      {email.body}
-                    </pre>
+
+                    <p className="text-xs mt-3 font-medium" style={{ color: isLight ? '#334155' : '#f8fafc' }}>
+                      {STATUS_LABELS[status]}
+                    </p>
+
+                    <p className="text-[10px] mt-1 min-h-[28px]" style={{ color: muted }}>
+                      {time ? formatDateTime(time) : '—'}
+                    </p>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        className="rounded-[24px] border p-6 mb-7"
+        style={{
+          background: panelBg,
+          borderColor: panelBorder,
+          boxShadow: panelShadow,
+        }}
+      >
+        <div
+          className="text-[10px] font-semibold tracking-[0.22em] uppercase mb-4"
+          style={{ color: muted }}
+        >
+          Update Status
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          {STATUS_FLOW.map((status) => {
+            const isCurrent = order.status === status
+
+            return (
+              <button
+                key={status}
+                disabled={isCurrent || updating}
+                onClick={() => updateStatus(status)}
+                className="px-4 py-2 rounded-[14px] text-xs font-semibold border transition-all disabled:opacity-60"
+                style={{
+                  background: isCurrent ? 'rgba(22,163,74,0.10)' : (isLight ? '#FFFFFF' : softBg),
+                  color: isCurrent ? COLORS.green : subText,
+                  borderColor: isCurrent ? 'rgba(22,163,74,0.22)' : softBorder,
+                }}
+              >
+                {updating && isCurrent ? (
+                  <span className="inline-flex items-center gap-1">
+                    <Loader2 size={12} className="animate-spin" />
+                    {STATUS_LABELS[status]}
+                  </span>
+                ) : (
+                  STATUS_LABELS[status]
+                )}
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      <div className="grid lg:grid-cols-12 gap-6">
+        <div className="lg:col-span-7 space-y-6">
+          <SectionCard
+            title="Order Details"
+            icon={FileText}
+            subtitle="Basic information about this order"
+            isLight={isLight}
+          >
+            <div className="grid sm:grid-cols-2 gap-4 text-sm">
+              <div>
+                <p className="mb-1" style={{ color: muted }}>Order ID</p>
+                <p className="font-medium" style={{ color: heading }}>{String(order.id)}</p>
+              </div>
+
+              <div>
+                <p className="mb-1" style={{ color: muted }}>Status</p>
+                <p className="font-medium capitalize" style={{ color: heading }}>{order.status || '—'}</p>
+              </div>
+
+              <div>
+                <p className="mb-1" style={{ color: muted }}>Created</p>
+                <p className="font-medium" style={{ color: heading }}>{formatDateTime(order.created_at)}</p>
+              </div>
+
+              <div>
+                <p className="mb-1" style={{ color: muted }}>Total Amount</p>
+                <p className="font-semibold" style={{ color: heading }}>
+                  {formatPeso(order.total_amount || order.estimated_total)}
+                </p>
+              </div>
+            </div>
+          </SectionCard>
+
+          <SectionCard
+            title="Customer Information"
+            icon={User}
+            subtitle="Customer contact and address"
+            isLight={isLight}
+          >
+            <div className="grid sm:grid-cols-2 gap-4 text-sm">
+              <div>
+                <p className="mb-1" style={{ color: muted }}>Name</p>
+                <p className="font-medium flex items-center gap-2" style={{ color: heading }}>
+                  <User size={13} style={{ color: muted }} />
+                  {order.customer_name || '—'}
+                </p>
+              </div>
+
+              <div>
+                <p className="mb-1" style={{ color: muted }}>Phone</p>
+                <p className="font-medium flex items-center gap-2" style={{ color: heading }}>
+                  <Phone size={13} style={{ color: muted }} />
+                  {order.customer_phone || '—'}
+                </p>
+              </div>
+
+              <div>
+                <p className="mb-1" style={{ color: muted }}>Email</p>
+                <p className="font-medium flex items-center gap-2" style={{ color: heading }}>
+                  <Mail size={13} style={{ color: muted }} />
+                  {order.customer_email || '—'}
+                </p>
+              </div>
+
+              <div>
+                <p className="mb-1" style={{ color: muted }}>Address</p>
+                <p className="font-medium flex items-start gap-2" style={{ color: heading }}>
+                  <MapPin size={13} style={{ color: muted, marginTop: '2px' }} />
+                  <span>{order.customer_address || '—'}</span>
+                </p>
+              </div>
+            </div>
+          </SectionCard>
+
+          <SectionCard
+            title="Order Items"
+            icon={Package}
+            subtitle="Products included in this order"
+            isLight={isLight}
+          >
+            {items.length === 0 ? (
+              <p className="text-sm" style={{ color: muted }}>No structured order items saved.</p>
+            ) : (
+              <div className="space-y-3">
+                {items.map((item, index) => (
+                  <div
+                    key={index}
+                    className="rounded-[18px] border p-4"
+                    style={{
+                      borderColor: softBorder,
+                      background: softBg,
+                    }}
+                  >
+                    <div className="flex items-start justify-between gap-3 flex-wrap">
+                      <div>
+                        <p className="font-medium" style={{ color: heading }}>
+                          {item.name || item.product_name || `Item ${index + 1}`}
+                        </p>
+                        <p className="text-sm mt-1" style={{ color: muted }}>
+                          Qty: {item.qty || item.quantity || 1}
+                        </p>
+                      </div>
+
+                      <div className="text-right">
+                        <p className="font-semibold" style={{ color: heading }}>
+                          {formatPeso(
+                            item.total ||
+                              item.subtotal ||
+                              item.price ||
+                              (item.unit_price || 0) * (item.qty || 1)
+                          )}
+                        </p>
+                        <p className="text-xs mt-1" style={{ color: muted }}>
+                          {item.unitPrice
+                            ? `${formatPeso(item.unitPrice)} / unit`
+                            : item.unit_price
+                            ? `${formatPeso(item.unit_price)} / unit`
+                            : ''}
+                        </p>
+                      </div>
+                    </div>
+
+                    {item.selections && Object.keys(item.selections).length > 0 && (
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {Object.entries(item.selections).map(([key, value]) => (
+                          <span
+                            key={key}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px]"
+                            style={{
+                              background: 'rgba(25,147,210,0.08)',
+                              color: COLORS.cyan,
+                              border: '1px solid rgba(25,147,210,0.14)',
+                            }}
+                          >
+                            <strong>{key}:</strong> {String(value)}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
+                    {(item.design_option || item.design_file_name || item.layout_request || item.delivery_method) && (
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {item.design_option && (
+                          <span
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px]"
+                            style={{
+                              background: 'rgba(22,163,74,0.08)',
+                              color: COLORS.green,
+                              border: '1px solid rgba(22,163,74,0.14)',
+                            }}
+                          >
+                            Design:{' '}
+                            {item.design_option === 'upload'
+                              ? 'Uploaded'
+                              : item.design_option === 'email'
+                              ? 'Will Email'
+                              : 'Needs Layout'}
+                          </span>
+                        )}
+
+                        {item.design_file_name && (
+                          <span
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px]"
+                            style={{
+                              background: 'rgba(100,116,139,0.08)',
+                              color: isLight ? COLORS.slate : '#cbd5e1',
+                              border: '1px solid rgba(100,116,139,0.14)',
+                            }}
+                          >
+                            File: {item.design_file_name}
+                          </span>
+                        )}
+
+                        {item.layout_request && (
+                          <span
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px]"
+                            style={{
+                              background: 'rgba(245,158,11,0.08)',
+                              color: COLORS.amber,
+                              border: '1px solid rgba(245,158,11,0.14)',
+                            }}
+                          >
+                            Layout Assistance Requested
+                          </span>
+                        )}
+
+                        {item.delivery_method && (
+                          <span
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px]"
+                            style={{
+                              background: 'rgba(139,92,246,0.08)',
+                              color: COLORS.violet,
+                              border: '1px solid rgba(139,92,246,0.14)',
+                            }}
+                          >
+                            {item.delivery_method === 'deliver'
+                              ? `Delivery (+${formatPeso(item.delivery_fee || 0)})`
+                              : 'Pickup'}
+                          </span>
+                        )}
+                      </div>
+                    )}
+
+                    {order.design_file_url && (
+                      <div className="mt-4 flex flex-wrap gap-3">
+                        <a
+                          href={order.design_file_url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-[14px] text-sm font-semibold border transition-all"
+                          style={{
+                            background: 'rgba(25,147,210,0.08)',
+                            color: COLORS.cyan,
+                            borderColor: 'rgba(25,147,210,0.16)',
+                          }}
+                        >
+                          <ExternalLink size={14} />
+                          View File
+                        </a>
+
+                        <a
+                          href={order.design_file_url}
+                          download={item.design_file_name || designInfo.fileName || 'customer-file'}
+                          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-[14px] text-sm font-semibold border transition-all"
+                          style={{
+                            background: 'rgba(22,163,74,0.08)',
+                            color: COLORS.green,
+                            borderColor: 'rgba(22,163,74,0.16)',
+                          }}
+                        >
+                          <Download size={14} />
+                          Download File
+                        </a>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
             )}
-          </div>
+          </SectionCard>
+        </div>
+
+        <div className="lg:col-span-5 space-y-6">
+          <SectionCard
+            title="Design Submission"
+            icon={ImageIcon}
+            subtitle="Customer-uploaded or referenced design file"
+            isLight={isLight}
+          >
+            <div className="space-y-4">
+              <div className="grid sm:grid-cols-2 gap-4 text-sm">
+                <div>
+                  <p className="mb-1" style={{ color: muted }}>Design Method</p>
+                  <p className="font-medium" style={{ color: heading }}>
+                    {designInfo.option === 'upload'
+                      ? 'Uploaded Design'
+                      : designInfo.option === 'email'
+                      ? 'Will Email Design'
+                      : designInfo.layoutRequest
+                      ? 'Needs Layout Assistance'
+                      : '—'}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="mb-1" style={{ color: muted }}>Reference File Name</p>
+                  <p className="font-medium break-all" style={{ color: heading }}>
+                    {designInfo.fileName || '—'}
+                  </p>
+                </div>
+              </div>
+
+              {!order.design_file_url ? (
+                <div
+                  className="rounded-[18px] border p-4 text-sm"
+                  style={{
+                    borderColor: softBorder,
+                    background: softBg,
+                  }}
+                >
+                  <p style={{ color: subText }}>No uploaded file URL saved for this order yet.</p>
+                </div>
+              ) : (
+                <div
+                  className="rounded-[18px] border p-4"
+                  style={{
+                    borderColor: softBorder,
+                    background: softBg,
+                  }}
+                >
+                  <div className="flex items-center gap-2 mb-3">
+                    <LinkIcon size={14} style={{ color: muted }} />
+                    <span className="text-sm font-medium" style={{ color: heading }}>
+                      Uploaded Design File
+                    </span>
+                  </div>
+
+                  {isImageFile(order.design_file_url) ? (
+                    <div className="space-y-4">
+                      <div
+                        className="rounded-[16px] overflow-hidden border"
+                        style={{
+                          borderColor: softBorder,
+                          background: isLight ? '#ffffff' : 'rgba(255,255,255,0.02)',
+                        }}
+                      >
+                        <img
+                          src={order.design_file_url}
+                          alt="Customer design"
+                          className="w-full max-h-[360px] object-contain"
+                        />
+                      </div>
+
+                      <div className="flex flex-wrap gap-3">
+                        <a
+                          href={order.design_file_url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-[14px] text-sm font-semibold border transition-all"
+                          style={{
+                            background: 'rgba(25,147,210,0.08)',
+                            color: COLORS.cyan,
+                            borderColor: 'rgba(25,147,210,0.16)',
+                          }}
+                        >
+                          <ExternalLink size={14} />
+                          View Full Image
+                        </a>
+
+                        <a
+                          href={order.design_file_url}
+                          download={designInfo.fileName || 'customer-design'}
+                          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-[14px] text-sm font-semibold border transition-all"
+                          style={{
+                            background: 'rgba(22,163,74,0.08)',
+                            color: COLORS.green,
+                            borderColor: 'rgba(22,163,74,0.16)',
+                          }}
+                        >
+                          <Download size={14} />
+                          Download File
+                        </a>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <p className="text-sm break-all" style={{ color: subText }}>
+                        {order.design_file_url}
+                      </p>
+
+                      <div className="flex flex-wrap gap-3">
+                        <a
+                          href={order.design_file_url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-[14px] text-sm font-semibold border transition-all"
+                          style={{
+                            background: 'rgba(25,147,210,0.08)',
+                            color: COLORS.cyan,
+                            borderColor: 'rgba(25,147,210,0.16)',
+                          }}
+                        >
+                          <ExternalLink size={14} />
+                          View File
+                        </a>
+
+                        <a
+                          href={order.design_file_url}
+                          download={designInfo.fileName || 'customer-file'}
+                          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-[14px] text-sm font-semibold border transition-all"
+                          style={{
+                            background: 'rgba(22,163,74,0.08)',
+                            color: COLORS.green,
+                            borderColor: 'rgba(22,163,74,0.16)',
+                          }}
+                        >
+                          <Download size={14} />
+                          Download File
+                        </a>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </SectionCard>
+
+          <SectionCard
+            title="Admin Notes"
+            icon={StickyNote}
+            subtitle="Internal notes for this order"
+            isLight={isLight}
+          >
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              rows={7}
+              placeholder="Add admin comments here..."
+              className="w-full rounded-[18px] border px-4 py-3 text-sm outline-none resize-none"
+              style={{
+                background: softBg,
+                borderColor: softBorder,
+                color: heading,
+              }}
+            />
+
+            <button
+              onClick={saveNotes}
+              disabled={savingNotes}
+              className="mt-4 inline-flex items-center gap-2 px-4 py-2.5 rounded-[14px] text-sm font-semibold transition-all"
+              style={{
+                background: 'rgba(22,163,74,0.10)',
+                border: '1px solid rgba(22,163,74,0.22)',
+                color: COLORS.green,
+              }}
+            >
+              {savingNotes ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+              Save Notes
+            </button>
+          </SectionCard>
+
+          <SectionCard
+            title="Customer Receipt View"
+            icon={FileText}
+            subtitle="Simple receipt-style preview"
+            isLight={isLight}
+          >
+            <div
+              className="rounded-[18px] border p-4"
+              style={{ borderColor: softBorder, background: softBg }}
+            >
+              <div
+                className="text-center pb-4 border-b"
+                style={{ borderColor: isLight ? '#e2e8f0' : 'rgba(255,255,255,0.08)' }}
+              >
+                <p className="font-semibold" style={{ color: heading }}>WELLPrint</p>
+                <p className="text-xs mt-1" style={{ color: muted }}>Customer Receipt Preview</p>
+              </div>
+
+              <div className="py-4 space-y-2 text-sm">
+                <div className="flex justify-between gap-4">
+                  <span style={{ color: muted }}>Order No.</span>
+                  <span className="font-medium" style={{ color: heading }}>{String(order.id)}</span>
+                </div>
+                <div className="flex justify-between gap-4">
+                  <span style={{ color: muted }}>Customer</span>
+                  <span className="font-medium text-right" style={{ color: heading }}>
+                    {order.customer_name || '—'}
+                  </span>
+                </div>
+                <div className="flex justify-between gap-4">
+                  <span style={{ color: muted }}>Date</span>
+                  <span className="font-medium" style={{ color: heading }}>{formatDate(order.created_at)}</span>
+                </div>
+                <div className="flex justify-between gap-4">
+                  <span style={{ color: muted }}>Status</span>
+                  <span className="font-medium capitalize" style={{ color: heading }}>{order.status || '—'}</span>
+                </div>
+                <div className="flex justify-between gap-4">
+                  <span style={{ color: muted }}>Fulfillment</span>
+                  <span className="font-medium capitalize" style={{ color: heading }}>
+                    {designInfo.deliveryMethod === 'deliver'
+                      ? `Deliver (+${formatPeso(designInfo.deliveryFee || 0)})`
+                      : designInfo.deliveryMethod === 'pickup'
+                      ? 'Pickup'
+                      : '—'}
+                  </span>
+                </div>
+              </div>
+
+              <div
+                className="pt-4 border-t"
+                style={{ borderColor: isLight ? '#e2e8f0' : 'rgba(255,255,255,0.08)' }}
+              >
+                <div className="flex justify-between items-center">
+                  <span className="font-medium" style={{ color: subText }}>Total</span>
+                  <span className="font-bold text-lg" style={{ color: heading }}>
+                    {formatPeso(order.total_amount || order.estimated_total)}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </SectionCard>
         </div>
       </div>
+
+      {toast && (
+        <div
+          className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-[16px] border text-sm"
+          style={{
+            background: isLight ? '#FFFFFF' : 'rgba(9, 25, 53, 0.98)',
+            borderColor: toast.ok ? 'rgba(22,163,74,0.22)' : 'rgba(220,38,38,0.22)',
+            color: toast.ok ? COLORS.green : COLORS.red,
+            boxShadow: isLight
+              ? '0 20px 60px rgba(15,23,42,0.14)'
+              : '0 20px 60px rgba(0,0,0,0.30)',
+          }}
+        >
+          {toast.ok ? <CheckCircle size={14} /> : <Circle size={14} />}
+          {toast.msg}
+        </div>
+      )}
     </AdminLayout>
   )
 }

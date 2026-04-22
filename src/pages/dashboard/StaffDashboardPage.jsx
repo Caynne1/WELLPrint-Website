@@ -1,323 +1,564 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useMemo, useState, useCallback } from 'react'
 import { Link } from 'react-router-dom'
-import { useOrders, ORDER_STATUSES } from '../../context/OrdersContext'
-import { useAuth } from '../../context/AuthContext'
 import AdminLayout from '../../components/admin/AdminLayout'
+import { supabase } from '../../lib/supabase'
+import { useAuth } from '../../context/AuthContext'
+import { useTheme } from '../../context/ThemeContext'
 import {
-  Package, Clock, CheckCircle, ArrowRight, Inbox,
-  RefreshCw, AlertCircle, Zap, ClipboardList,
-  Eye, Edit3, User, Bell,
-  ShoppingBag, BarChart2, Lock, CheckSquare, Tag,
+  ShoppingCart,
+  Package,
+  Clock,
+  RefreshCw,
+  AlertCircle,
+  CheckCircle2,
+  Loader2,
+  ArrowRight,
+  Inbox,
+  Mail,
+  Printer,
+  TrendingUp,
 } from 'lucide-react'
 
-function formatPHP(n) { return '₱' + Number(n).toLocaleString('en-PH', { minimumFractionDigits: 0 }) }
+function formatPHP(n) {
+  return '₱' + Number(n || 0).toLocaleString('en-PH', { minimumFractionDigits: 0 })
+}
+
 function timeAgo(iso) {
+  if (!iso) return '—'
   const diff = (Date.now() - new Date(iso)) / 1000
   if (diff < 60) return 'just now'
   if (diff < 3600) return `${Math.floor(diff / 60)}m ago`
   if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`
-  return `${Math.floor(diff / 86400)}d ago`
+  return new Date(iso).toLocaleDateString('en-PH', { month: 'short', day: 'numeric' })
 }
 
-function PermissionBadge({ label, granted }) {
+const STATUS_STYLES = {
+  pending: { bg: 'rgba(25,147,210,0.10)', border: 'rgba(25,147,210,0.22)', color: '#1993D2', label: 'Pending' },
+  processing: { bg: 'rgba(245,158,11,0.10)', border: 'rgba(245,158,11,0.22)', color: '#f59e0b', label: 'Processing' },
+  printing: { bg: 'rgba(139,92,246,0.10)', border: 'rgba(139,92,246,0.22)', color: '#8b5cf6', label: 'Printing' },
+  ready: { bg: 'rgba(16,185,129,0.10)', border: 'rgba(16,185,129,0.22)', color: '#10b981', label: 'Ready' },
+  completed: { bg: 'rgba(22,163,74,0.10)', border: 'rgba(22,163,74,0.22)', color: '#16a34a', label: 'Completed' },
+  cancelled: { bg: 'rgba(220,38,38,0.10)', border: 'rgba(220,38,38,0.22)', color: '#dc2626', label: 'Cancelled' },
+}
+
+function StatusBadge({ status }) {
+  const s = STATUS_STYLES[status] || STATUS_STYLES.pending
   return (
-    <div className="flex items-center gap-2 px-3 py-2 rounded-sm"
+    <span
+      className="text-[10px] font-semibold px-2.5 py-1 rounded-full border whitespace-nowrap"
+      style={{ background: s.bg, borderColor: s.border, color: s.color }}
+    >
+      {s.label}
+    </span>
+  )
+}
+
+function StatCard({ label, value, icon: Icon, color, sub, loading, href, isLight }) {
+  const cardBg = isLight ? '#FFFFFF' : 'rgba(9, 25, 53, 0.92)'
+  const cardBorder = isLight ? 'rgba(15,23,42,0.08)' : 'rgba(255,255,255,0.06)'
+  const cardShadow = isLight
+    ? '0 10px 30px rgba(15,23,42,0.05)'
+    : '0 10px 30px rgba(0,0,0,0.24)'
+  const textMain = isLight ? '#0f172a' : '#f8fafc'
+  const textSub = isLight ? '#64748b' : 'rgba(226,232,240,0.82)'
+  const textMuted = isLight ? '#94a3b8' : 'rgba(148,163,184,0.88)'
+  const arrowColor = isLight ? 'rgba(15,23,42,0.25)' : 'rgba(226,232,240,0.28)'
+
+  const inner = (
+    <div
+      className="rounded-[22px] p-6 border transition-all hover:-translate-y-1 h-full"
       style={{
-        background: granted ? 'rgba(19,161,80,0.07)' : 'rgba(255,255,255,0.03)',
-        border: `1px solid ${granted ? 'rgba(19,161,80,0.2)' : 'rgba(255,255,255,0.06)'}`,
-      }}>
-      <div className="w-4 h-4 rounded-sm flex items-center justify-center shrink-0"
-        style={{ background: granted ? 'rgba(19,161,80,0.15)' : 'rgba(255,255,255,0.05)', border: `1px solid ${granted ? 'rgba(19,161,80,0.3)' : 'rgba(255,255,255,0.08)'}` }}>
-        {granted
-          ? <CheckCircle size={9} style={{ color: '#13A150' }} />
-          : <Lock size={9} className="text-ivory-300/25" />}
-      </div>
-      <span className="font-body text-[10px]"
-        style={{ color: granted ? 'rgba(216,216,216,0.7)' : 'rgba(216,216,216,0.2)' }}>
-        {label}
-      </span>
-    </div>
-  )
-}
-
-function TaskItem({ text, done = false, urgent = false }) {
-  const [checked, setChecked] = useState(done)
-  return (
-    <div className="flex items-center gap-3 py-2.5 border-b border-white/[0.04] last:border-0">
-      <button
-        onClick={() => setChecked(v => !v)}
-        className="w-4 h-4 rounded-sm border shrink-0 flex items-center justify-center transition-all"
-        style={{
-          background: checked ? 'rgba(19,161,80,0.2)' : 'transparent',
-          borderColor: checked ? 'var(--wp-green)' : 'rgba(255,255,255,0.15)',
-        }}>
-        {checked && <CheckSquare size={10} style={{ color: '#13A150' }} />}
-      </button>
-      <span className="flex-1 text-xs font-body"
-        style={{
-          color: checked ? 'rgba(216,216,216,0.25)' : urgent ? '#FDC010' : 'rgba(216,216,216,0.6)',
-          textDecoration: checked ? 'line-through' : 'none',
-        }}>
-        {text}
-      </span>
-      {urgent && !checked && (
-        <span className="font-body text-[8px] px-1.5 py-0.5 rounded-sm"
-          style={{ background: 'rgba(251,176,59,0.12)', color: '#FDC010' }}>URGENT</span>
-      )}
-    </div>
-  )
-}
-
-/* ── Quick Access tile ── */
-function QuickTile({ label, to, icon: Icon, color, allowed }) {
-  if (allowed) {
-    return (
-      <Link to={to}
-        className="flex flex-col items-center gap-2 p-3 rounded-sm border border-transparent hover:border-white/[0.07] hover:bg-white/[0.03] transition-all group">
-        <div className="w-8 h-8 rounded-sm flex items-center justify-center"
-          style={{ background: `${color}12`, border: `1px solid ${color}22` }}>
-          <Icon size={15} style={{ color }} />
+        background: cardBg,
+        borderColor: cardBorder,
+        boxShadow: cardShadow,
+      }}
+    >
+      <div className="flex items-center justify-between mb-4">
+        <div
+          className="w-10 h-10 rounded-xl flex items-center justify-center"
+          style={{ background: `${color}15`, border: `1px solid ${color}30` }}
+        >
+          <Icon size={18} style={{ color }} />
         </div>
-        <span className="text-[10px] font-body text-ivory-300/40 group-hover:text-white transition-colors text-center">{label}</span>
-      </Link>
-    )
-  }
-  return (
-    <div className="flex flex-col items-center gap-2 p-3 rounded-sm border border-white/[0.04] opacity-30 cursor-not-allowed">
-      <div className="w-8 h-8 rounded-sm flex items-center justify-center"
-        style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
-        <Lock size={13} className="text-ivory-300/30" />
+        {href && <ArrowRight size={14} style={{ color: arrowColor }} />}
       </div>
-      <span className="text-[10px] font-body text-ivory-300/25 text-center">{label}</span>
+
+      <div className="text-3xl font-black mb-0.5" style={{ color: textMain }}>
+        {loading ? '—' : value}
+      </div>
+      <div className="text-xs font-semibold uppercase tracking-wider" style={{ color: textSub }}>
+        {label}
+      </div>
+      {sub && <div className="text-[10px] mt-1" style={{ color: textMuted }}>{sub}</div>}
+    </div>
+  )
+
+  if (href) return <Link to={href} className="block h-full">{inner}</Link>
+  return inner
+}
+
+function RevenueCard({ label, value, color, loading, isLight }) {
+  return (
+    <div
+      className="rounded-[20px] p-5 border"
+      style={{
+        background: isLight ? '#FFFFFF' : 'rgba(9, 25, 53, 0.92)',
+        borderColor: isLight ? 'rgba(15,23,42,0.07)' : 'rgba(255,255,255,0.06)',
+        boxShadow: isLight
+          ? '0 6px 20px rgba(15,23,42,0.04)'
+          : '0 10px 30px rgba(0,0,0,0.24)',
+      }}
+    >
+      <div
+        className="text-[10px] uppercase tracking-widest mb-2"
+        style={{ color: isLight ? '#94a3b8' : 'rgba(148,163,184,0.90)' }}
+      >
+        {label}
+      </div>
+      <div
+        className="text-2xl font-black"
+        style={{ color: loading ? (isLight ? '#ccc' : 'rgba(148,163,184,0.55)') : (isLight ? '#0f172a' : '#f8fafc') }}
+      >
+        {loading ? '—' : formatPHP(value)}
+      </div>
+      <div className="mt-2 h-1 rounded-full" style={{ background: `${color}20` }}>
+        <div
+          className="h-1 rounded-full transition-all duration-700"
+          style={{ background: color, width: loading ? '0%' : '60%' }}
+        />
+      </div>
     </div>
   )
 }
 
 export default function StaffDashboardPage() {
-  const { orders, refetch } = useOrders()
-  const { user, hasPermission } = useAuth()
-  const [now, setNow] = useState(new Date())
-  useEffect(() => { const t = setInterval(() => setNow(new Date()), 60000); return () => clearInterval(t) }, [])
+  const { user } = useAuth()
+  const { theme } = useTheme()
+  const isLight = theme === 'light'
 
-  const greeting = () => { const h = now.getHours(); return h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening' }
+  const [stats, setStats] = useState({
+    orders: 0,
+    pendingCount: 0,
+    processingCount: 0,
+    readyCount: 0,
+    revenueToday: 0,
+    revenueWeek: 0,
+    inboxCount: 0,
+  })
+  const [recentOrders, setRecentOrders] = useState([])
+  const [loadingStats, setLoadingStats] = useState(true)
+  const [loadingOrders, setLoadingOrders] = useState(true)
+  const [lastRefreshed, setLastRefreshed] = useState(null)
 
-  const newOrders    = orders.filter(o => o.status === 'new')
-  const activeOrders = orders.filter(o => !['completed', 'cancelled'].includes(o.status))
-  const todayOrders  = orders.filter(o => new Date(o.createdAt).toDateString() === now.toDateString())
-  const handledOrders = orders.filter(o => o.status !== 'new').length
-  const recentActivity = [...orders].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 4)
+  const fetchAll = useCallback(async () => {
+    setLoadingStats(true)
+    setLoadingOrders(true)
 
-  const canViewOrders    = hasPermission('view_orders')
-  const canManageOrders  = hasPermission('manage_orders')
-  const canViewProducts  = hasPermission('view_products')
-  const canViewAnalytics = hasPermission('view_analytics')
+    const [allOrders, inbox] = await Promise.all([
+      supabase.from('orders').select('*', { count: 'exact', head: true }),
+      supabase.from('contact_messages').select('*', { count: 'exact', head: true }),
+    ])
 
-  const PERMISSION_LABELS_MAP = {
-    view_orders:     'View Orders',
-    manage_orders:   'Manage Orders',
-    view_products:   'View Products',
-    manage_products: 'Manage Products',
-    view_analytics:  'View Analytics',
-  }
+    const { count: pendingCount } = await supabase
+      .from('orders')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'pending')
 
-  const TASKS = [
-    { text: `Review ${newOrders.length} new order${newOrders.length !== 1 ? 's' : ''}`, urgent: newOrders.length > 0 },
-    { text: 'Update printing status for active jobs', urgent: false },
-    { text: 'Follow up on quoted orders > 48h', urgent: false },
-    { text: 'Check artwork submissions', urgent: false },
-  ]
+    const { count: processingCount } = await supabase
+      .from('orders')
+      .select('*', { count: 'exact', head: true })
+      .in('status', ['processing', 'printing'])
 
-  const QUICK_TILES = [
-    { label: 'Orders',     to: '/dashboard/orders',     icon: Package,    color: '#CD1B6E', perm: 'view_orders'    },
-    { label: 'Products',   to: '/dashboard/products',   icon: ShoppingBag,color: '#FDC010', perm: 'view_products'  },
-    { label: 'Categories', to: '/dashboard/categories', icon: Tag,        color: '#1993D2', perm: 'manage_categories' },
-    { label: 'Analytics',  to: '/dashboard/analytics',  icon: BarChart2,  color: '#13A150', perm: 'view_analytics' },
-  ]
+    const { count: readyCount } = await supabase
+      .from('orders')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'ready')
+
+    const now = new Date()
+    const startOfDay = new Date(now)
+    startOfDay.setHours(0, 0, 0, 0)
+
+    const startOfWeek = new Date(now)
+    startOfWeek.setDate(now.getDate() - 7)
+
+    const [dayRev, weekRev] = await Promise.all([
+      supabase.from('orders').select('estimated_total').gte('created_at', startOfDay.toISOString()).not('status', 'eq', 'cancelled'),
+      supabase.from('orders').select('estimated_total').gte('created_at', startOfWeek.toISOString()).not('status', 'eq', 'cancelled'),
+    ])
+
+    const sum = (r) => (r.data || []).reduce((acc, row) => acc + (row.estimated_total || 0), 0)
+
+    setStats({
+      orders: allOrders.count || 0,
+      pendingCount: pendingCount || 0,
+      processingCount: processingCount || 0,
+      readyCount: readyCount || 0,
+      revenueToday: sum(dayRev),
+      revenueWeek: sum(weekRev),
+      inboxCount: inbox.count || 0,
+    })
+    setLoadingStats(false)
+
+    const { data: recent } = await supabase
+      .from('orders')
+      .select('id, created_at, status, customer_name, customer_email, estimated_total, order_type')
+      .order('created_at', { ascending: false })
+      .limit(8)
+
+    setRecentOrders(recent || [])
+    setLoadingOrders(false)
+    setLastRefreshed(new Date())
+  }, [])
+
+  useEffect(() => {
+    fetchAll()
+  }, [fetchAll])
+
+  useEffect(() => {
+    const ordersChannel = supabase
+      .channel('staff-dashboard-orders-rt')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, fetchAll)
+      .subscribe()
+
+    const inboxChannel = supabase
+      .channel('staff-dashboard-inbox-rt')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'contact_messages' }, fetchAll)
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(ordersChannel)
+      supabase.removeChannel(inboxChannel)
+    }
+  }, [fetchAll])
+
+  const greeting = (() => {
+    const h = new Date().getHours()
+    if (h < 12) return 'Good morning'
+    if (h < 18) return 'Good afternoon'
+    return 'Good evening'
+  })()
+
+  const panelBg = isLight ? '#FFFFFF' : 'rgba(9, 25, 53, 0.92)'
+  const panelBorder = isLight ? 'rgba(15,23,42,0.08)' : 'rgba(255,255,255,0.06)'
+  const panelShadow = isLight
+    ? '0 10px 30px rgba(15,23,42,0.05)'
+    : '0 10px 30px rgba(0,0,0,0.24)'
+  const heading = isLight ? '#0f172a' : '#f8fafc'
+  const subText = isLight ? '#64748b' : 'rgba(226,232,240,0.78)'
+  const muted = isLight ? '#94a3b8' : 'rgba(148,163,184,0.82)'
+  const rowBorder = isLight ? 'rgba(15,23,42,0.06)' : 'rgba(255,255,255,0.06)'
+  const topBarBg = isLight ? '#FFFFFF' : '#021022'
 
   return (
     <AdminLayout>
-      {/* Header */}
-      <div className="mb-8 flex items-start justify-between gap-4">
+      <div className="flex items-start justify-between gap-4 mb-10 flex-wrap">
         <div>
-          <span className="font-body text-[10px] tracking-widest uppercase text-ivory-300/30">
-            {now.toLocaleDateString('en-PH', { weekday: 'long', month: 'long', day: 'numeric' })}
-          </span>
-          <h1 className="text-white text-2xl font-bold mt-0.5" style={{ fontFamily: "'Lora', serif" }}>
-            {greeting()}, <span style={{ color: 'var(--wp-green)' }}>{user?.name?.split(' ')[0]}</span>
+          <p className="text-[10px] tracking-[0.25em] uppercase mb-2" style={{ color: muted }}>
+            Staff Dashboard
+          </p>
+          <h1 className="text-3xl font-bold" style={{ color: heading }}>
+            {greeting}
+            {user?.name ? `, ${user.name.split(' ')[0]}` : ''}
           </h1>
-          <p className="text-ivory-300/40 text-sm mt-0.5">
-            {todayOrders.length > 0
-              ? `${todayOrders.length} order${todayOrders.length > 1 ? 's' : ''} came in today.`
-              : 'No new orders today yet.'}
-            {activeOrders.length > 0 && (
-              <span className="ml-2 text-ivory-300/30">· {activeOrders.length} active</span>
-            )}
+          <p className="mt-1.5 text-sm" style={{ color: subText }}>
+            Stay on top of active orders, production flow, and customer messages.
           </p>
         </div>
-        <button onClick={refetch}
-          className="flex items-center gap-2 px-3 py-2 rounded-sm text-xs font-body border border-white/[0.08] text-ivory-300/40 hover:text-white hover:border-wp-green/40 transition-all">
-          <RefreshCw size={12} /> Refresh
+
+        <button
+          onClick={fetchAll}
+          className="flex items-center gap-2 text-xs rounded-xl px-3 py-2 transition-colors border"
+          style={{
+            color: subText,
+            borderColor: isLight ? 'rgba(15,23,42,0.12)' : 'rgba(255,255,255,0.12)',
+            background: topBarBg,
+          }}
+        >
+          <RefreshCw size={12} />
+          {lastRefreshed ? `Updated ${timeAgo(lastRefreshed)}` : 'Refresh'}
         </button>
       </div>
 
-      {/* Urgent alert */}
-      {newOrders.length > 0 && canViewOrders && (
-        <div className="mb-6 flex items-center justify-between px-5 py-3.5 rounded-sm border"
-          style={{ background: 'rgba(236,0,140,0.07)', borderColor: 'rgba(236,0,140,0.25)' }}>
-          <div className="flex items-center gap-3">
+      {!loadingStats && stats.pendingCount > 0 && (
+        <Link
+          to="/dashboard/orders"
+          className="flex items-center gap-3 mb-8 px-5 py-4 rounded-[18px] border transition-all hover:-translate-y-0.5"
+          style={{
+            background: isLight ? 'rgba(205,27,110,0.06)' : 'rgba(205,27,110,0.08)',
+            borderColor: 'rgba(205,27,110,0.20)',
+            boxShadow: isLight ? '0 4px 20px rgba(205,27,110,0.06)' : '0 4px 20px rgba(205,27,110,0.10)',
+          }}
+        >
+          <div
+            className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
+            style={{ background: 'rgba(205,27,110,0.12)', border: '1px solid rgba(205,27,110,0.25)' }}
+          >
             <AlertCircle size={15} style={{ color: '#CD1B6E' }} />
-            <span className="text-sm font-semibold" style={{ color: '#CD1B6E' }}>
-              {newOrders.length} new order {newOrders.length > 1 ? 'inquiries need' : 'inquiry needs'} attention
+          </div>
+          <div className="flex-1 min-w-0">
+            <span className="text-sm font-semibold" style={{ color: isLight ? '#1f2937' : '#f8fafc' }}>
+              {stats.pendingCount} order{stats.pendingCount !== 1 ? 's' : ''} waiting for action
+            </span>
+            <span className="text-xs ml-2" style={{ color: subText }}>
+              — review pending work now
             </span>
           </div>
-          <Link to="/dashboard/orders?filter=new"
-            className="flex items-center gap-1 text-xs font-body hover:underline" style={{ color: '#CD1B6E' }}>
-            Review <ArrowRight size={11} />
-          </Link>
-        </div>
+          <ArrowRight size={15} style={{ color: '#CD1B6E', flexShrink: 0 }} />
+        </Link>
       )}
 
-      {/* KPI row */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
-        {[
-          { label: 'Awaiting',    value: newOrders.length,    icon: Inbox,       color: '#CD1B6E', sub: 'New inquiries'  },
-          { label: 'In Progress', value: activeOrders.length, icon: Clock,       color: '#FDC010', sub: 'Active orders'  },
-          { label: 'Handled',     value: handledOrders,       icon: CheckCircle, color: '#13A150', sub: 'Processed'      },
-        ].map(({ label, value, icon: Icon, color, sub }) => (
-          <div key={label} className="bg-ink-800 border border-white/[0.07] rounded-sm p-5 hover:border-white/[0.12] transition-all">
-            <div className="flex items-start justify-between mb-3">
-              <div className="w-8 h-8 rounded-sm flex items-center justify-center"
-                style={{ background: `${color}14`, border: `1px solid ${color}30` }}>
-                <Icon size={15} style={{ color }} />
+      <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-8">
+        <StatCard
+          label="Total Orders"
+          value={stats.orders}
+          icon={ShoppingCart}
+          color="#1993D2"
+          sub={`${stats.pendingCount} pending`}
+          loading={loadingStats}
+          href="/dashboard/orders"
+          isLight={isLight}
+        />
+        <StatCard
+          label="In Production"
+          value={stats.processingCount}
+          icon={Printer}
+          color="#8b5cf6"
+          sub="Processing + printing"
+          loading={loadingStats}
+          href="/dashboard/orders"
+          isLight={isLight}
+        />
+        <StatCard
+          label="Ready Orders"
+          value={stats.readyCount}
+          icon={CheckCircle2}
+          color="#13A150"
+          sub="Ready for pickup / delivery"
+          loading={loadingStats}
+          href="/dashboard/orders"
+          isLight={isLight}
+        />
+        <StatCard
+          label="Inbox"
+          value={stats.inboxCount}
+          icon={Mail}
+          color="#f59e0b"
+          sub="Customer concerns and follow-ups"
+          loading={loadingStats}
+          href="/dashboard/inbox"
+          isLight={isLight}
+        />
+      </div>
+
+      <div className="grid sm:grid-cols-2 gap-5 mb-10">
+        <RevenueCard
+          label="Today's Order Value"
+          value={stats.revenueToday}
+          color="#13A150"
+          loading={loadingStats}
+          isLight={isLight}
+        />
+        <RevenueCard
+          label="Last 7 Days Value"
+          value={stats.revenueWeek}
+          color="#1993D2"
+          loading={loadingStats}
+          isLight={isLight}
+        />
+      </div>
+
+      <div
+        className="rounded-[22px] border overflow-hidden mb-10"
+        style={{
+          background: panelBg,
+          borderColor: panelBorder,
+          boxShadow: panelShadow,
+        }}
+      >
+        <div
+          className="px-6 py-5 border-b flex items-center justify-between"
+          style={{ borderColor: rowBorder }}
+        >
+          <div>
+            <h2 className="text-2xl font-bold" style={{ color: heading }}>
+              Recent Orders
+            </h2>
+            <p className="text-sm mt-1" style={{ color: subText }}>
+              Latest orders assigned to the production workflow
+            </p>
+          </div>
+
+          <Link
+            to="/dashboard/orders"
+            className="inline-flex items-center gap-2 text-sm font-semibold"
+            style={{ color: '#1993D2' }}
+          >
+            View All
+            <ArrowRight size={14} />
+          </Link>
+        </div>
+
+        {loadingOrders ? (
+          <div className="py-20 text-center">
+            <div className="inline-flex items-center gap-2" style={{ color: subText }}>
+              <Loader2 size={16} className="animate-spin" />
+              Loading recent orders...
+            </div>
+          </div>
+        ) : recentOrders.length === 0 ? (
+          <div className="py-20 text-center">
+            <Inbox size={30} className="mx-auto mb-3" style={{ color: muted }} />
+            <p className="text-sm" style={{ color: subText }}>No orders yet.</p>
+          </div>
+        ) : (
+          <div>
+            {recentOrders.map((order) => (
+              <Link
+                key={order.id}
+                to={`/dashboard/orders/${order.id}`}
+                className="grid md:grid-cols-[1.6fr_1fr_auto_auto] gap-4 items-center px-6 py-5 transition-colors"
+                style={{
+                  borderTop: `1px solid ${rowBorder}`,
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = isLight ? 'rgba(248,250,252,0.70)' : 'rgba(255,255,255,0.03)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'transparent'
+                }}
+              >
+                <div className="min-w-0">
+                  <p className="font-semibold truncate" style={{ color: heading }}>
+                    {order.customer_name || 'Unknown Customer'}
+                  </p>
+                  <p className="text-sm truncate mt-0.5" style={{ color: subText }}>
+                    {order.order_type || 'Order'}
+                  </p>
+                </div>
+
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold truncate" style={{ color: heading }}>
+                    {order.id}
+                  </p>
+                  <p className="text-xs truncate mt-0.5" style={{ color: muted }}>
+                    {timeAgo(order.created_at)}
+                  </p>
+                </div>
+
+                <div>
+                  <StatusBadge status={order.status} />
+                </div>
+
+                <div className="text-right">
+                  <p className="font-bold" style={{ color: heading }}>
+                    {formatPHP(order.estimated_total)}
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="grid lg:grid-cols-2 gap-5">
+        <div
+          className="rounded-[22px] border p-6"
+          style={{
+            background: panelBg,
+            borderColor: panelBorder,
+            boxShadow: panelShadow,
+          }}
+        >
+          <div className="flex items-center gap-3 mb-4">
+            <div
+              className="w-10 h-10 rounded-xl flex items-center justify-center"
+              style={{ background: 'rgba(25,147,210,0.15)', border: '1px solid rgba(25,147,210,0.26)' }}
+            >
+              <Mail size={18} style={{ color: '#1993D2' }} />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold" style={{ color: heading }}>
+                Inbox Overview
+              </h3>
+              <p className="text-sm" style={{ color: subText }}>
+                Customer concerns, requests, and follow-ups
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-end justify-between gap-4">
+            <div>
+              <div className="text-3xl font-black" style={{ color: heading }}>
+                {loadingStats ? '—' : stats.inboxCount}
+              </div>
+              <div className="text-xs uppercase tracking-[0.18em] mt-1" style={{ color: muted }}>
+                Total Messages
               </div>
             </div>
-            <div className="text-white text-2xl font-black leading-none mb-1" style={{ fontFamily: "'Lora', serif" }}>{value}</div>
-            <div className="text-ivory-300/55 text-xs font-semibold">{label}</div>
-            <div className="text-ivory-300/25 text-[10px] font-body">{sub}</div>
+
+            <Link
+              to="/dashboard/inbox"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-[14px] text-sm font-semibold border"
+              style={{
+                background: isLight ? 'rgba(25,147,210,0.08)' : 'rgba(25,147,210,0.14)',
+                color: '#1993D2',
+                borderColor: 'rgba(25,147,210,0.18)',
+              }}
+            >
+              Open Inbox
+              <ArrowRight size={14} />
+            </Link>
           </div>
-        ))}
-      </div>
-
-      {/* Main 2-col grid */}
-      <div className="grid lg:grid-cols-5 gap-4 mb-4">
-
-        {/* Orders queue — col-span 3 */}
-        <div className="lg:col-span-3 bg-ink-800 border border-white/[0.07] rounded-sm overflow-hidden">
-          <div className="px-5 py-4 border-b border-white/[0.06] flex items-center justify-between"
-            style={{ background: 'rgba(19,161,80,0.04)' }}>
-            <div className="flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-wp-green" style={{ animation: 'pulse 2s infinite' }} />
-              <span className="font-body text-[10px] tracking-widest uppercase text-wp-green">Your Queue</span>
-            </div>
-            {canViewOrders && (
-              <Link to="/dashboard/orders"
-                className="text-[10px] font-body text-ivory-300/30 hover:text-wp-green transition-colors flex items-center gap-1">
-                All orders <ArrowRight size={10} />
-              </Link>
-            )}
-          </div>
-
-          {!canViewOrders ? (
-            <div className="py-14 flex flex-col items-center justify-center gap-3">
-              <Lock size={20} className="text-ivory-300/15" />
-              <p className="text-ivory-300/25 text-xs font-body">You don't have permission to view orders</p>
-            </div>
-          ) : recentActivity.length === 0 ? (
-            <div className="py-14 flex flex-col items-center justify-center gap-3">
-              <Inbox size={22} style={{ color: 'var(--wp-green)', opacity: 0.3 }} />
-              <p className="text-ivory-300/30 text-xs font-body">No orders yet</p>
-            </div>
-          ) : (
-            <div className="divide-y divide-white/[0.04]">
-              {recentActivity.map(order => {
-                const st = ORDER_STATUSES[order.status] ?? ORDER_STATUSES.new
-                return (
-                  <div key={order.id} className="flex items-center gap-4 px-5 py-3.5 hover:bg-white/[0.02] transition-colors">
-                    <div className="w-2 h-2 rounded-full shrink-0"
-                      style={{ background: st.color, boxShadow: order.status === 'new' ? `0 0 6px ${st.color}` : 'none' }} />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-0.5">
-                        <span className="text-white text-xs font-body font-bold">{order.id}</span>
-                        <span className="text-[9px] font-body px-1.5 py-0.5 rounded-sm"
-                          style={{ background: st.bg, color: st.color }}>{st.label}</span>
-                        {order.status === 'new' && (
-                          <span className="text-[8px] font-body px-1 py-0.5 rounded-sm"
-                            style={{ background: 'rgba(236,0,140,0.15)', color: '#CD1B6E' }}>NEW</span>
-                        )}
-                      </div>
-                      <div className="text-ivory-300/40 text-[10px] font-body truncate">
-                        {order.customer.name} · {timeAgo(order.createdAt)}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      <span className="text-white text-xs font-body font-bold">{formatPHP(order.estimatedTotal)}</span>
-                      {canManageOrders ? (
-                        <Link to={`/dashboard/orders/${order.id}`}
-                          className="w-7 h-7 rounded-sm flex items-center justify-center border border-white/[0.08] text-ivory-300/30 hover:text-wp-green hover:border-wp-green/30 transition-all">
-                          <Edit3 size={11} />
-                        </Link>
-                      ) : canViewOrders ? (
-                        <Link to={`/dashboard/orders/${order.id}`}
-                          className="w-7 h-7 rounded-sm flex items-center justify-center border border-white/[0.08] text-ivory-300/30 hover:text-white transition-all">
-                          <Eye size={11} />
-                        </Link>
-                      ) : null}
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          )}
         </div>
 
-        {/* Right col — col-span 2 */}
-        <div className="lg:col-span-2 flex flex-col gap-4">
-
-          {/* Today's checklist */}
-          <div className="bg-ink-800 border border-white/[0.07] rounded-sm overflow-hidden">
-            <div className="px-5 py-3.5 border-b border-white/[0.06] flex items-center gap-2"
-              style={{ background: 'rgba(251,176,59,0.04)' }}>
-              <ClipboardList size={11} style={{ color: '#FDC010' }} />
-              <span className="font-body text-[10px] tracking-widest uppercase" style={{ color: '#FDC010' }}>Today's Tasks</span>
+        <div
+          className="rounded-[22px] border p-6"
+          style={{
+            background: panelBg,
+            borderColor: panelBorder,
+            boxShadow: panelShadow,
+          }}
+        >
+          <div className="flex items-center gap-3 mb-4">
+            <div
+              className="w-10 h-10 rounded-xl flex items-center justify-center"
+              style={{ background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.26)' }}
+            >
+              <Clock size={18} style={{ color: '#f59e0b' }} />
             </div>
-            <div className="px-4 py-2">
-              {TASKS.map((t, i) => <TaskItem key={i} {...t} />)}
+            <div>
+              <h3 className="text-lg font-bold" style={{ color: heading }}>
+                Workflow Snapshot
+              </h3>
+              <p className="text-sm" style={{ color: subText }}>
+                Quick look at current production load
+              </p>
             </div>
           </div>
 
-          {/* Quick access */}
-          <div className="bg-ink-800 border border-white/[0.07] rounded-sm overflow-hidden">
-            <div className="px-5 py-3.5 border-b border-white/[0.06] flex items-center gap-2"
-              style={{ background: 'rgba(19,161,80,0.04)' }}>
-              <Zap size={11} style={{ color: 'var(--wp-green)' }} />
-              <span className="font-body text-[10px] tracking-widest uppercase text-wp-green">Quick Access</span>
-            </div>
-            <div className="p-3 grid grid-cols-2 gap-2">
-              {QUICK_TILES.map(({ label, to, icon, color, perm }) => (
-                <QuickTile key={to} label={label} to={to} icon={icon} color={color}
-                  allowed={hasPermission(perm)} />
-              ))}
-            </div>
+          <div className="grid grid-cols-3 gap-3">
+            {[
+              { label: 'Pending', value: stats.pendingCount, color: '#1993D2' },
+              { label: 'Production', value: stats.processingCount, color: '#8b5cf6' },
+              { label: 'Ready', value: stats.readyCount, color: '#10b981' },
+            ].map((item) => (
+              <div
+                key={item.label}
+                className="rounded-[16px] p-4 border"
+                style={{
+                  background: isLight ? '#f8fafc' : 'rgba(255,255,255,0.03)',
+                  borderColor: isLight ? 'rgba(15,23,42,0.07)' : 'rgba(255,255,255,0.06)',
+                }}
+              >
+                <div className="text-2xl font-black" style={{ color: item.color }}>
+                  {item.value}
+                </div>
+                <div className="text-[11px] mt-1 font-semibold uppercase tracking-[0.16em]" style={{ color: muted }}>
+                  {item.label}
+                </div>
+              </div>
+            ))}
           </div>
-        </div>
-      </div>
-
-      {/* My Permissions */}
-      <div className="bg-ink-800 border border-white/[0.07] rounded-sm overflow-hidden">
-        <div className="px-5 py-3.5 border-b border-white/[0.06] flex items-center gap-2"
-          style={{ background: 'rgba(25,147,210,0.04)' }}>
-          <User size={11} style={{ color: '#1993D2' }} />
-          <span className="font-body text-[10px] tracking-widest uppercase" style={{ color: '#1993D2' }}>My Access Permissions</span>
-        </div>
-        <div className="p-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
-          {Object.entries(PERMISSION_LABELS_MAP).map(([key, label]) => (
-            <PermissionBadge key={key} label={label} granted={hasPermission(key)} />
-          ))}
-        </div>
-        <div className="px-5 py-3 border-t border-white/[0.04]">
-          <p className="text-[10px] font-body text-ivory-300/25">
-            Permissions are managed by your Admin. Contact them to request access changes.
-          </p>
         </div>
       </div>
     </AdminLayout>

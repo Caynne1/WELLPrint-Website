@@ -1,147 +1,156 @@
 import { Link } from 'react-router-dom'
-import { Mail, Phone, MapPin, Instagram, Facebook, Linkedin, ArrowUpRight } from 'lucide-react'
-
-const SERVICES = [
-  { label: 'Business Cards',           href: '/products?cat=business-cards' },
-  { label: 'Digital Printing',         href: '/products?cat=digital' },
-  { label: 'Large Format & Banners',   href: '/products?cat=large-format' },
-  { label: 'Signage',                  href: '/products?cat=signage' },
-  { label: 'Custom Packaging',         href: '/products?cat=packaging' },
-  { label: 'Booklets & Catalogs',      href: '/products?cat=booklets' },
-  { label: 'Offset Lithography',       href: '/products?cat=offset' },
-  { label: 'Professional Layout Design', href: '/services#layout-design' },
-]
-const COMPANY = [
-  { label: 'About WELLPrint',  href: '/about' },
-  { label: 'Our Process',      href: '/about#process' },
-  { label: 'Quality Promise',  href: '/about#quality' },
-  { label: 'Services',         href: '/services' },
-  { label: 'Contact Us',       href: '/contact' },
-]
-const SUPPORT = [
-  { label: 'Track Your Order',    href: '/track' },
-  { label: 'File Specifications', href: '/file-specs' },
-  { label: 'FAQs',                href: '/faq' },
-  { label: 'Terms of Service',    href: '/terms' },
-  { label: 'Privacy Policy',      href: '/privacy' },
-]
+import {
+  Phone,
+  Mail,
+  MapPin,
+  Facebook,
+  Instagram,
+  Twitter,
+} from 'lucide-react'
 
 export default function Footer() {
-  const year = new Date().getFullYear()
   return (
-    <footer className="bg-ink-950 border-t border-white/[0.07] pt-20 pb-10 relative overflow-hidden">
-      {/* Decorative faded logo watermark */}
-      <div className="absolute bottom-0 right-0 opacity-[0.03] pointer-events-none select-none" aria-hidden="true">
-        <img src="/logos/icons/icon-main.svg" alt="" className="w-80 h-80 object-contain" />
-      </div>
-
-      <div className="max-w-7xl mx-auto px-6 relative z-10">
-        {/* Top */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-16">
+    <footer className="bg-ink-900 border-t border-white/[0.06] text-ivory-300">
+      <div className="max-w-7xl mx-auto px-6 py-14">
+        <div className="grid md:grid-cols-4 gap-10">
           {/* Brand */}
-          <div className="lg:col-span-2">
-            <Link to="/" className="block mb-6 w-fit">
-              <img src="/logos/vertical/main-light.svg" alt="WELLPrint" className="h-20 w-auto object-contain" />
-            </Link>
+          <div>
+            <h2
+              className="text-white text-xl font-bold mb-3"
+              style={{ fontFamily: "'Lora', serif" }}
+            >
+              WELL<span style={{ color: 'var(--wp-green)' }}>Print</span>
+            </h2>
 
-            <p className="text-ivory-300/55 text-sm leading-relaxed mb-6 max-w-xs">
-              Precision printing for businesses, creatives, and brands that demand nothing less than exceptional quality — right here in the Philippines.
+            <p className="text-sm text-ivory-300/40 leading-relaxed">
+              Your trusted printing partner for high-quality and reliable print
+              solutions. We turn your ideas into professional outputs.
             </p>
+          </div>
 
-            {/* CMYK bar */}
-            <div className="cmyk-bar mb-6 rounded-full" />
+          {/* Quick Links */}
+          <div>
+            <h3 className="text-white font-semibold mb-4 text-sm">
+              Quick Links
+            </h3>
 
-            <ul className="space-y-3 mb-8">
-              {[
-                { Icon: Mail,   text: 'hello@wellprint.com.ph',        href: 'mailto:hello@wellprint.com.ph' },
-                { Icon: Phone,  text: '+63 (2) 8XXX-XXXX',             href: 'tel:+6328XXXXXXX' },
-                { Icon: MapPin, text: 'Metro Manila, Philippines',      href: null },
-              ].map(({ Icon, text, href }) => (
-                <li key={text}>
-                  {href ? (
-                    <a href={href} className="flex items-start gap-2.5 text-sm text-ivory-300/60 hover:text-wp-green transition-colors group">
-                      <Icon size={14} className="mt-0.5 flex-shrink-0 text-wp-green/60 group-hover:text-wp-green transition-colors" />
-                      {text}
-                    </a>
-                  ) : (
-                    <span className="flex items-start gap-2.5 text-sm text-ivory-300/60">
-                      <Icon size={14} className="mt-0.5 flex-shrink-0 text-wp-green/60" />
-                      {text}
-                    </span>
-                  )}
-                </li>
-              ))}
+            <ul className="space-y-2 text-sm">
+              <li>
+                <Link to="/" className="hover:text-wp-green transition-colors">
+                  Home
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/products"
+                  className="hover:text-wp-green transition-colors"
+                >
+                  Products
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/about"
+                  className="hover:text-wp-green transition-colors"
+                >
+                  About
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/contact"
+                  className="hover:text-wp-green transition-colors"
+                >
+                  Contact
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Customer */}
+          <div>
+            <h3 className="text-white font-semibold mb-4 text-sm">
+              Customer
+            </h3>
+
+            <ul className="space-y-2 text-sm">
+              <li>
+                <Link
+                  to="/track-order"
+                  className="hover:text-wp-green transition-colors"
+                >
+                  Track Your Order
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/cart"
+                  className="hover:text-wp-green transition-colors"
+                >
+                  Cart
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/products"
+                  className="hover:text-wp-green transition-colors"
+                >
+                  Browse Products
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Contact */}
+          <div>
+            <h3 className="text-white font-semibold mb-4 text-sm">
+              Contact Us
+            </h3>
+
+            <ul className="space-y-3 text-sm">
+              <li className="flex items-start gap-2">
+                <MapPin size={14} className="mt-0.5 text-wp-green" />
+                <span>Ormoc City, Philippines</span>
+              </li>
+
+              <li className="flex items-center gap-2">
+                <Phone size={14} className="text-wp-green" />
+                <span>+63 9XX XXX XXXX</span>
+              </li>
+
+              <li className="flex items-center gap-2">
+                <Mail size={14} className="text-wp-green" />
+                <span>wellprintormoc@gmail.com</span>
+              </li>
             </ul>
 
-            <div className="flex items-center gap-3">
-              {[
-                { Icon: Instagram, href: '#', label: 'Instagram' },
-                { Icon: Facebook,  href: '#', label: 'Facebook' },
-                { Icon: Linkedin,  href: '#', label: 'LinkedIn' },
-              ].map(({ Icon, href, label }) => (
-                <a key={label} href={href} aria-label={label}
-                  className="w-9 h-9 border border-white/10 flex items-center justify-center text-ivory-300/50 hover:text-white hover:border-wp-green/50 hover:bg-wp-green/10 transition-all duration-200 rounded-sm">
-                  <Icon size={15} />
-                </a>
-              ))}
+            {/* Socials */}
+            <div className="flex items-center gap-3 mt-5">
+              <a
+                href="#"
+                className="w-9 h-9 rounded-full bg-white/[0.05] flex items-center justify-center hover:bg-wp-green/20 transition"
+              >
+                <Facebook size={14} />
+              </a>
+              <a
+                href="#"
+                className="w-9 h-9 rounded-full bg-white/[0.05] flex items-center justify-center hover:bg-wp-green/20 transition"
+              >
+                <Instagram size={14} />
+              </a>
+              <a
+                href="#"
+                className="w-9 h-9 rounded-full bg-white/[0.05] flex items-center justify-center hover:bg-wp-green/20 transition"
+              >
+                <Twitter size={14} />
+              </a>
             </div>
           </div>
-
-          {/* Link columns */}
-          {[
-            { title: 'Services', links: SERVICES },
-            { title: 'Company',  links: COMPANY },
-            { title: 'Support',  links: SUPPORT },
-          ].map(({ title, links }) => (
-            <div key={title}>
-              <h4 className="font-body text-[10px] tracking-[0.2em] uppercase mb-5" style={{ color: 'var(--wp-green)' }}>
-                {title}
-              </h4>
-              <ul className="space-y-2.5">
-                {links.map(({ label, href }) => (
-                  <li key={label}>
-                    <Link to={href} className="text-sm text-ivory-300/55 hover:text-white transition-colors duration-200 flex items-center gap-1 group w-fit">
-                      {label}
-                      <ArrowUpRight size={11} className="opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200" />
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-
-        {/* Newsletter */}
-        <div className="border border-white/[0.08] bg-ink-800/50 p-6 md:p-8 mb-12 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 rounded-sm">
-          <div>
-            <h4 className="text-white text-lg mb-1" style={{ fontFamily: "'Lora', serif" }}>
-              Stay in the loop
-            </h4>
-            <p className="text-sm text-ivory-300/55">Deals, new products, and print tips — no spam.</p>
-          </div>
-          <form className="flex w-full md:w-auto gap-0" onSubmit={e => e.preventDefault()}>
-            <input type="email" placeholder="your@email.com"
-              className="bg-ink-900 border border-white/[0.12] text-white placeholder:text-ivory-300/25 text-sm px-4 py-2.5 flex-1 md:w-64 focus:outline-none focus:border-wp-green/50 transition-colors font-body rounded-none" />
-            <button type="submit"
-              className="px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-white whitespace-nowrap transition-colors duration-200 rounded-none"
-              style={{ background: 'var(--wp-green)' }}
-              onMouseEnter={e => e.target.style.background = 'var(--wp-green-lt)'}
-              onMouseLeave={e => e.target.style.background = 'var(--wp-green)'}>
-              Subscribe
-            </button>
-          </form>
         </div>
 
         {/* Bottom */}
-        <hr className="section-rule mb-8" />
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-ivory-300/25 font-body tracking-wider">
-            © {year} WELLPrint · Espiel - Bereso Group. All rights reserved.
-          </p>
-          <div className="flex items-center gap-6">
-            <span className="badge badge-green">ISO 9001 Certified</span>
-            <span className="text-xs text-ivory-300/25 font-body">Secure uploads · 256-bit SSL</span>
-          </div>
+        <div className="border-t border-white/[0.06] mt-10 pt-6 text-center text-xs text-ivory-300/30">
+          © {new Date().getFullYear()} WELLPrint. All rights reserved.
         </div>
       </div>
     </footer>

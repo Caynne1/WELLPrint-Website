@@ -2,208 +2,421 @@ import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { useTheme } from '../../context/ThemeContext'
-
 import {
-  LayoutDashboard, Package, LogOut, Menu, X, Printer,
-  ChevronRight, User, Bell, Users, BarChart2, ShoppingBag,
-  Shield, Sun, Moon, Home, ExternalLink, Tag
+  LayoutDashboard,
+  Package,
+  LogOut,
+  Menu,
+  X,
+  ChevronRight,
+  User,
+  Bell,
+  Users,
+  BarChart2,
+  ShoppingBag,
+  Shield,
+  Home,
+  ExternalLink,
+  Tag,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Mail,
+  Sun,
+  Moon,
 } from 'lucide-react'
 
 const NAV = [
-  { to: '/dashboard',             icon: LayoutDashboard, label: 'Dashboard',  perm: null               },
-  { to: '/dashboard/orders',      icon: Package,         label: 'Orders',     perm: 'view_orders'      },
-  { to: '/dashboard/products',    icon: ShoppingBag,     label: 'Products',   perm: 'view_products'    },
-  { to: '/dashboard/categories',  icon: Tag,             label: 'Categories', perm: 'manage_categories'},
-  { to: '/dashboard/analytics',   icon: BarChart2,       label: 'Analytics',  perm: 'view_analytics'   },
+  { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', perm: null },
+  { to: '/dashboard/orders', icon: Package, label: 'Orders', perm: 'view_orders' },
+  { to: '/dashboard/inbox', icon: Mail, label: 'Inbox', perm: null },
+  { to: '/dashboard/products', icon: ShoppingBag, label: 'Products', perm: 'view_products' },
+  { to: '/dashboard/categories', icon: Tag, label: 'Categories', perm: 'manage_categories' },
+  { to: '/dashboard/analytics', icon: BarChart2, label: 'Analytics', perm: 'view_analytics' },
 ]
 
-const ADMIN_NAV = [
-  { to: '/dashboard/staff',    icon: Users,           label: 'Staff Mgmt' },
-]
+const ADMIN_NAV = [{ to: '/dashboard/staff', icon: Users, label: 'Staff Mgmt' }]
 
-function Sidebar({ mobile = false, onClose }) {
+function Sidebar({
+  mobile = false,
+  collapsed = false,
+  onClose,
+  onToggleCollapse,
+  isLight,
+  toggleTheme,
+}) {
   const { user, logout, hasPermission } = useAuth()
-  const { theme, toggleTheme } = useTheme()
   const location = useLocation()
   const navigate = useNavigate()
-  function handleLogout() { logout(); navigate('/login') }
 
-  const isLight = theme === 'light'
+  function handleLogout() {
+    logout()
+    navigate('/login')
+  }
 
-  // Sidebar always dark green in light mode, dark in dark mode
-  const sidebarBg    = isLight ? '#004600' : '#0A0A0A'
-  const sidebarBorder= isLight ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.05)'
-  const textPrimary  = '#FFFFFF'
-  const textMuted    = isLight ? '#FFFFFF' : 'rgba(216,216,216,0.45)'
-  const textFaint    = isLight ? 'rgba(255,255,255,0.70)' : 'rgba(216,216,216,0.30)'
-  const dividerColor = isLight ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.06)'
-  const activeNavBg  = isLight ? 'rgba(234,193,32,0.15)' : 'rgba(19,161,80,0.1)'
-  const activeNavColor = isLight ? '#EAC120' : 'var(--wp-green)'
-  const activeNavBorder= isLight ? 'rgba(234,193,32,0.35)' : 'rgba(19,161,80,0.2)'
-  const hoverNavColor  = isLight ? '#FFFFFF' : 'rgba(216,216,216,0.8)'
+  const sidebarBg = isLight ? '#1993D2' : '#07152d'
+  const sidebarBorder = isLight
+    ? 'rgba(255,255,255,0.10)'
+    : 'rgba(255,255,255,0.06)'
+  const textPrimary = '#FFFFFF'
+  const textMuted = isLight ? 'rgba(255,255,255,0.88)' : 'rgba(226,232,240,0.88)'
+  const textFaint = isLight ? 'rgba(255,255,255,0.68)' : 'rgba(148,163,184,0.95)'
+  const dividerColor = isLight
+    ? 'rgba(255,255,255,0.12)'
+    : 'rgba(255,255,255,0.08)'
+  const hoverBg = isLight
+    ? 'rgba(255,255,255,0.10)'
+    : 'rgba(255,255,255,0.06)'
+  const activeBg = isLight
+    ? 'rgba(255,255,255,0.18)'
+    : 'rgba(25,147,210,0.18)'
+  const activeBorder = isLight
+    ? 'rgba(255,255,255,0.24)'
+    : 'rgba(25,147,210,0.30)'
+  const controlBg = isLight
+    ? 'rgba(255,255,255,0.08)'
+    : 'rgba(255,255,255,0.04)'
+  const controlBorder = isLight
+    ? 'rgba(255,255,255,0.12)'
+    : 'rgba(255,255,255,0.08)'
+  const sidebarWidth = mobile ? '17rem' : collapsed ? '5.5rem' : '16rem'
+
+  const visibleNav = NAV.filter(({ perm }) => !perm || hasPermission?.(perm))
 
   return (
-    <aside className="flex flex-col h-full p-5"
-      style={{ background: sidebarBg, borderRight: `1px solid ${sidebarBorder}`, width: mobile ? '17rem' : '15rem' }}>
+    <aside
+      className="flex flex-col h-full p-4 sm:p-5 transition-all duration-300"
+      style={{
+        background: sidebarBg,
+        borderRight: `1px solid ${sidebarBorder}`,
+        width: sidebarWidth,
+      }}
+    >
+      <div className="flex items-start justify-between gap-2 mb-8">
+        <div
+          className={`flex items-center gap-3 min-w-0 ${
+            collapsed && !mobile ? 'justify-center w-full' : ''
+          }`}
+        >
+          <img
+            src="/logos/icons/icon-dark.svg"
+            alt="WELLPrint"
+            className="w-10 h-10 object-contain shrink-0"
+          />
 
-      {/* Logo */}
-      <div className="flex items-center gap-3 mb-8">
-        <img src="/logos/icons/icon-white.svg" alt="WELLPrint" className="w-9 h-9 object-contain shrink-0" />
-        <div className="flex-1 min-w-0">
-          <div className="font-bold text-sm" style={{ fontFamily: "'Lora', serif", color: textPrimary }}>WELLPrint</div>
-          <div className="text-[9px] tracking-widest uppercase" style={{ fontFamily: "'Montserrat', sans-serif", color: textFaint }}>Staff Portal</div>
+          {(!collapsed || mobile) && (
+            <div className="min-w-0">
+              <div
+                className="truncate leading-none"
+                style={{
+                  color: textPrimary,
+                  fontFamily: 'Inter, sans-serif',
+                  fontWeight: 700,
+                  fontSize: '1.25rem',
+                }}
+              >
+                WELLPrint
+              </div>
+              <div
+                className="mt-1 uppercase tracking-[0.22em] truncate"
+                style={{
+                  color: isLight ? 'rgba(255,255,255,0.78)' : 'rgba(191,219,254,0.78)',
+                  fontSize: '0.65rem',
+                  fontWeight: 600,
+                }}
+              >
+                Admin Portal
+              </div>
+            </div>
+          )}
         </div>
-        {mobile && (
-          <button onClick={onClose} className="ml-auto transition-colors" style={{ color: textFaint }}>
-            <X size={18} />
-          </button>
-        )}
-      </div>
 
-      {/* Nav links */}
-      <nav className="flex-1 space-y-1">
-        {NAV.filter(({ perm }) => !perm || user?.role === 'admin' || hasPermission(perm)).map(({ to, icon: Icon, label }) => {
-          const active = location.pathname === to || (to !== '/dashboard' && location.pathname.startsWith(to))
-          const linkColor = active ? activeNavColor : textMuted
-          return (
-            <Link key={to} to={to} onClick={onClose}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-sm text-sm transition-all"
+        <div className="flex items-center gap-1 shrink-0">
+          {!mobile && (
+            <button
+              onClick={onToggleCollapse}
+              className="hidden lg:flex w-8 h-8 rounded-xl items-center justify-center transition-all"
               style={{
-                background: active ? activeNavBg : 'transparent',
-                color: linkColor,
-                border: active ? `1px solid ${activeNavBorder}` : '1px solid transparent',
+                color: textMuted,
+                background: controlBg,
+                border: `1px solid ${controlBorder}`,
               }}
-              onMouseEnter={e => {
-                if (!active) {
-                  e.currentTarget.style.color = hoverNavColor
-                  e.currentTarget.querySelectorAll('span, svg').forEach(el => el.style.color = hoverNavColor)
-                }
-              }}
-              onMouseLeave={e => {
-                if (!active) {
-                  e.currentTarget.style.color = linkColor
-                  e.currentTarget.querySelectorAll('span, svg').forEach(el => el.style.color = linkColor)
-                }
+              title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            >
+              {collapsed ? <PanelLeftOpen size={15} /> : <PanelLeftClose size={15} />}
+            </button>
+          )}
+
+          {mobile && (
+            <button
+              onClick={onClose}
+              className="w-8 h-8 rounded-xl flex items-center justify-center transition-all"
+              style={{
+                color: textMuted,
+                background: controlBg,
+                border: `1px solid ${controlBorder}`,
               }}
             >
-              <Icon size={15} style={{ color: linkColor }} />
-              <span className="font-body tracking-wide text-xs" style={{ color: linkColor }}>{label}</span>
-              {active && <ChevronRight size={12} className="ml-auto" style={{ color: activeNavColor }} />}
-            </Link>
-          )
-        })}
+              <X size={15} />
+            </button>
+          )}
+        </div>
+      </div>
 
-        {/* Admin-only section */}
+      <nav className="flex-1 flex flex-col min-h-0">
+        <div className="space-y-1.5">
+          {visibleNav.map(({ to, icon: Icon, label }) => {
+            const active =
+              location.pathname === to || (to !== '/dashboard' && location.pathname.startsWith(to))
+
+            return (
+              <Link
+                key={to}
+                to={to}
+                onClick={onClose}
+                className={`group flex items-center gap-3 rounded-[16px] transition-all duration-200 ${
+                  collapsed && !mobile ? 'justify-center px-0 py-3' : 'px-3 py-3'
+                }`}
+                style={{
+                  background: active ? activeBg : 'transparent',
+                  border: `1px solid ${active ? activeBorder : 'transparent'}`,
+                  color: textPrimary,
+                }}
+                title={collapsed && !mobile ? label : undefined}
+                onMouseEnter={(e) => {
+                  if (!active) e.currentTarget.style.background = hoverBg
+                }}
+                onMouseLeave={(e) => {
+                  if (!active) e.currentTarget.style.background = 'transparent'
+                }}
+              >
+                <Icon size={18} style={{ color: '#FFFFFF', flexShrink: 0 }} />
+                {(!collapsed || mobile) && (
+                  <>
+                    <span
+                      className="flex-1 truncate"
+                      style={{
+                        color: '#FFFFFF',
+                        fontSize: '0.95rem',
+                        fontWeight: active ? 600 : 500,
+                      }}
+                    >
+                      {label}
+                    </span>
+                    {active && <ChevronRight size={14} style={{ color: '#FFFFFF' }} />}
+                  </>
+                )}
+              </Link>
+            )
+          })}
+        </div>
+
         {user?.role === 'admin' && (
-          <>
-            <div className="pt-3 pb-1 flex items-center gap-2 px-1">
-              <Shield size={9} style={{ color: '#CD1B6E' }} />
-              <span className="font-body text-[8px] tracking-widest uppercase" style={{ color: 'rgba(205,27,110,0.7)' }}>Admin Only</span>
-              <div className="flex-1 h-px" style={{ background: 'rgba(205,27,110,0.2)' }} />
-            </div>
-            {ADMIN_NAV.map(({ to, icon: Icon, label }) => {
-              const active = location.pathname.startsWith(to)
-              return (
-                <Link key={to} to={to} onClick={onClose}
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-sm text-sm transition-all"
+          <div className="mt-5 pt-5" style={{ borderTop: `1px solid ${dividerColor}` }}>
+            {(!collapsed || mobile) && (
+              <div className="flex items-center gap-2 px-1 mb-2">
+                <Shield size={11} style={{ color: '#FFFFFF' }} />
+                <span
                   style={{
-                    background: active ? 'rgba(205,27,110,0.12)' : 'transparent',
-                    color: active ? '#FF66A6' : textMuted,
-                    border: active ? '1px solid rgba(205,27,110,0.25)' : '1px solid transparent',
+                    color: isLight ? 'rgba(255,255,255,0.72)' : 'rgba(191,219,254,0.78)',
+                    fontSize: '0.62rem',
+                    fontWeight: 700,
+                    letterSpacing: '0.18em',
+                    textTransform: 'uppercase',
                   }}
-                  onMouseEnter={e => { if (!active) e.currentTarget.style.color = hoverNavColor }}
-                  onMouseLeave={e => { if (!active) e.currentTarget.style.color = textMuted }}
                 >
-                  <Icon size={15} />
-                  <span className="font-body tracking-wide text-xs">{label}</span>
-                  {active && <ChevronRight size={12} className="ml-auto" />}
-                </Link>
-              )
-            })}
-          </>
+                  Admin Only
+                </span>
+                <div className="flex-1 h-px" style={{ background: dividerColor }} />
+              </div>
+            )}
+
+            <div className="space-y-1.5">
+              {ADMIN_NAV.map(({ to, icon: Icon, label }) => {
+                const active = location.pathname.startsWith(to)
+
+                return (
+                  <Link
+                    key={to}
+                    to={to}
+                    onClick={onClose}
+                    className={`group flex items-center gap-3 rounded-[16px] transition-all duration-200 ${
+                      collapsed && !mobile ? 'justify-center px-0 py-3' : 'px-3 py-3'
+                    }`}
+                    style={{
+                      background: active ? activeBg : 'transparent',
+                      border: `1px solid ${active ? activeBorder : 'transparent'}`,
+                      color: '#FFFFFF',
+                    }}
+                    title={collapsed && !mobile ? label : undefined}
+                    onMouseEnter={(e) => {
+                      if (!active) e.currentTarget.style.background = hoverBg
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!active) e.currentTarget.style.background = 'transparent'
+                    }}
+                  >
+                    <Icon size={18} style={{ color: '#FFFFFF', flexShrink: 0 }} />
+                    {(!collapsed || mobile) && (
+                      <>
+                        <span
+                          className="flex-1 truncate"
+                          style={{
+                            color: '#FFFFFF',
+                            fontSize: '0.95rem',
+                            fontWeight: active ? 600 : 500,
+                          }}
+                        >
+                          {label}
+                        </span>
+                        {active && <ChevronRight size={14} style={{ color: '#FFFFFF' }} />}
+                      </>
+                    )}
+                  </Link>
+                )
+              })}
+            </div>
+          </div>
         )}
       </nav>
 
-      {/* Bottom section */}
       <div className="pt-4 mt-4 space-y-3" style={{ borderTop: `1px solid ${dividerColor}` }}>
-
-        {/* Theme toggle */}
         <button
           onClick={toggleTheme}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-sm border transition-all group"
-          style={{ borderColor: dividerColor, background: 'transparent' }}
-          onMouseEnter={e => e.currentTarget.style.borderColor = isLight ? 'rgba(234,193,32,0.5)' : 'rgba(251,176,59,0.3)'}
-          onMouseLeave={e => e.currentTarget.style.borderColor = dividerColor}
+          className={`w-full flex items-center gap-3 rounded-[16px] border transition-all ${
+            collapsed && !mobile ? 'justify-center px-0 py-3' : 'px-3 py-3'
+          }`}
+          style={{
+            borderColor: controlBorder,
+            background: controlBg,
+            color: '#FFFFFF',
+          }}
+          title={collapsed && !mobile ? (isLight ? 'Dark Mode' : 'Light Mode') : undefined}
         >
-          {isLight ? (
+          <div
+            className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
+            style={{
+              background: isLight ? 'rgba(255,255,255,0.10)' : 'rgba(255,255,255,0.05)',
+              border: `1px solid ${controlBorder}`,
+            }}
+          >
+            {isLight ? (
+              <Moon size={14} style={{ color: '#FFFFFF' }} />
+            ) : (
+              <Sun size={14} style={{ color: '#FFFFFF' }} />
+            )}
+          </div>
+
+          {(!collapsed || mobile) && (
             <>
-              <div className="w-6 h-6 rounded-sm flex items-center justify-center shrink-0"
-                style={{ background: 'rgba(25,147,210,0.2)', border: '1px solid rgba(25,147,210,0.4)' }}>
-                <Moon size={13} style={{ color: '#00BAFF' }} />
-              </div>
-              <span className="font-body text-[10px] tracking-widest uppercase transition-colors flex-1" style={{ color: textFaint }}>
-                Dark Mode
+              <span
+                className="flex-1 text-left uppercase"
+                style={{
+                  color: '#FFFFFF',
+                  fontSize: '0.68rem',
+                  fontWeight: 700,
+                  letterSpacing: '0.16em',
+                }}
+              >
+                {isLight ? 'Dark Mode' : 'Light Mode'}
               </span>
-              <div className="w-8 h-4 rounded-full relative shrink-0" style={{ background: 'rgba(234,193,32,0.3)' }}>
-                <div className="absolute right-0.5 top-0.5 w-3 h-3 rounded-full transition-all" style={{ background: '#EAC120' }} />
-              </div>
-            </>
-          ) : (
-            <>
-              <div className="w-6 h-6 rounded-sm flex items-center justify-center shrink-0"
-                style={{ background: 'rgba(251,176,59,0.12)', border: '1px solid rgba(251,176,59,0.25)' }}>
-                <Sun size={13} style={{ color: '#FDC010' }} />
-              </div>
-              <span className="font-body text-[10px] tracking-widest uppercase transition-colors flex-1" style={{ color: textFaint }}>
-                Light Mode
-              </span>
-              <div className="w-8 h-4 rounded-full relative shrink-0" style={{ background: 'rgba(255,255,255,0.1)' }}>
-                <div className="absolute left-0.5 top-0.5 w-3 h-3 rounded-full transition-all" style={{ background: '#FDC010' }} />
+
+              <div
+                className="w-9 h-5 rounded-full relative shrink-0"
+                style={{
+                  background: isLight
+                    ? 'rgba(255,255,255,0.20)'
+                    : 'rgba(25,147,210,0.35)',
+                }}
+              >
+                <div
+                  className="absolute top-0.5 w-4 h-4 rounded-full transition-all"
+                  style={{
+                    background: '#FFFFFF',
+                    left: isLight ? '1.05rem' : '0.12rem',
+                  }}
+                />
               </div>
             </>
           )}
         </button>
 
-        {/* User info */}
-        <div className="flex items-center gap-3 px-1">
-          <div className="w-8 h-8 rounded-sm flex items-center justify-center shrink-0 font-bold text-sm"
-            style={{
-              background: user?.role === 'admin' ? 'rgba(205,27,110,0.2)' : 'rgba(234,193,32,0.2)',
-              border: `1px solid ${user?.role === 'admin' ? 'rgba(205,27,110,0.4)' : 'rgba(234,193,32,0.4)'}`,
-              color: user?.role === 'admin' ? '#FF66A6' : '#EAC120',
-              fontFamily: "'Lora', serif",
-            }}>
-            {user?.name?.charAt(0) ?? '?'}
-          </div>
-          <div className="min-w-0 flex-1">
-            <div className="text-xs font-semibold truncate" style={{ color: textPrimary }}>{user?.name}</div>
-            <div className="font-body text-[9px] truncate capitalize flex items-center gap-1" style={{ color: textFaint }}>
-              {user?.role === 'admin'
-                ? <><Shield size={8} style={{ color: '#FF66A6' }} /> Admin</>
-                : <><User size={8} /> Staff</>
-              }
+        {(!collapsed || mobile) && (
+          <div className="flex items-center gap-3 px-1">
+            <div
+              className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 font-bold text-sm"
+              style={{
+                background: isLight ? 'rgba(255,255,255,0.14)' : 'rgba(255,255,255,0.06)',
+                border: `1px solid ${controlBorder}`,
+                color: '#FFFFFF',
+                fontFamily: 'Inter, sans-serif',
+              }}
+            >
+              {user?.name?.charAt(0) ?? '?'}
+            </div>
+
+            <div className="min-w-0 flex-1">
+              <div className="text-sm font-semibold truncate" style={{ color: textPrimary }}>
+                {user?.name}
+              </div>
+              <div
+                className="truncate capitalize flex items-center gap-1"
+                style={{ color: textFaint, fontSize: '0.72rem' }}
+              >
+                <User size={11} />
+                {user?.role}
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
-        {/* Back to Homepage */}
-        <Link to="/"
-          className="w-full flex items-center gap-2 px-3 py-2.5 rounded-sm text-xs font-body border transition-all"
-          style={{ borderColor: dividerColor, color: textFaint, background: 'transparent' }}
-          onMouseEnter={e => { e.currentTarget.style.borderColor = isLight ? 'rgba(234,193,32,0.5)' : 'rgba(19,161,80,0.3)'; e.currentTarget.style.color = isLight ? '#EAC120' : 'var(--wp-green)' }}
-          onMouseLeave={e => { e.currentTarget.style.borderColor = dividerColor; e.currentTarget.style.color = textFaint }}>
-          <Home size={13} />
-          <span className="flex-1">Back to Homepage</span>
-          <ExternalLink size={10} className="opacity-40" />
+        <Link
+          to="/"
+          onClick={onClose}
+          className={`w-full flex items-center gap-2 rounded-[16px] border transition-all ${
+            collapsed && !mobile ? 'justify-center px-0 py-3' : 'px-3 py-3'
+          }`}
+          style={{
+            borderColor: controlBorder,
+            color: '#FFFFFF',
+            background: 'transparent',
+          }}
+          title={collapsed && !mobile ? 'Back to Homepage' : undefined}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = hoverBg
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = 'transparent'
+          }}
+        >
+          <Home size={14} />
+          {(!collapsed || mobile) && (
+            <>
+              <span className="flex-1 text-sm">Back to Homepage</span>
+              <ExternalLink size={11} className="opacity-70" />
+            </>
+          )}
         </Link>
 
-        {/* Sign out */}
-        <button onClick={handleLogout}
-          className="w-full flex items-center gap-2 px-3 py-2 rounded-sm text-xs font-body transition-all border border-transparent"
-          style={{ color: textFaint }}
-          onMouseEnter={e => { e.currentTarget.style.color = '#FF66A6'; e.currentTarget.style.background = 'rgba(205,27,110,0.08)'; e.currentTarget.style.borderColor = 'rgba(205,27,110,0.15)' }}
-          onMouseLeave={e => { e.currentTarget.style.color = textFaint; e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'transparent' }}>
-          <LogOut size={13} /> Sign Out
+        <button
+          onClick={handleLogout}
+          className={`w-full flex items-center gap-2 rounded-[16px] border transition-all ${
+            collapsed && !mobile ? 'justify-center px-0 py-3' : 'px-3 py-3'
+          }`}
+          style={{
+            borderColor: controlBorder,
+            color: '#FFFFFF',
+            background: 'transparent',
+          }}
+          title={collapsed && !mobile ? 'Sign Out' : undefined}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = hoverBg
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = 'transparent'
+          }}
+        >
+          <LogOut size={14} />
+          {(!collapsed || mobile) && <span className="flex-1 text-left text-sm">Sign Out</span>}
         </button>
       </div>
     </aside>
@@ -212,61 +425,116 @@ function Sidebar({ mobile = false, onClose }) {
 
 export default function AdminLayout({ children }) {
   const { user } = useAuth()
-  const { theme } = useTheme()
+  const { theme, toggleTheme } = useTheme()
   const location = useLocation()
+
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [collapsed, setCollapsed] = useState(false)
+
   const isLight = theme === 'light'
 
   return (
-    <div className="flex h-screen overflow-hidden" style={{ background: isLight ? '#D0D6CE' : 'var(--ink-900)' }}>
-      {/* Desktop sidebar */}
+    <div
+      className="flex h-screen overflow-hidden"
+      style={{ background: isLight ? '#F4F7FB' : '#03112a' }}
+    >
       <div className="hidden lg:flex flex-col h-full shrink-0">
-        <Sidebar />
+        <Sidebar
+          collapsed={collapsed}
+          onToggleCollapse={() => setCollapsed((v) => !v)}
+          isLight={isLight}
+          toggleTheme={toggleTheme}
+        />
       </div>
 
-      {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div className="lg:hidden fixed inset-0 z-50 flex">
-          <Sidebar mobile onClose={() => setSidebarOpen(false)} />
+          <Sidebar
+            mobile
+            onClose={() => setSidebarOpen(false)}
+            isLight={isLight}
+            toggleTheme={toggleTheme}
+          />
           <div className="flex-1 bg-black/60" onClick={() => setSidebarOpen(false)} />
         </div>
       )}
 
-      {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <header className="shrink-0 flex items-center justify-between px-5 py-4"
+        <header
+          className="shrink-0 flex items-center justify-between px-5 py-4"
           style={{
-            background: isLight ? '#FAF7F2' : 'var(--ink-950)',
-            borderBottom: isLight ? '1px solid rgba(0,70,0,0.1)' : '1px solid rgba(255,255,255,0.06)',
-          }}>
+            background: isLight ? '#FFFFFF' : '#021022',
+            borderBottom: isLight
+              ? '1px solid rgba(15,23,42,0.06)'
+              : '1px solid rgba(255,255,255,0.06)',
+          }}
+        >
           <div className="flex items-center gap-3">
-            <button onClick={() => setSidebarOpen(true)}
+            <button
+              onClick={() => setSidebarOpen(true)}
               className="lg:hidden transition-colors"
-              style={{ color: isLight ? '#004600' : 'rgba(216,216,216,0.5)' }}>
+              style={{ color: isLight ? '#0f172a' : 'rgba(226,232,240,0.80)' }}
+            >
               <Menu size={20} />
             </button>
-            <span className="font-body text-[10px] tracking-widest uppercase"
-              style={{ color: isLight ? 'rgba(0,70,0,0.45)' : 'rgba(216,216,216,0.25)' }}>
-              {NAV.find(n => location.pathname.startsWith(n.to))?.label ?? 'Admin'}
+
+            <span
+              className="text-[10px] tracking-widest uppercase"
+              style={{
+                color: isLight ? 'rgba(15,23,42,0.40)' : 'rgba(148,163,184,0.75)',
+              }}
+            >
+              {NAV.find((n) => location.pathname.startsWith(n.to))?.label ??
+                ADMIN_NAV.find((n) => location.pathname.startsWith(n.to))?.label ??
+                'Admin'}
             </span>
           </div>
+
           <div className="flex items-center gap-3">
-            <Bell size={16} style={{ color: isLight ? 'rgba(0,70,0,0.3)' : 'rgba(216,216,216,0.2)' }} />
-            <Link to="/"
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-[10px] font-body border transition-all"
+            <Bell
+              size={16}
               style={{
-                borderColor: isLight ? 'rgba(0,70,0,0.15)' : 'rgba(255,255,255,0.08)',
-                color: isLight ? 'rgba(0,70,0,0.5)' : 'rgba(216,216,216,0.35)',
+                color: isLight ? 'rgba(15,23,42,0.28)' : 'rgba(226,232,240,0.60)',
+              }}
+            />
+
+            <Link
+              to="/"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-[12px] text-[10px] border transition-all"
+              style={{
+                borderColor: isLight ? 'rgba(15,23,42,0.10)' : 'rgba(255,255,255,0.10)',
+                color: isLight ? 'rgba(15,23,42,0.50)' : 'rgba(226,232,240,0.70)',
                 background: 'transparent',
               }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = isLight ? 'rgba(0,70,0,0.4)' : 'rgba(19,161,80,0.3)'; e.currentTarget.style.color = isLight ? '#004600' : 'var(--wp-green)' }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = isLight ? 'rgba(0,70,0,0.15)' : 'rgba(255,255,255,0.08)'; e.currentTarget.style.color = isLight ? 'rgba(0,70,0,0.5)' : 'rgba(216,216,216,0.35)' }}>
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = isLight
+                  ? 'rgba(25,147,210,0.45)'
+                  : 'rgba(25,147,210,0.40)'
+                e.currentTarget.style.color = isLight ? '#1993D2' : '#FFFFFF'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = isLight
+                  ? 'rgba(15,23,42,0.10)'
+                  : 'rgba(255,255,255,0.10)'
+                e.currentTarget.style.color = isLight
+                  ? 'rgba(15,23,42,0.50)'
+                  : 'rgba(226,232,240,0.70)'
+              }}
+            >
               <Home size={11} /> Homepage
             </Link>
-            <div className="text-xs font-body hidden sm:block"
-              style={{ color: isLight ? 'rgba(0,70,0,0.5)' : 'rgba(216,216,216,0.35)' }}>{user?.name}</div>
+
+            <div
+              className="text-xs hidden sm:block"
+              style={{
+                color: isLight ? 'rgba(15,23,42,0.50)' : 'rgba(226,232,240,0.80)',
+              }}
+            >
+              {user?.name}
+            </div>
           </div>
         </header>
+
         <main className="flex-1 overflow-y-auto p-5 sm:p-8">{children}</main>
       </div>
     </div>

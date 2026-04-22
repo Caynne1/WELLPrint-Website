@@ -1,213 +1,468 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import AdminLayout from '../../components/admin/AdminLayout'
 import { supabase } from '../../lib/supabase'
-import { useOrders, ORDER_STATUSES } from '../../context/OrdersContext'
-import { TrendingUp, TrendingDown, BarChart2, PieChart, ArrowUpRight, Loader2 } from 'lucide-react'
+import { useTheme } from '../../context/ThemeContext'
+import {
+  BarChart2,
+  RefreshCw,
+  Loader2,
+  Package,
+  ShoppingCart,
+  TrendingUp,
+  CheckCircle2,
+  Clock3,
+  Printer,
+  Mail,
+  Truck,
+  Store,
+} from 'lucide-react'
 
-function formatPHP(n) { return '₱' + Number(n || 0).toLocaleString('en-PH', { minimumFractionDigits: 0 }) }
+function formatPeso(value) {
+  return `₱${Number(value || 0).toLocaleString('en-PH', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`
+}
+
+function SummaryCard({ title, value, icon: Icon, color, isLight, subtitle }) {
+  return (
+    <div
+      className="rounded-[24px] border p-5"
+      style={{
+        background: isLight ? '#FFFFFF' : 'rgba(9, 25, 53, 0.92)',
+        borderColor: isLight ? 'rgba(15,23,42,0.08)' : 'rgba(255,255,255,0.06)',
+        boxShadow: isLight
+          ? '0 10px 30px rgba(15,23,42,0.05)'
+          : '0 10px 30px rgba(0,0,0,0.24)',
+      }}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p
+            className="text-xs uppercase tracking-[0.18em] mb-2"
+            style={{ color: isLight ? '#94a3b8' : 'rgba(148,163,184,0.88)' }}
+          >
+            {title}
+          </p>
+          <h3
+            className="text-2xl font-bold"
+            style={{ color: isLight ? '#0f172a' : '#f8fafc' }}
+          >
+            {value}
+          </h3>
+          {subtitle && (
+            <p
+              className="text-xs mt-2"
+              style={{ color: isLight ? '#64748b' : 'rgba(226,232,240,0.78)' }}
+            >
+              {subtitle}
+            </p>
+          )}
+        </div>
+
+        <div
+          className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0"
+          style={{
+            background: `${color}14`,
+            border: `1px solid ${color}24`,
+            color,
+          }}
+        >
+          <Icon size={18} />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function ChartCard({ title, children, isLight }) {
+  return (
+    <div
+      className="rounded-[24px] border p-6"
+      style={{
+        background: isLight ? '#FFFFFF' : 'rgba(9, 25, 53, 0.92)',
+        borderColor: isLight ? 'rgba(15,23,42,0.08)' : 'rgba(255,255,255,0.06)',
+        boxShadow: isLight
+          ? '0 10px 30px rgba(15,23,42,0.05)'
+          : '0 10px 30px rgba(0,0,0,0.24)',
+      }}
+    >
+      <h3
+        className="text-lg font-bold mb-5"
+        style={{ color: isLight ? '#0f172a' : '#f8fafc' }}
+      >
+        {title}
+      </h3>
+      {children}
+    </div>
+  )
+}
 
 export default function AdminAnalyticsPage() {
-  const { orders } = useOrders()
-  const [categoryStats, setCategoryStats] = useState([])
-  const [productStats, setProductStats] = useState([])
-  const [loadingStats, setLoadingStats] = useState(true)
-  const [period, setPeriod] = useState('month')
+  const { theme } = useTheme()
+  const isLight = theme === 'light'
+
+  const [loading, setLoading] = useState(true)
+  const [orders, setOrders] = useState([])
+  const [products, setProducts] = useState([])
+  const [messages, setMessages] = useState([])
 
   useEffect(() => {
-    async function fetchStats() {
-      setLoadingStats(true)
-      // Top products by order item count (requires order_items table if it exists)
-      // Fall back to products table with sort_order as a proxy
-      const { data: prods } = await supabase
-        .from('products')
-        .select('id, name, base_price, status, categories(name)')
-        .eq('status', 'active')
-        .order('sort_order', { ascending: true })
-        .limit(5)
-
-      const { data: cats } = await supabase
-        .from('categories')
-        .select('id, name')
-        .order('sort_order', { ascending: true })
-
-      setProductStats(prods ?? [])
-      setCategoryStats(cats ?? [])
-      setLoadingStats(false)
-    }
-    fetchStats()
+    fetchAnalytics()
   }, [])
 
-  // Derive stats from real orders
-  const totalOrders    = orders.length
-  const completedOrders = orders.filter(o => o.status === 'completed')
-  const completedRev   = completedOrders.reduce((s, o) => s + (o.estimatedTotal ?? 0), 0)
-  const avgOrder       = completedOrders.length ? completedRev / completedOrders.length : 0
-  const convRate       = totalOrders ? Math.round((completedOrders.length / totalOrders) * 100) : 0
+  async function fetchAnalytics() {
+    setLoading(true)
 
-  // Group orders by month for the bar chart
-  const monthlyMap = {}
-  orders.forEach(o => {
-    const d = new Date(o.createdAt)
-    const key = d.toLocaleString('en-US', { month: 'short' })
-    if (!monthlyMap[key]) monthlyMap[key] = { orders: 0, revenue: 0 }
-    monthlyMap[key].orders += 1
-    if (o.status === 'completed') monthlyMap[key].revenue += o.estimatedTotal ?? 0
-  })
+    const [
+      { data: ordersData, error: ordersError },
+      { data: productsData, error: productsError },
+      { data: messagesData, error: messagesError },
+    ] = await Promise.all([
+      supabase.from('orders').select('*').order('created_at', { ascending: false }),
+      supabase.from('products').select('*'),
+      supabase.from('contact_messages').select('*'),
+    ])
 
-  // Keep last 6 months in order
-  const last6 = Array.from({ length: 6 }, (_, i) => {
-    const d = new Date()
-    d.setMonth(d.getMonth() - (5 - i))
-    return d.toLocaleString('en-US', { month: 'short' })
-  })
-  const monthlyData = last6.map(m => ({ month: m, ...(monthlyMap[m] ?? { orders: 0, revenue: 0 }) }))
+    if (ordersError) console.error('Orders analytics error:', ordersError)
+    if (productsError) console.error('Products analytics error:', productsError)
+    if (messagesError) console.error('Messages analytics error:', messagesError)
 
-  const maxRev = Math.max(...monthlyData.map(d => d.revenue), 1)
-  const maxOrd = Math.max(...monthlyData.map(d => d.orders), 1)
+    setOrders(ordersData || [])
+    setProducts(productsData || [])
+    setMessages(messagesData || [])
+    setLoading(false)
+  }
 
-  const totalStatusCount = orders.length || 1
+  const stats = useMemo(() => {
+    const revenue = orders
+      .filter((o) => o.status !== 'cancelled')
+      .reduce((sum, o) => sum + Number(o.total_amount || o.estimated_total || 0), 0)
+
+    const completedRevenue = orders
+      .filter((o) => o.status === 'completed')
+      .reduce((sum, o) => sum + Number(o.total_amount || o.estimated_total || 0), 0)
+
+    return {
+      totalOrders: orders.length,
+      totalRevenue: revenue,
+      completedRevenue,
+      totalProducts: products.length,
+      activeProducts: products.filter((p) => p.is_active).length,
+      totalMessages: messages.length,
+    }
+  }, [orders, products, messages])
+
+  const statusBreakdown = useMemo(() => {
+    const map = {
+      pending: 0,
+      processing: 0,
+      printing: 0,
+      ready: 0,
+      completed: 0,
+      cancelled: 0,
+    }
+
+    orders.forEach((order) => {
+      if (map[order.status] !== undefined) {
+        map[order.status] += 1
+      }
+    })
+
+    return map
+  }, [orders])
+
+  const concernBreakdown = useMemo(() => {
+    const map = {}
+    messages.forEach((message) => {
+      const key = message.concern_type || 'Other'
+      map[key] = (map[key] || 0) + 1
+    })
+    return Object.entries(map).sort((a, b) => b[1] - a[1])
+  }, [messages])
+
+  const fulfillmentBreakdown = useMemo(() => {
+    const result = { pickup: 0, deliver: 0 }
+
+    orders.forEach((order) => {
+      const items = Array.isArray(order.items)
+        ? order.items
+        : typeof order.items === 'string'
+        ? JSON.parse(order.items || '[]')
+        : []
+
+      const item = items.find((x) => x?.delivery_method)
+      if (item?.delivery_method === 'deliver') result.deliver += 1
+      else result.pickup += 1
+    })
+
+    return result
+  }, [orders])
+
+  const monthlyRevenue = useMemo(() => {
+    const map = {}
+
+    orders
+      .filter((o) => o.status !== 'cancelled')
+      .forEach((order) => {
+        const date = new Date(order.created_at)
+        const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+        map[key] = (map[key] || 0) + Number(order.total_amount || order.estimated_total || 0)
+      })
+
+    return Object.entries(map)
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .slice(-6)
+  }, [orders])
+
+  const maxMonthlyRevenue = Math.max(...monthlyRevenue.map(([, value]) => value), 1)
+  const maxConcernCount = Math.max(...concernBreakdown.map(([, value]) => value), 1)
+  const maxStatusCount = Math.max(...Object.values(statusBreakdown), 1)
+
+  const heading = isLight ? '#0f172a' : '#f8fafc'
+  const subText = isLight ? '#64748b' : 'rgba(226,232,240,0.78)'
+  const muted = isLight ? '#94a3b8' : 'rgba(148,163,184,0.82)'
+  const softBg = isLight ? '#f8fafc' : 'rgba(255,255,255,0.03)'
+  const softBorder = isLight ? 'rgba(15,23,42,0.08)' : 'rgba(255,255,255,0.06)'
 
   return (
     <AdminLayout>
-      <div className="mb-7 flex items-start justify-between gap-4 flex-wrap">
+      <div className="mb-8 flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-white text-2xl font-bold mb-1" style={{ fontFamily: "'Lora', serif" }}>Analytics</h1>
-          <p className="text-ivory-300/40 text-sm">Overview based on your live order data.</p>
-        </div>
-        <div className="flex items-center gap-2">
-          {['week', 'month', 'quarter'].map(p => (
-            <button key={p} onClick={() => setPeriod(p)}
-              className="text-[10px] font-body px-3 py-1.5 rounded-sm border transition-all capitalize"
-              style={{ background: period === p ? 'rgba(19,161,80,0.1)' : 'transparent', color: period === p ? 'var(--wp-green)' : 'rgba(216,216,216,0.35)', borderColor: period === p ? 'rgba(19,161,80,0.3)' : 'rgba(255,255,255,0.08)' }}>
-              {p}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* KPI cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        {[
-          { label: 'Total Orders',   value: totalOrders,        icon: BarChart2,    color: '#1993D2' },
-          { label: 'Est. Revenue',   value: formatPHP(completedRev), icon: TrendingUp, color: '#13A150' },
-          { label: 'Avg. Order',     value: formatPHP(avgOrder), icon: ArrowUpRight, color: '#FDC010' },
-          { label: 'Conversion',     value: `${convRate}%`,     icon: PieChart,     color: '#CD1B6E' },
-        ].map(({ label, value, icon: Icon, color }) => (
-          <div key={label} className="bg-ink-800 border border-white/[0.07] rounded-sm p-5">
-            <div className="flex items-start justify-between mb-4">
-              <div className="w-9 h-9 rounded-sm flex items-center justify-center" style={{ background: `${color}14`, border: `1px solid ${color}30` }}>
-                <Icon size={16} style={{ color }} />
-              </div>
+          <div className="inline-flex items-center gap-2 mb-3">
+            <div
+              className="w-8 h-8 rounded-2xl flex items-center justify-center"
+              style={{
+                background: 'rgba(139,92,246,0.10)',
+                border: '1px solid rgba(139,92,246,0.20)',
+              }}
+            >
+              <BarChart2 size={15} style={{ color: '#8b5cf6' }} />
             </div>
-            <div className="text-white text-2xl font-black mb-0.5" style={{ fontFamily: "'Lora', serif" }}>{value}</div>
-            <div className="text-ivory-300/60 text-xs font-semibold mb-0.5">{label}</div>
-            <div className="text-ivory-300/25 text-[10px] font-body">From {orders.length} total orders</div>
+            <span
+              className="text-[10px] font-semibold tracking-[0.22em] uppercase"
+              style={{ color: muted }}
+            >
+              Analytics Overview
+            </span>
           </div>
-        ))}
+
+          <h1
+            className="text-[2rem] font-bold mb-1 leading-none"
+            style={{ color: heading }}
+          >
+            Analytics
+          </h1>
+          <p className="text-sm" style={{ color: subText }}>
+            Monitor your orders, products, revenue, and inbox activity
+          </p>
+        </div>
+
+        <button
+          onClick={fetchAnalytics}
+          className="inline-flex items-center gap-2 px-4 py-3 rounded-[16px] text-sm font-semibold transition-all hover:scale-[1.01]"
+          style={{
+            background: isLight ? '#FFFFFF' : 'rgba(9, 25, 53, 0.92)',
+            border: isLight
+              ? '1px solid rgba(15,23,42,0.08)'
+              : '1px solid rgba(255,255,255,0.06)',
+            color: subText,
+            boxShadow: isLight
+              ? '0 10px 30px rgba(15,23,42,0.05)'
+              : '0 10px 30px rgba(0,0,0,0.24)',
+          }}
+        >
+          <RefreshCw size={14} />
+          Refresh
+        </button>
       </div>
 
-      {/* Charts row */}
-      <div className="grid lg:grid-cols-3 gap-4 mb-4">
-        {/* Revenue bar chart */}
-        <div className="lg:col-span-2 bg-ink-800 border border-white/[0.07] rounded-sm overflow-hidden">
-          <div className="px-5 py-4 border-b border-white/[0.06]" style={{ background: 'rgba(25,147,210,0.04)' }}>
-            <span className="font-body text-[10px] tracking-widest uppercase" style={{ color: '#1993D2' }}>Monthly Revenue (Completed Orders)</span>
+      {loading ? (
+        <div
+          className="rounded-[24px] border py-20 text-center"
+          style={{
+            background: isLight ? '#FFFFFF' : 'rgba(9, 25, 53, 0.92)',
+            borderColor: isLight ? 'rgba(15,23,42,0.08)' : 'rgba(255,255,255,0.06)',
+            boxShadow: isLight
+              ? '0 10px 30px rgba(15,23,42,0.05)'
+              : '0 10px 30px rgba(0,0,0,0.24)',
+          }}
+        >
+          <div className="inline-flex items-center gap-2" style={{ color: subText }}>
+            <Loader2 size={16} className="animate-spin" />
+            Loading analytics...
           </div>
-          <div className="p-5">
-            {totalOrders === 0 ? (
-              <div className="h-40 flex items-center justify-center text-ivory-300/25 font-body text-xs">No order data yet</div>
-            ) : (
-              <div className="flex items-end gap-2 h-40">
-                {monthlyData.map(d => (
-                  <div key={d.month} className="flex-1 flex flex-col items-center gap-1">
-                    <div className="text-[8px] font-body text-ivory-300/25">{d.revenue > 0 ? formatPHP(d.revenue / 1000) + 'k' : ''}</div>
-                    <div className="w-full rounded-sm relative group"
-                      style={{ height: `${Math.max((d.revenue / maxRev) * 100, d.revenue > 0 ? 4 : 0)}%`, minHeight: 4, background: d.revenue > 0 ? 'rgba(25,147,210,0.25)' : 'rgba(255,255,255,0.04)', border: `1px solid ${d.revenue > 0 ? 'rgba(25,147,210,0.2)' : 'rgba(255,255,255,0.06)'}` }}>
-                      <div className="absolute inset-0 rounded-sm opacity-0 group-hover:opacity-100 transition-all" style={{ background: 'rgba(25,147,210,0.4)' }} />
+        </div>
+      ) : (
+        <>
+          <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-7">
+            <SummaryCard
+              title="Total Orders"
+              value={stats.totalOrders}
+              icon={ShoppingCart}
+              color="#1993D2"
+              isLight={isLight}
+            />
+            <SummaryCard
+              title="Total Revenue"
+              value={formatPeso(stats.totalRevenue)}
+              icon={TrendingUp}
+              color="#13A150"
+              isLight={isLight}
+              subtitle={`Completed Revenue: ${formatPeso(stats.completedRevenue)}`}
+            />
+            <SummaryCard
+              title="Products"
+              value={stats.totalProducts}
+              icon={Package}
+              color="#8b5cf6"
+              isLight={isLight}
+              subtitle={`${stats.activeProducts} active`}
+            />
+            <SummaryCard
+              title="Inbox Messages"
+              value={stats.totalMessages}
+              icon={Mail}
+              color="#f59e0b"
+              isLight={isLight}
+            />
+          </div>
+
+          <div className="grid lg:grid-cols-2 gap-6 mb-7">
+            <ChartCard title="Order Status Breakdown" isLight={isLight}>
+              <div className="space-y-4">
+                {[
+                  { key: 'pending', label: 'Pending', color: '#1993D2', icon: Clock3 },
+                  { key: 'processing', label: 'Processing', color: '#f59e0b', icon: TrendingUp },
+                  { key: 'printing', label: 'Printing', color: '#8b5cf6', icon: Printer },
+                  { key: 'ready', label: 'Ready', color: '#10b981', icon: CheckCircle2 },
+                  { key: 'completed', label: 'Completed', color: '#16a34a', icon: CheckCircle2 },
+                  { key: 'cancelled', label: 'Cancelled', color: '#dc2626', icon: Clock3 },
+                ].map((item) => {
+                  const value = statusBreakdown[item.key] || 0
+                  const width = `${(value / maxStatusCount) * 100}%`
+                  return (
+                    <div key={item.key}>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <div className="flex items-center gap-2">
+                          <item.icon size={14} style={{ color: item.color }} />
+                          <span style={{ color: heading }}>{item.label}</span>
+                        </div>
+                        <span style={{ color: subText }}>{value}</span>
+                      </div>
+                      <div
+                        className="h-2 rounded-full"
+                        style={{ background: softBg, border: `1px solid ${softBorder}` }}
+                      >
+                        <div
+                          className="h-full rounded-full"
+                          style={{ width, background: item.color }}
+                        />
+                      </div>
                     </div>
-                    <div className="text-[8px] font-body text-ivory-300/35">{d.month}</div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
-            )}
-          </div>
-        </div>
+            </ChartCard>
 
-        {/* Status breakdown */}
-        <div className="bg-ink-800 border border-white/[0.07] rounded-sm overflow-hidden">
-          <div className="px-5 py-4 border-b border-white/[0.06]" style={{ background: 'rgba(236,0,140,0.04)' }}>
-            <span className="font-body text-[10px] tracking-widest uppercase" style={{ color: '#CD1B6E' }}>Order Status</span>
-          </div>
-          <div className="p-5 space-y-3">
-            {Object.entries(ORDER_STATUSES).map(([key, st]) => {
-              const count = orders.filter(o => o.status === key).length
-              const pct = Math.round((count / totalStatusCount) * 100)
-              return (
-                <div key={key}>
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-[10px] font-body" style={{ color: st.color }}>{st.label}</span>
-                    <span className="text-[10px] font-body text-ivory-300/40">{count} ({pct}%)</span>
+            <ChartCard title="Fulfillment Breakdown" isLight={isLight}>
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div
+                  className="rounded-[20px] border p-5"
+                  style={{ background: softBg, borderColor: softBorder }}
+                >
+                  <div className="flex items-center gap-2 mb-3">
+                    <Store size={16} style={{ color: '#10b981' }} />
+                    <span style={{ color: heading }}>Pickup Orders</span>
                   </div>
-                  <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.05)' }}>
-                    <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: st.color, opacity: 0.7 }} />
+                  <div
+                    className="text-3xl font-black"
+                    style={{ color: isLight ? '#0f172a' : '#f8fafc' }}
+                  >
+                    {fulfillmentBreakdown.pickup}
                   </div>
                 </div>
-              )
-            })}
-          </div>
-        </div>
-      </div>
 
-      {/* Orders trend + catalog overview */}
-      <div className="grid lg:grid-cols-2 gap-4">
-        {/* Orders per month */}
-        <div className="bg-ink-800 border border-white/[0.07] rounded-sm overflow-hidden">
-          <div className="px-5 py-4 border-b border-white/[0.06]" style={{ background: 'rgba(19,161,80,0.04)' }}>
-            <span className="font-body text-[10px] tracking-widest uppercase text-wp-green">Monthly Orders</span>
-          </div>
-          <div className="p-5">
-            <div className="flex items-end gap-2 h-28">
-              {monthlyData.map(d => (
-                <div key={d.month} className="flex-1 flex flex-col items-center gap-1">
-                  <div className="text-[8px] font-body text-ivory-300/25">{d.orders || ''}</div>
-                  <div className="w-full rounded-sm"
-                    style={{ height: `${Math.max((d.orders / maxOrd) * 100, d.orders > 0 ? 4 : 0)}%`, minHeight: 4, background: d.orders > 0 ? 'rgba(19,161,80,0.25)' : 'rgba(255,255,255,0.04)', border: `1px solid ${d.orders > 0 ? 'rgba(19,161,80,0.2)' : 'rgba(255,255,255,0.06)'}` }} />
-                  <div className="text-[8px] font-body text-ivory-300/35">{d.month}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Products from Supabase */}
-        <div className="bg-ink-800 border border-white/[0.07] rounded-sm overflow-hidden">
-          <div className="px-5 py-4 border-b border-white/[0.06]" style={{ background: 'rgba(251,176,59,0.04)' }}>
-            <span className="font-body text-[10px] tracking-widest uppercase" style={{ color: '#FDC010' }}>Active Products</span>
-          </div>
-          {loadingStats ? (
-            <div className="py-10 flex items-center justify-center gap-2 text-ivory-300/25">
-              <Loader2 size={14} className="animate-spin" /> Loading…
-            </div>
-          ) : productStats.length === 0 ? (
-            <div className="py-10 text-center text-ivory-300/25 font-body text-xs">No products yet</div>
-          ) : (
-            <div className="divide-y divide-white/[0.04]">
-              {productStats.map((p, i) => (
-                <div key={p.id} className="flex items-center gap-3 px-5 py-3">
-                  <span className="text-[10px] font-body text-ivory-300/20 w-4 shrink-0">{i + 1}</span>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-white text-xs font-semibold truncate">{p.name}</div>
-                    <div className="text-ivory-300/30 text-[10px] font-body">{p.categories?.name ?? 'Uncategorized'}</div>
+                <div
+                  className="rounded-[20px] border p-5"
+                  style={{ background: softBg, borderColor: softBorder }}
+                >
+                  <div className="flex items-center gap-2 mb-3">
+                    <Truck size={16} style={{ color: '#8b5cf6' }} />
+                    <span style={{ color: heading }}>Delivery Orders</span>
                   </div>
-                  <div className="text-right shrink-0">
-                    <div className="text-white text-xs font-body font-bold">{formatPHP(p.base_price)}</div>
+                  <div
+                    className="text-3xl font-black"
+                    style={{ color: isLight ? '#0f172a' : '#f8fafc' }}
+                  >
+                    {fulfillmentBreakdown.deliver}
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
+              </div>
+            </ChartCard>
+          </div>
+
+          <div className="grid lg:grid-cols-2 gap-6">
+            <ChartCard title="Revenue by Month" isLight={isLight}>
+              <div className="space-y-4">
+                {monthlyRevenue.length === 0 ? (
+                  <p style={{ color: subText }}>No revenue data available yet.</p>
+                ) : (
+                  monthlyRevenue.map(([month, value]) => (
+                    <div key={month}>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span style={{ color: heading }}>{month}</span>
+                        <span style={{ color: subText }}>{formatPeso(value)}</span>
+                      </div>
+                      <div
+                        className="h-2 rounded-full"
+                        style={{ background: softBg, border: `1px solid ${softBorder}` }}
+                      >
+                        <div
+                          className="h-full rounded-full"
+                          style={{
+                            width: `${(value / maxMonthlyRevenue) * 100}%`,
+                            background: '#13A150',
+                          }}
+                        />
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </ChartCard>
+
+            <ChartCard title="Message Concern Types" isLight={isLight}>
+              <div className="space-y-4">
+                {concernBreakdown.length === 0 ? (
+                  <p style={{ color: subText }}>No message data available yet.</p>
+                ) : (
+                  concernBreakdown.map(([type, count]) => (
+                    <div key={type}>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span style={{ color: heading }}>{type}</span>
+                        <span style={{ color: subText }}>{count}</span>
+                      </div>
+                      <div
+                        className="h-2 rounded-full"
+                        style={{ background: softBg, border: `1px solid ${softBorder}` }}
+                      >
+                        <div
+                          className="h-full rounded-full"
+                          style={{
+                            width: `${(count / maxConcernCount) * 100}%`,
+                            background: '#f59e0b',
+                          }}
+                        />
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </ChartCard>
+          </div>
+        </>
+      )}
     </AdminLayout>
   )
 }
