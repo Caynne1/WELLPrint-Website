@@ -103,7 +103,6 @@ function Sidebar({
             className="w-10 h-10 object-contain shrink-0"
           />
 
-<<<<<<< HEAD
           {(!collapsed || mobile) && (
             <div className="min-w-0">
               <div
@@ -129,14 +128,6 @@ function Sidebar({
               </div>
             </div>
           )}
-=======
-      {/* Logo */}
-      <div className="flex items-center gap-3 mb-8">
-        <img src="/logos/icons/icon-white.svg" alt="WELLPrint" className="w-9 h-9 object-contain shrink-0" />
-        <div className="flex-1 min-w-0">
-          <div className="font-bold text-sm" style={{ fontFamily: "'Lora', serif", color: textPrimary }}>WELLPrint</div>
-          <div className="text-[9px] tracking-widest uppercase" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: textFaint }}>Staff Portal</div>
->>>>>>> a5d91e36c677cee500593d29c92d9ae63d16399d
         </div>
 
         <div className="flex items-center gap-1 shrink-0">

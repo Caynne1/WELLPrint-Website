@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import { useEffect, useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import {
@@ -110,14 +109,6 @@ function FeatureBar({ isDark }) {
     </div>
   )
 }
-=======
-import HeroSection              from '../components/sections/HeroSection'
-import MarqueeStrip             from '../components/sections/MarqueeStrip'
-import FeaturedProductsSection  from '../components/sections/FeaturedProductsSection'
-import ProcessSection           from '../components/sections/ProcessSection'
-import SocialProofSection       from '../components/sections/SocialProofSection'
-import CTASection               from '../components/sections/CTASection'
->>>>>>> a5d91e36c677cee500593d29c92d9ae63d16399d
 
 export default function HomePage() {
   const { theme } = useTheme()
@@ -133,7 +124,6 @@ export default function HomePage() {
   }, [])
 
   return (
-<<<<<<< HEAD
     <main className={isDark ? 'bg-[#060c14]' : 'bg-[#f4f6f4]'}>
       {/* ── HERO ── */}
       <section className="relative overflow-hidden min-h-[760px] flex flex-col">
@@ -291,7 +281,6 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 relative">
-    
 
             {steps.map(({ title, desc, icon: Icon, num }, i) => (
               <div
@@ -478,7 +467,7 @@ export default function HomePage() {
                 : `linear-gradient(135deg, ${COLORS.green} 0%, ${COLORS.greenDk} 40%, #0b5a20 100%)`,
             }}
           >
-            <div className="absolute -right-16 -top-20 w-72 h-72 rounded-full opacity-20" style={{ background: isDark ? COLORS.cyan : 'rgba(255,255,255,0.15)' }} />
+            <div className="absolute -right-16 -top-16 w-72 h-72 rounded-full opacity-20" style={{ background: isDark ? COLORS.cyan : 'rgba(255,255,255,0.15)' }} />
             <div className="absolute -left-8 -bottom-12 w-56 h-56 rounded-full opacity-10" style={{ background: isDark ? COLORS.green : 'rgba(255,255,255,0.20)' }} />
             <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
 
@@ -524,15 +513,5 @@ export default function HomePage() {
         </div>
       </section>
     </main>
-=======
-    <>
-      <HeroSection />
-      <MarqueeStrip />
-      <FeaturedProductsSection />
-      <ProcessSection />
-      <SocialProofSection />
-      <CTASection />
-    </>
->>>>>>> a5d91e36c677cee500593d29c92d9ae63d16399d
   )
 }

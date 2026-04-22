@@ -1,12 +1,10 @@
-import { useState, useEffect, useMemo, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import {
   ArrowLeft,
   Star,
   ChevronRight,
   ChevronLeft,
-  Minus,
-  Plus,
   MessageSquare,
   CheckCircle,
   ImagePlus,
@@ -15,27 +13,33 @@ import {
   FileText,
   ArrowRight,
   ShoppingCart,
-  Clock,
-  Package,
+  Sparkles,
+  Clock3,
   ShieldCheck,
-  Upload,
-  Mail,
-  Truck,
-  Store,
-  AlertCircle,
-  X,
+  Package,
 } from 'lucide-react'
 import { useCart } from '../context/CartContext'
-import { useProduct, useProducts } from '../hooks/useProducts'
+import { useProduct } from '../hooks/useProducts'
 
-const DELIVERY_FEE = 500
-const MAX_FILE_SIZE = 10 * 1024 * 1024
-const ALLOWED_FILE_TYPES = [
-  'image/png',
-  'image/jpeg',
-  'image/jpg',
-  'application/pdf',
-]
+/* ── KEEP YOUR EXISTING PRODUCTS OBJECT EXACTLY AS-IS ABOVE THIS LINE ── */
+
+/* ── Helpers ── */
+function Stars({ rating, size = 13 }) {
+  return (
+    <div className="flex items-center gap-0.5">
+      {[1, 2, 3, 4, 5].map((i) => (
+        <Star
+          key={i}
+          size={size}
+          fill={i <= Math.round(rating) ? 'var(--wp-yellow)' : 'transparent'}
+          style={{
+            color: i <= Math.round(rating) ? 'var(--wp-yellow)' : 'rgba(148,163,184,0.28)',
+          }}
+        />
+      ))}
+    </div>
+  )
+}
 
 function useScrollReveal() {
   const ref = useRef(null)
@@ -45,8 +49,8 @@ function useScrollReveal() {
     if (!el) return
 
     const obs = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
+      ([e]) => {
+        if (e.isIntersecting) {
           el.classList.add('visible')
           obs.disconnect()
         }
@@ -61,154 +65,78 @@ function useScrollReveal() {
   return ref
 }
 
-function Stars({ rating = 5, size = 13 }) {
-  return (
-    <div className="flex items-center gap-0.5">
-      {[1, 2, 3, 4, 5].map((i) => (
-        <Star
-          key={i}
-          size={size}
-          fill={i <= Math.round(rating) ? 'var(--wp-yellow)' : 'transparent'}
-          style={{
-            color:
-              i <= Math.round(rating)
-                ? 'var(--wp-yellow)'
-                : 'rgba(216,216,216,0.2)',
-          }}
-        />
-      ))}
-    </div>
-  )
-}
-
-function Gallery({ imageUrls = [] }) {
+function Gallery({ imageUrls = [], accent }) {
+  const count = imageUrls.length || 1
   const [active, setActive] = useState(0)
-<<<<<<< HEAD
-  const count = imageUrls.length
-=======
-  const [lens, setLens] = useState(null) // { cursorX, cursorY, containerW, containerH }
-  const imgContainerRef = useRef(null)
->>>>>>> a5d91e36c677cee500593d29c92d9ae63d16399d
 
   useEffect(() => {
     setActive(0)
   }, [imageUrls])
 
-  if (!count) {
-    return (
-      <div
-        className="relative bg-ink-700 border border-white/[0.08] rounded-sm overflow-hidden flex items-center justify-center"
-        style={{ aspectRatio: '1 / 1' }}
-      >
-        <div className="flex flex-col items-center justify-center gap-3">
-          <ImagePlus size={40} style={{ color: 'rgba(216,216,216,0.20)' }} />
-          <span className="font-body text-[10px] tracking-widest uppercase text-ivory-300/15">
-            No Product Image
-          </span>
-        </div>
-      </div>
-    )
-  }
-
-  const ZOOM = 2.5
-  const LENS_SIZE = 130 // px diameter
-
-  function handleMouseMove(e) {
-    if (!currentUrl || !imgContainerRef.current) return
-    const rect = imgContainerRef.current.getBoundingClientRect()
-    setLens({
-      cursorX: e.clientX - rect.left,   // px from left of container
-      cursorY: e.clientY - rect.top,    // px from top of container
-      containerW: rect.width,
-      containerH: rect.height,
-    })
-  }
-
-  function handleMouseLeave() {
-    setLens(null)
-  }
-
-  // Lens top-left position (clamp so lens stays inside container)
-  const half = LENS_SIZE / 2
-  const lensLeft = lens ? Math.min(Math.max(lens.cursorX - half, 0), lens.containerW - LENS_SIZE) : 0
-  const lensTop  = lens ? Math.min(Math.max(lens.cursorY - half, 0), lens.containerH - LENS_SIZE) : 0
-
-  // The background-position for the zoomed image inside the lens.
-  // We want the pixel under the cursor to be at the center of the lens.
-  // bgX/bgY = how far to shift the zoomed image (negative = shift left/up)
-  const bgX = lens ? -(lens.cursorX * ZOOM - half) : 0
-  const bgY = lens ? -(lens.cursorY * ZOOM - half) : 0
+  const currentUrl = imageUrls[active] || null
 
   return (
     <div className="flex flex-col gap-3">
       <div
-<<<<<<< HEAD
-        className="relative bg-ink-700 border border-white/[0.08] rounded-sm overflow-hidden"
-        style={{ aspectRatio: '1 / 1' }}
-      >
-        <img
-          src={imageUrls[active]}
-          alt={`Product image ${active + 1}`}
-          className="w-full h-full object-cover"
-        />
-
-=======
-        ref={imgContainerRef}
-        className="relative bg-ink-700 border border-white/[0.08] rounded-sm overflow-hidden"
-        style={{ aspectRatio: '1/1', cursor: lens ? 'crosshair' : 'default' }}
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
+        className="relative rounded-[24px] overflow-hidden border bg-white shadow-[0_12px_36px_rgba(15,23,42,0.07)]"
+        style={{
+          aspectRatio: '1 / 1',
+          borderColor: 'rgba(15,23,42,0.08)',
+        }}
       >
         {currentUrl ? (
-          <img src={currentUrl} alt={`Product image ${active + 1}`} className="w-full h-full object-cover" />
+          <img
+            src={currentUrl}
+            alt={`Product image ${active + 1}`}
+            className="w-full h-full object-cover"
+          />
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
-            <ImagePlus size={40} style={{ color: accent, opacity: 0.15 }} />
-            <span className="font-body text-[10px] tracking-widest uppercase text-ivory-300/15">
+            <ImagePlus size={40} style={{ color: accent, opacity: 0.22 }} />
+            <span className="font-body text-[10px] tracking-[0.22em] uppercase text-slate-300">
               Product Image
             </span>
           </div>
         )}
 
-        {/* Magnifying lens */}
-        {lens && currentUrl && (
-          <div
-            style={{
-              position: 'absolute',
-              left: lensLeft,
-              top: lensTop,
-              width: LENS_SIZE,
-              height: LENS_SIZE,
-              borderRadius: '50%',
-              border: `2px solid ${accent}`,
-              boxShadow: `0 0 0 1px ${accent}55, 0 8px 32px rgba(0,0,0,0.8)`,
-              backgroundImage: `url(${currentUrl})`,
-              backgroundRepeat: 'no-repeat',
-              backgroundSize: `${lens.containerW * ZOOM}px ${lens.containerH * ZOOM}px`,
-              backgroundPosition: `${bgX}px ${bgY}px`,
-              pointerEvents: 'none',
-              zIndex: 20,
-            }}
-          />
-        )}
+        <div
+          className="absolute inset-x-0 bottom-0 h-20"
+          style={{ background: 'linear-gradient(180deg, transparent, rgba(0,0,0,0.12))' }}
+        />
 
-        <div className="absolute top-4 left-4 w-6 h-6 border-t-2 border-l-2" style={{ borderColor: `${accent}40` }} />
-        <div className="absolute bottom-4 right-4 w-6 h-6 border-b-2 border-r-2" style={{ borderColor: `${accent}40` }} />
->>>>>>> a5d91e36c677cee500593d29c92d9ae63d16399d
+        <div
+          className="absolute top-4 left-4 w-7 h-7 border-t-2 border-l-2 rounded-tl-md"
+          style={{ borderColor: `${accent}50` }}
+        />
+        <div
+          className="absolute bottom-4 right-4 w-7 h-7 border-b-2 border-r-2 rounded-br-md"
+          style={{ borderColor: `${accent}50` }}
+        />
+
         {count > 1 && (
           <>
             <button
               onClick={() => setActive((a) => (a - 1 + count) % count)}
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-sm bg-ink-900/70 border border-white/10
-                flex items-center justify-center text-ivory-300/50 hover:text-white hover:bg-ink-900 transition-all"
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full flex items-center justify-center transition-all"
+              style={{
+                background: 'rgba(255,255,255,0.88)',
+                border: '1px solid rgba(15,23,42,0.08)',
+                color: '#475569',
+                boxShadow: '0 8px 20px rgba(15,23,42,0.08)',
+              }}
             >
               <ChevronLeft size={16} />
             </button>
 
             <button
               onClick={() => setActive((a) => (a + 1) % count)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-sm bg-ink-900/70 border border-white/10
-                flex items-center justify-center text-ivory-300/50 hover:text-white hover:bg-ink-900 transition-all"
+              className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full flex items-center justify-center transition-all"
+              style={{
+                background: 'rgba(255,255,255,0.88)',
+                border: '1px solid rgba(15,23,42,0.08)',
+                color: '#475569',
+                boxShadow: '0 8px 20px rgba(15,23,42,0.08)',
+              }}
             >
               <ChevronRight size={16} />
             </button>
@@ -217,28 +145,20 @@ function Gallery({ imageUrls = [] }) {
       </div>
 
       {count > 1 && (
-        <div className="flex gap-2">
+        <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
           {imageUrls.map((url, i) => (
             <button
               key={i}
               onClick={() => setActive(i)}
-              className="flex-1 border rounded-sm transition-all overflow-hidden"
+              className="overflow-hidden rounded-[16px] border transition-all"
               style={{
                 aspectRatio: '1 / 1',
-                background: '#1A1A1A',
-                borderColor:
-                  active === i
-                    ? 'var(--wp-green)'
-                    : 'rgba(255,255,255,0.07)',
-                boxShadow:
-                  active === i ? '0 0 0 1px var(--wp-green)' : 'none',
+                background: '#fff',
+                borderColor: active === i ? accent : 'rgba(15,23,42,0.08)',
+                boxShadow: active === i ? `0 0 0 1px ${accent}` : 'none',
               }}
             >
-              <img
-                src={url}
-                alt={`Thumb ${i + 1}`}
-                className="w-full h-full object-cover"
-              />
+              <img src={url} alt={`Thumb ${i + 1}`} className="w-full h-full object-cover" />
             </button>
           ))}
         </div>
@@ -247,624 +167,460 @@ function Gallery({ imageUrls = [] }) {
   )
 }
 
-function OptionGroup({ label, choices, selected, onSelect }) {
-  if (!Array.isArray(choices) || choices.length === 0) return null
+function OptionGroup({ label, choices, selected, onSelect, accent }) {
+  const isQuantity = label === 'Quantity'
+  const [customMode, setCustomMode] = useState(false)
+  const [customInput, setCustomInput] = useState('')
+
+  useEffect(() => {
+    if (!choices.includes(selected) && selected !== 'Custom') {
+      return
+    }
+    if (choices.includes(selected)) {
+      setCustomMode(false)
+      setCustomInput('')
+    }
+  }, [selected, choices])
+
+  const displaySelected = customMode
+    ? customInput
+      ? `${customInput} pcs`
+      : 'Custom'
+    : selected
 
   return (
-    <div>
-      <div className="text-[10px] uppercase tracking-widest text-ivory-300/35 mb-2">
-        {label}
+    <div className="rounded-[18px] border bg-white p-4" style={{ borderColor: 'rgba(15,23,42,0.08)' }}>
+      <div className="flex items-baseline gap-2 mb-3">
+        <span className="font-body text-[10px] tracking-[0.2em] uppercase text-slate-400">
+          {label}
+        </span>
+        <span className="text-xs font-semibold text-slate-700">
+          {displaySelected}
+        </span>
       </div>
-      <div className="flex flex-wrap gap-2">
-        {choices.map((choice) => {
-          const active = selected === choice
+
+      <div className="flex flex-wrap gap-2 items-center">
+        {choices.map((c) => {
+          const isActive = !customMode && c === selected
           return (
             <button
-              key={choice}
-              onClick={() => onSelect(choice)}
-              className="px-3 py-2 rounded-sm border text-xs transition-all"
-              style={{
-                borderColor: active
-                  ? 'var(--wp-green)'
-                  : 'rgba(255,255,255,0.10)',
-                background: active
-                  ? 'rgba(22,163,74,0.12)'
-                  : 'rgba(255,255,255,0.03)',
-                color: active ? 'var(--wp-green)' : 'rgba(216,216,216,0.70)',
+              key={c}
+              onClick={() => {
+                onSelect(c)
+                setCustomMode(false)
+                setCustomInput('')
               }}
+              className="px-3.5 py-2 text-xs rounded-[14px] border transition-all font-body"
+              style={
+                isActive
+                  ? {
+                      borderColor: accent,
+                      color: accent,
+                      background: `${accent}12`,
+                      boxShadow: `0 0 0 1px ${accent}20`,
+                    }
+                  : {
+                      borderColor: 'rgba(15,23,42,0.08)',
+                      color: '#64748b',
+                      background: '#ffffff',
+                    }
+              }
             >
-              {choice}
+              {c}
             </button>
           )
         })}
+
+        {isQuantity && (
+          <button
+            onClick={() => {
+              setCustomMode(true)
+              setCustomInput('')
+              onSelect('Custom')
+            }}
+            className="px-3.5 py-2 text-xs rounded-[14px] border transition-all font-body"
+            style={
+              customMode
+                ? {
+                    borderColor: accent,
+                    color: accent,
+                    background: `${accent}12`,
+                    boxShadow: `0 0 0 1px ${accent}20`,
+                  }
+                : {
+                    borderColor: 'rgba(15,23,42,0.08)',
+                    color: '#64748b',
+                    background: '#ffffff',
+                  }
+            }
+          >
+            Custom
+          </button>
+        )}
       </div>
+
+      {isQuantity && customMode && (
+        <div className="mt-3 flex items-center gap-2">
+          <input
+            autoFocus
+            type="number"
+            min="1"
+            placeholder="e.g. 350"
+            value={customInput}
+            onChange={(e) => {
+              const raw = e.target.value
+              setCustomInput(raw)
+              const v = parseInt(raw)
+              if (!isNaN(v) && v > 0) {
+                onSelect(`${v} pcs`)
+              } else {
+                onSelect('Custom')
+              }
+            }}
+            className="w-36 h-10 px-3 text-sm font-body border rounded-[12px] focus:outline-none transition-all"
+            style={{
+              background: '#ffffff',
+              borderColor: customInput ? accent : 'rgba(15,23,42,0.10)',
+              color: '#0f172a',
+              boxShadow: customInput ? `0 0 0 1px ${accent}20` : 'none',
+            }}
+          />
+          <span className="text-slate-400 text-xs font-body">pcs</span>
+        </div>
+      )}
     </div>
   )
 }
 
-function ChoiceCard({ active, onClick, icon: Icon, title, subtitle, color = 'var(--wp-cyan)' }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="w-full text-left rounded-sm border p-4 transition-all"
-      style={{
-        borderColor: active ? color : 'rgba(255,255,255,0.08)',
-        background: active ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.02)',
-        boxShadow: active ? `0 0 0 1px ${color}` : 'none',
-      }}
-    >
-      <div className="flex items-start gap-3">
-        <div
-          className="w-9 h-9 rounded-sm flex items-center justify-center shrink-0"
-          style={{
-            background: active ? 'rgba(255,255,255,0.10)' : 'rgba(255,255,255,0.04)',
-            color,
-          }}
-        >
-          <Icon size={16} />
-        </div>
+function FAQ({ q, a }) {
+  const [open, setOpen] = useState(false)
 
-        <div className="min-w-0">
-          <div className="text-sm font-semibold text-white">{title}</div>
-          <div className="text-xs text-ivory-300/40 mt-1 leading-relaxed">
-            {subtitle}
-          </div>
-        </div>
-      </div>
-    </button>
+  return (
+    <div className="border-b border-slate-100 last:border-none">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="w-full flex items-center justify-between py-4 text-left gap-4 group"
+      >
+        <span className="text-slate-700 text-sm group-hover:text-emerald-700 transition-colors">
+          {q}
+        </span>
+        <ChevronRight
+          size={14}
+          className="shrink-0 text-slate-300 transition-transform duration-200"
+          style={{ transform: open ? 'rotate(90deg)' : 'rotate(0deg)' }}
+        />
+      </button>
+
+      {open && <p className="pb-4 text-slate-500 text-sm leading-relaxed">{a}</p>}
+    </div>
   )
 }
 
+function RelatedCard({ slug, product }) {
+  return (
+    <Link
+      to={`/products/${slug}`}
+      className="rounded-[18px] border bg-white flex gap-3 p-3 items-center group hover:no-underline shadow-sm hover:shadow-[0_14px_36px_rgba(15,23,42,0.08)] transition-all duration-300"
+      style={{ borderColor: 'rgba(15,23,42,0.08)' }}
+    >
+      <div className="w-14 h-14 shrink-0 rounded-[14px] bg-slate-50 border border-slate-100 flex items-center justify-center">
+        <ImagePlus size={16} style={{ color: product.accent, opacity: 0.22 }} />
+      </div>
+      <div className="min-w-0">
+        <p
+          className="text-slate-900 text-xs font-semibold leading-snug group-hover:text-emerald-700 transition-colors line-clamp-2"
+          style={{ fontFamily: "'Lora', serif" }}
+        >
+          {product.name}
+        </p>
+        <p className="text-slate-400 text-[10px] font-body mt-0.5">
+          {product.price > 0 ? `₱${product.price.toLocaleString()}` : 'Get Quote'}{' '}
+          <span className="text-slate-300">{product.priceNote}</span>
+        </p>
+      </div>
+    </Link>
+  )
+}
+
+/* ── Page ── */
 export default function ProductDetailPage() {
   const { slug } = useParams()
-  const { product, loading } = useProduct(slug)
-  const { products: allProducts } = useProducts()
+
+  const { product: dbProduct, loading: dbLoading } = useProduct(slug)
+
+  const product = PRODUCTS[slug] || PRODUCTS['business-cards-standard']
+  const {
+    name,
+    cat,
+    catSlug,
+    price,
+    priceNote,
+    minQty,
+    tag,
+    accent,
+    rating,
+    reviews,
+    sold,
+    desc,
+    specs,
+    options,
+    turnaround,
+    faqs,
+  } = product
+
+  const galleryImages = dbProduct
+    ? [
+        ...(dbProduct.thumbnail_url ? [dbProduct.thumbnail_url] : []),
+        ...(Array.isArray(dbProduct.images) ? dbProduct.images : []),
+      ]
+    : []
+
+  const displayName = dbProduct?.name ?? name
+  const displayBasePrice = dbProduct?.base_price ?? price
+  const displayDesc = dbProduct?.short_description ?? desc
+  const displayTurnaround = dbProduct?.turnaround_days
+    ? `${dbProduct.turnaround_days} business days`
+    : turnaround
+
+  const [selections, setSelections] = useState(() =>
+    Object.fromEntries(Object.entries(options).map(([k, v]) => [k, v[0]]))
+  )
+  const [hearted, setHearted] = useState(false)
+  const [inquired, setInquired] = useState(false)
+  const [addedToCart, setAddedToCart] = useState(false)
   const { addToCart } = useCart()
 
-  const [hearted, setHearted] = useState(false)
-  const [addedToCart, setAddedToCart] = useState(false)
-  const [inquired, setInquired] = useState(false)
-  const [qty, setQty] = useState(1)
-  const [selections, setSelections] = useState({})
-
-  const [designOption, setDesignOption] = useState('upload')
-  const [designFile, setDesignFile] = useState(null)
-  const [designError, setDesignError] = useState('')
-  const [deliveryMethod, setDeliveryMethod] = useState('pickup')
-
-  const specsRef = useScrollReveal()
-  const relatedRef = useScrollReveal()
+  function getQty() {
+    const raw = selections['Quantity'] || ''
+    const n = parseInt(raw.replace(/,/g, ''))
+    return !isNaN(n) && n > 0 ? n : 1
+  }
 
   useEffect(() => {
-    setHearted(false)
-    setAddedToCart(false)
+    setSelections(Object.fromEntries(Object.entries(options).map(([k, v]) => [k, v[0]])))
     setInquired(false)
-    setQty(1)
-    setSelections({})
-    setDesignOption('upload')
-    setDesignFile(null)
-    setDesignError('')
-    setDeliveryMethod('pickup')
+    setAddedToCart(false)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }, [slug])
 
-  const galleryImages = useMemo(() => {
-    if (!product) return []
-    return [
-      ...(product.thumbnail_url ? [product.thumbnail_url] : []),
-      ...(Array.isArray(product.images) ? product.images : []),
-    ]
-  }, [product])
-
-  const optionGroups = useMemo(() => {
-    if (!product) return {}
-    return product.options && typeof product.options === 'object'
-      ? product.options
-      : {}
-  }, [product])
-
-  useEffect(() => {
-    const defaults = {}
-    Object.entries(optionGroups).forEach(([label, choices]) => {
-      defaults[label] = Array.isArray(choices) && choices.length ? choices[0] : ''
-    })
-    setSelections(defaults)
-  }, [optionGroups])
-
-  const relatedProducts = useMemo(() => {
-    if (!product || !Array.isArray(allProducts)) return []
-    return allProducts
-      .filter((p) => p.slug !== product.slug)
-      .filter((p) => p.category_id === product.category_id)
-      .slice(0, 3)
-  }, [product, allProducts])
-
-  const displayPrice = Number(product?.base_price || 0)
-  const deliveryFee = deliveryMethod === 'deliver' ? DELIVERY_FEE : 0
-  const subtotal = displayPrice * qty
-  const grandTotal = subtotal + deliveryFee
-
-  function handleDesignFileChange(e) {
-    const file = e.target.files?.[0]
-    setDesignError('')
-
-    if (!file) {
-      setDesignFile(null)
-      return
-    }
-
-    if (!ALLOWED_FILE_TYPES.includes(file.type)) {
-      setDesignError('Unsupported file type. Please upload PNG, JPG, JPEG, or PDF.')
-      setDesignFile(null)
-      return
-    }
-
-    if (file.size > MAX_FILE_SIZE) {
-      setDesignError('File is too large. Please choose “I will email the design” instead.')
-      setDesignFile(null)
-      return
-    }
-
-    setDesignFile(file)
-  }
-
-  function clearDesignFile() {
-    setDesignFile(null)
-    setDesignError('')
+  function handleInquire() {
+    setInquired(true)
+    setTimeout(() => setInquired(false), 2500)
   }
 
   function handleAddToCart() {
-    if (!product) return
-
-    if (designOption === 'upload' && !designFile) {
-      setDesignError('Please upload your design file first, or choose another design option.')
-      return
-    }
+    const qty = getQty()
+    const unitPrice = displayBasePrice > 0 && minQty > 1 ? displayBasePrice / minQty : displayBasePrice
 
     addToCart({
-      slug: product.slug,
-      id: product.id,
-      name: product.name,
-      unitPrice: displayPrice,
-      priceNote: product.unit ? `/ ${product.unit}` : '',
+      slug,
+      name: displayName,
+      unitPrice,
+      priceNote: '/ pc',
+      selections: { ...selections },
       qty,
-      selections,
-      thumbnail_url: product.thumbnail_url || null,
-      designOption,
-      designFileName: designFile?.name || null,
-      designFile,
-      layoutRequest: designOption === 'no_design',
-      deliveryMethod,
-      deliveryFee,
+      accent,
     })
 
     setAddedToCart(true)
-    setTimeout(() => setAddedToCart(false), 2200)
+    setTimeout(() => setAddedToCart(false), 2500)
   }
 
-  function handleInquire() {
-    setInquired(true)
-    setTimeout(() => setInquired(false), 2200)
-  }
+  const related = Object.entries(PRODUCTS)
+    .filter(([s, p]) => s !== slug && p.catSlug === catSlug)
+    .slice(0, 3)
 
-  if (loading) {
+  const specsRef = useScrollReveal()
+  const faqRef = useScrollReveal()
+  const relRef = useScrollReveal()
+
+  const displayPrice = displayBasePrice > 0 ? `₱${Number(displayBasePrice).toLocaleString()}` : 'Get Quote'
+  const pricePerPc = displayBasePrice > 0 && minQty > 1 ? displayBasePrice / minQty : null
+
+  if (dbLoading && !dbProduct) {
     return (
-      <div className="min-h-screen bg-ink-900 pt-24 pb-20">
+      <div className="min-h-screen bg-[#f4f6f4] pt-24 pb-20">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center py-20 text-ivory-300/50">
-            Loading product...
+          <div className="grid lg:grid-cols-12 gap-10">
+            <div className="lg:col-span-5 rounded-[24px] bg-white border animate-pulse" style={{ aspectRatio: '1/1', borderColor: 'rgba(15,23,42,0.08)' }} />
+            <div className="lg:col-span-4 space-y-4">
+              <div className="h-4 rounded-full bg-slate-200 w-1/3" />
+              <div className="h-10 rounded-full bg-slate-200 w-3/4" />
+              <div className="h-5 rounded-full bg-slate-200 w-1/2" />
+              <div className="h-28 rounded-[24px] bg-slate-200" />
+            </div>
+            <div className="lg:col-span-3 h-72 rounded-[24px] bg-slate-200" />
           </div>
         </div>
       </div>
     )
   }
-
-  if (!product) {
-    return (
-      <div className="min-h-screen bg-ink-900 pt-24 pb-20">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center py-20">
-            <h2
-              className="text-white text-2xl font-bold mb-3"
-              style={{ fontFamily: "'Lora', serif" }}
-            >
-              Product not found
-            </h2>
-            <p className="text-ivory-300/45 mb-6">
-              The product you’re looking for is unavailable or no longer exists.
-            </p>
-            <Link to="/products" className="btn-press inline-flex items-center gap-2 px-5 py-3">
-              <ArrowLeft size={14} /> Back to Products
-            </Link>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  const displayTurnaround = product.turnaround_days
-    ? `${product.turnaround_days} business day${product.turnaround_days > 1 ? 's' : ''}`
-    : 'Based on project scope'
-
-  const rating = 4.9
-  const reviews = 120
 
   return (
-    <div className="min-h-screen bg-ink-900 pt-24 pb-20">
+    <div className="min-h-screen bg-[#f4f6f4] pt-24 pb-20">
       <div className="max-w-7xl mx-auto px-6">
-        <nav className="flex items-center gap-2 text-[10px] font-body tracking-wider text-ivory-300/30 mb-8 flex-wrap">
-          <Link to="/" className="hover:text-ivory-300/60 transition-colors">
-            Home
-          </Link>
+        {/* Breadcrumb */}
+        <nav className="flex items-center gap-2 text-[10px] font-body tracking-[0.18em] text-slate-400 mb-8 flex-wrap uppercase">
+          <Link to="/" className="hover:text-slate-600 transition-colors">Home</Link>
           <ChevronRight size={10} />
-          <Link
-            to="/products"
-            className="hover:text-ivory-300/60 transition-colors"
-          >
-            Products
-          </Link>
+          <Link to="/products" className="hover:text-slate-600 transition-colors">Products</Link>
           <ChevronRight size={10} />
-          <span className="text-ivory-300/55">{product.name}</span>
+          <span>{cat}</span>
+          <ChevronRight size={10} />
+          <span className="text-slate-600">{displayName}</span>
         </nav>
 
+        {/* Top intro row */}
+        <div className="mb-6">
+          <Link
+            to="/products"
+            className="inline-flex items-center gap-2 text-[11px] font-semibold text-slate-500 hover:text-emerald-700 transition-colors"
+          >
+            <ArrowLeft size={14} />
+            Back to catalog
+          </Link>
+        </div>
+
+        {/* Main grid */}
         <div className="grid lg:grid-cols-12 gap-10 mb-16">
+          {/* Gallery */}
           <div className="lg:col-span-5">
-            <Gallery imageUrls={galleryImages} />
+            <Gallery imageUrls={galleryImages} accent={accent} />
           </div>
 
+          {/* Info */}
           <div className="lg:col-span-4 flex flex-col gap-5">
             <div>
-              {product.categories?.name && (
+              {tag && (
                 <div
-                  className="inline-flex items-center gap-1.5 mb-3 px-2.5 py-1 rounded-sm text-[10px] font-body font-bold tracking-widest uppercase"
+                  className="inline-flex items-center gap-1.5 mb-3 px-3 py-1 rounded-full text-[10px] font-body font-bold tracking-[0.18em] uppercase"
                   style={{
-                    background: 'rgba(25,147,210,0.18)',
-                    color: 'var(--wp-cyan)',
-                    border: '1px solid rgba(25,147,210,0.35)',
+                    background: `${accent}15`,
+                    color: accent,
+                    border: `1px solid ${accent}25`,
                   }}
                 >
-                  {product.categories.name}
+                  <Sparkles size={11} />
+                  {tag}
                 </div>
               )}
 
               <h1
-                className="text-white leading-tight mb-3"
-                style={{
-                  fontFamily: "'Lora', serif",
-                  fontWeight: 900,
-                  fontSize: 'clamp(1.5rem, 3vw, 2rem)',
-                }}
+                className="text-slate-900 leading-tight mb-3"
+                style={{ fontFamily: "'Lora', serif", fontWeight: 900, fontSize: 'clamp(1.7rem, 3vw, 2.2rem)' }}
               >
-                {product.name}
+                {displayName}
               </h1>
 
               <div className="flex items-center gap-3 flex-wrap">
                 <Stars rating={rating} />
-                <span className="text-wp-yellow text-sm font-bold font-body">
-                  {rating}
-                </span>
-                <span className="text-ivory-300/30 text-xs font-body">
-                  {reviews}+ reviews
-                </span>
+                <span className="text-[13px] font-bold text-amber-500">{rating}</span>
+                <span className="text-xs text-slate-400">{reviews} Ratings</span>
+                <div className="h-3 w-px bg-slate-200" />
+                <span className="text-xs text-slate-400">{sold} Sold</span>
               </div>
             </div>
 
-            <div className="bg-ink-800 border border-white/[0.07] rounded-sm px-5 py-4">
-              <div className="text-ivory-300/40 text-[10px] font-body tracking-widest uppercase mb-1">
-                Starting Price
-              </div>
-              <div className="flex items-baseline gap-2">
-                <span
-                  className="text-white font-black"
-                  style={{
-                    fontFamily: "'Lora', serif",
-                    fontSize: 'clamp(1.6rem, 3vw, 2.2rem)',
-                  }}
-                >
-                  ₱{displayPrice.toLocaleString()}
-                </span>
-                <span className="text-ivory-300/35 text-xs font-body">
-                  {product.unit ? `/ ${product.unit}` : ''}
-                </span>
-              </div>
-              <p className="text-ivory-300/30 text-[10px] font-body mt-1.5">
-                Final price may vary based on quantity, selected options, and delivery method.
+            {/* Price */}
+            <div className="rounded-[24px] border bg-white px-6 py-5 shadow-[0_10px_32px_rgba(15,23,42,0.06)]" style={{ borderColor: 'rgba(15,23,42,0.08)' }}>
+              {pricePerPc ? (
+                <>
+                  <div className="text-slate-400 text-[10px] font-body tracking-[0.18em] uppercase mb-1">
+                    Price per piece
+                  </div>
+                  <div className="flex items-baseline gap-2">
+                    <span
+                      className="text-slate-900 font-black"
+                      style={{ fontFamily: "'Lora', serif", fontSize: 'clamp(1.8rem, 3vw, 2.4rem)' }}
+                    >
+                      ₱{pricePerPc % 1 === 0 ? pricePerPc.toLocaleString() : pricePerPc.toFixed(2)}
+                    </span>
+                    <span className="text-slate-400 text-xs font-body">/ pc</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 mt-1.5">
+                    <span className="text-slate-400 text-[10px] font-body">
+                      {displayPrice} {priceNote}
+                    </span>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="text-slate-400 text-[10px] font-body tracking-[0.18em] uppercase mb-1">
+                    {displayBasePrice > 0 ? 'Price' : 'Pricing'}
+                  </div>
+                  <div className="flex items-baseline gap-2">
+                    <span
+                      className="text-slate-900 font-black"
+                      style={{ fontFamily: "'Lora', serif", fontSize: 'clamp(1.8rem, 3vw, 2.4rem)' }}
+                    >
+                      {displayPrice}
+                    </span>
+                    <span className="text-slate-400 text-xs font-body">{priceNote}</span>
+                  </div>
+                </>
+              )}
+
+              <p className="text-slate-400 text-[10px] font-body mt-2">
+                Final price confirmed via inquiry · Bulk discounts available
               </p>
             </div>
 
-            {Object.keys(optionGroups).length > 0 && (
-              <div className="space-y-5">
-                {Object.entries(optionGroups).map(([label, choices]) => (
-                  <OptionGroup
-                    key={label}
-                    label={label}
-                    choices={Array.isArray(choices) ? choices : []}
-                    selected={selections[label]}
-                    onSelect={(value) =>
-                      setSelections((prev) => ({ ...prev, [label]: value }))
-                    }
-                  />
-                ))}
-              </div>
-            )}
-
-            <div>
-              <div className="text-[10px] uppercase tracking-widest text-ivory-300/35 mb-2">
-                Quantity
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setQty((q) => Math.max(1, q - 1))}
-                  className="w-10 h-10 rounded-sm border border-white/10 bg-ink-800 text-ivory-300/70 hover:text-white transition-all flex items-center justify-center"
-                >
-                  <Minus size={14} />
-                </button>
-                <div className="w-14 h-10 rounded-sm border border-white/10 bg-ink-800 text-white flex items-center justify-center text-sm font-semibold">
-                  {qty}
-                </div>
-                <button
-                  onClick={() => setQty((q) => q + 1)}
-                  className="w-10 h-10 rounded-sm border border-white/10 bg-ink-800 text-ivory-300/70 hover:text-white transition-all flex items-center justify-center"
-                >
-                  <Plus size={14} />
-                </button>
-              </div>
+            {/* Options */}
+            <div className="space-y-4">
+              {Object.entries(options).map(([label, choices]) => (
+                <OptionGroup
+                  key={label}
+                  label={label}
+                  choices={choices}
+                  selected={selections[label]}
+                  onSelect={(v) => setSelections((s) => ({ ...s, [label]: v }))}
+                  accent={accent}
+                />
+              ))}
             </div>
 
-            {/* DESIGN SUBMISSION */}
-            <div className="bg-ink-800 border border-white/[0.07] rounded-sm p-5 space-y-4">
-              <div>
-                <div className="text-[10px] uppercase tracking-widest text-ivory-300/35 mb-1">
-                  Design Submission
-                </div>
-                <p className="text-xs text-ivory-300/40 leading-relaxed">
-                  Choose how you want to provide your design file for printing.
-                </p>
-              </div>
-
-              <div className="space-y-3">
-                <ChoiceCard
-                  active={designOption === 'upload'}
-                  onClick={() => {
-                    setDesignOption('upload')
-                    setDesignError('')
-                  }}
-                  icon={Upload}
-                  title="Upload design now"
-                  subtitle="Upload PNG, JPG, JPEG, or PDF files up to 10MB."
-                  color="var(--wp-green)"
-                />
-
-                <ChoiceCard
-                  active={designOption === 'email'}
-                  onClick={() => {
-                    setDesignOption('email')
-                    setDesignError('')
-                  }}
-                  icon={Mail}
-                  title="I will email the design"
-                  subtitle="Best for larger files that cannot be uploaded here."
-                  color="var(--wp-cyan)"
-                />
-
-                <ChoiceCard
-                  active={designOption === 'no_design'}
-                  onClick={() => {
-                    setDesignOption('no_design')
-                    setDesignError('')
-                  }}
-                  icon={FileText}
-                  title="I don’t have a design yet"
-                  subtitle="You may request layout assistance for an additional fee."
-                  color="var(--wp-yellow)"
-                />
-              </div>
-
-              {designOption === 'upload' && (
-                <div className="space-y-3">
-                  <label
-                    className="block rounded-sm border border-dashed p-4 cursor-pointer transition-all"
-                    style={{
-                      borderColor: designFile
-                        ? 'var(--wp-green)'
-                        : 'rgba(255,255,255,0.14)',
-                      background: 'rgba(255,255,255,0.02)',
-                    }}
-                  >
-                    <input
-                      type="file"
-                      accept=".png,.jpg,.jpeg,.pdf"
-                      className="hidden"
-                      onChange={handleDesignFileChange}
-                    />
-                    <div className="flex items-center gap-3">
-                      <div
-                        className="w-10 h-10 rounded-sm flex items-center justify-center"
-                        style={{
-                          background: 'rgba(22,163,74,0.10)',
-                          color: 'var(--wp-green)',
-                        }}
-                      >
-                        <Upload size={16} />
-                      </div>
-                      <div className="min-w-0">
-                        <div className="text-sm font-semibold text-white">
-                          {designFile ? 'Design file selected' : 'Click to upload design'}
-                        </div>
-                        <div className="text-xs text-ivory-300/35 mt-1">
-                          Accepted: PNG, JPG, JPEG, PDF · Max 10MB
-                        </div>
-                      </div>
-                    </div>
-                  </label>
-
-                  {designFile && (
-                    <div
-                      className="flex items-center justify-between gap-3 rounded-sm border p-3"
-                      style={{
-                        borderColor: 'rgba(22,163,74,0.22)',
-                        background: 'rgba(22,163,74,0.06)',
-                      }}
-                    >
-                      <div className="min-w-0">
-                        <div className="text-sm text-white font-medium truncate">
-                          {designFile.name}
-                        </div>
-                        <div className="text-[11px] text-ivory-300/40 mt-1">
-                          {(designFile.size / 1024 / 1024).toFixed(2)} MB
-                        </div>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={clearDesignFile}
-                        className="w-8 h-8 rounded-sm flex items-center justify-center text-ivory-300/45 hover:text-white transition-all"
-                        style={{ background: 'rgba(255,255,255,0.06)' }}
-                      >
-                        <X size={14} />
-                      </button>
-                    </div>
-                  )}
-
-                  {designError && (
-                    <div className="flex items-start gap-2 text-xs text-[#fca5a5]">
-                      <AlertCircle size={14} className="mt-0.5 shrink-0" />
-                      <span>{designError}</span>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {designOption === 'email' && (
-                <div
-                  className="rounded-sm border p-4 text-sm"
-                  style={{
-                    borderColor: 'rgba(25,147,210,0.22)',
-                    background: 'rgba(25,147,210,0.06)',
-                  }}
-                >
-                  <div className="text-white font-medium mb-1">
-                    Send your design via email
-                  </div>
-                  <p className="text-ivory-300/50 leading-relaxed">
-                    Please send your file to{' '}
-                    <span className="text-white font-semibold">
-                      wellprintormoc@gmail.com
-                    </span>{' '}
-                    and include your name plus the product you are ordering.
-                  </p>
-                </div>
-              )}
-
-              {designOption === 'no_design' && (
-                <div
-                  className="rounded-sm border p-4 text-sm"
-                  style={{
-                    borderColor: 'rgba(245,158,11,0.22)',
-                    background: 'rgba(245,158,11,0.06)',
-                  }}
-                >
-                  <div className="text-white font-medium mb-1">
-                    Layout assistance available
-                  </div>
-                  <p className="text-ivory-300/50 leading-relaxed">
-                    You may request layout assistance from our team. This service
-                    has an additional fee, which will be confirmed during order processing.
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {/* FULFILLMENT */}
-            <div className="bg-ink-800 border border-white/[0.07] rounded-sm p-5 space-y-4">
-              <div>
-                <div className="text-[10px] uppercase tracking-widest text-ivory-300/35 mb-1">
-                  Fulfillment Option
-                </div>
-                <p className="text-xs text-ivory-300/40 leading-relaxed">
-                  Choose whether you will pick up your order or have it delivered.
-                </p>
-              </div>
-
-              <div className="space-y-3">
-                <ChoiceCard
-                  active={deliveryMethod === 'pickup'}
-                  onClick={() => setDeliveryMethod('pickup')}
-                  icon={Store}
-                  title="Pick up"
-                  subtitle="Collect your order personally when it is ready."
-                  color="var(--wp-green)"
-                />
-
-                <ChoiceCard
-                  active={deliveryMethod === 'deliver'}
-                  onClick={() => setDeliveryMethod('deliver')}
-                  icon={Truck}
-                  title="Deliver"
-                  subtitle="A flat delivery fee of ₱500 will be added for now."
-                  color="var(--wp-cyan)"
-                />
-              </div>
-
-              <div
-                className="rounded-sm border p-4"
-                style={{
-                  borderColor: 'rgba(255,255,255,0.08)',
-                  background: 'rgba(255,255,255,0.02)',
-                }}
-              >
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-ivory-300/45">Product subtotal</span>
-                  <span className="text-white font-medium">
-                    ₱{subtotal.toLocaleString()}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between text-sm mt-2">
-                  <span className="text-ivory-300/45">Delivery fee</span>
-                  <span className="text-white font-medium">
-                    ₱{deliveryFee.toLocaleString()}
-                  </span>
-                </div>
-                <div className="h-px bg-white/6 my-3" />
-                <div className="flex items-center justify-between">
-                  <span className="text-ivory-300/55 text-sm font-semibold">Estimated total</span>
-                  <span
-                    className="text-white font-black"
-                    style={{ fontFamily: "'Lora', serif", fontSize: '1.25rem' }}
-                  >
-                    ₱{grandTotal.toLocaleString()}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2.5 text-sm">
-              <CheckCircle
-                size={15}
-                style={{ color: 'var(--wp-green)', flexShrink: 0 }}
-              />
-              <span className="text-ivory-300/55">
-                Ready in{' '}
-                <span className="text-white font-semibold">
-                  {displayTurnaround}
-                </span>
+            {/* Turnaround */}
+            <div className="flex items-center gap-2.5 text-sm rounded-[18px] border bg-white px-4 py-3" style={{ borderColor: 'rgba(15,23,42,0.08)' }}>
+              <Clock3 size={15} style={{ color: 'var(--wp-green)', flexShrink: 0 }} />
+              <span className="text-slate-500">
+                Ready in <span className="text-slate-900 font-semibold">{displayTurnaround}</span>
               </span>
             </div>
 
+            {/* CTAs */}
             <div className="flex flex-col gap-3 pt-1">
               <button
                 onClick={handleAddToCart}
-                className="w-full flex items-center justify-center gap-2.5 text-sm py-3.5 rounded-sm font-bold uppercase tracking-widest transition-all btn-press"
+                disabled={displayBasePrice === 0}
+                className="w-full flex items-center justify-center gap-2.5 text-sm py-3.5 rounded-[16px] font-bold uppercase tracking-[0.16em] transition-all"
                 style={
                   addedToCart
-                    ? { background: 'var(--wp-green)', color: '#0a0a0a' }
-                    : {}
+                    ? {
+                        background: 'var(--wp-green)',
+                        color: '#ffffff',
+                        boxShadow: '0 12px 28px rgba(22,163,74,0.20)',
+                      }
+                    : displayBasePrice === 0
+                    ? {
+                        background: '#f8fafc',
+                        color: '#94a3b8',
+                        cursor: 'not-allowed',
+                        border: '1px solid rgba(15,23,42,0.08)',
+                      }
+                    : {
+                        background: 'linear-gradient(135deg, var(--wp-green) 0%, var(--wp-green-dk) 100%)',
+                        color: '#ffffff',
+                        boxShadow: '0 12px 28px rgba(22,163,74,0.20)',
+                      }
                 }
               >
                 {addedToCart ? (
                   <>
                     <CheckCircle size={16} /> Added to Cart!
+                  </>
+                ) : displayBasePrice === 0 ? (
+                  <>
+                    <ShoppingCart size={16} /> Quote Required
                   </>
                 ) : (
                   <>
@@ -876,13 +632,11 @@ export default function ProductDetailPage() {
               <div className="flex gap-3">
                 <button
                   onClick={handleInquire}
-                  className="flex-1 flex items-center justify-center gap-2 text-sm py-3 rounded-sm border-2 font-bold uppercase tracking-wide transition-all"
+                  className="flex-1 flex items-center justify-center gap-2 text-sm py-3 rounded-[16px] border font-bold uppercase tracking-[0.12em] transition-all"
                   style={{
-                    color: 'var(--wp-cyan)',
-                    borderColor: 'var(--wp-cyan)',
-                    background: inquired
-                      ? 'rgba(25,147,210,0.14)'
-                      : 'transparent',
+                    color: accent,
+                    borderColor: `${accent}55`,
+                    background: inquired ? `${accent}15` : '#ffffff',
                   }}
                 >
                   {inquired ? (
@@ -898,208 +652,163 @@ export default function ProductDetailPage() {
 
                 <Link
                   to="/contact"
-                  className="flex-1 btn-press flex items-center justify-center gap-2 text-sm py-3"
+                  className="flex-1 inline-flex items-center justify-center gap-2 text-sm py-3 rounded-[16px] font-bold uppercase tracking-[0.12em] text-white"
+                  style={{
+                    background: 'linear-gradient(135deg, var(--wp-green) 0%, var(--wp-green-dk) 100%)',
+                  }}
                 >
                   Request Quote <ArrowRight size={14} />
                 </Link>
 
                 <button
                   onClick={() => setHearted((v) => !v)}
-                  className="w-12 h-12 border border-white/[0.10] rounded-sm bg-ink-800 flex items-center justify-center transition-all hover:border-wp-magenta/40"
+                  className="w-12 h-12 border rounded-[16px] bg-white flex items-center justify-center transition-all"
                   style={{
-                    color: hearted
-                      ? 'var(--wp-magenta)'
-                      : 'rgba(216,216,216,0.25)',
+                    borderColor: hearted ? 'var(--wp-magenta)' : 'rgba(15,23,42,0.08)',
+                    color: hearted ? 'var(--wp-magenta)' : '#94a3b8',
                   }}
                 >
-                  <Heart
-                    size={16}
-                    fill={hearted ? 'var(--wp-magenta)' : 'transparent'}
-                  />
+                  <Heart size={16} fill={hearted ? 'var(--wp-magenta)' : 'transparent'} />
                 </button>
               </div>
             </div>
 
             <div className="flex items-center gap-2 pt-1">
-              <Share2 size={12} className="text-ivory-300/25" />
-              <span className="text-ivory-300/25 text-[10px] font-body tracking-wider">
+              <Share2 size={12} className="text-slate-300" />
+              <span className="text-slate-400 text-[10px] font-body tracking-[0.16em] uppercase">
                 Share this product
               </span>
             </div>
           </div>
 
+          {/* Sidebar */}
           <div className="lg:col-span-3 space-y-4">
-            <div className="bg-ink-800 border border-white/[0.07] rounded-sm p-5">
-              <div className="text-[10px] uppercase tracking-widest text-ivory-300/35 mb-3">
-                Product Overview
+            <div className="rounded-[22px] border bg-white p-5 shadow-sm" style={{ borderColor: 'rgba(15,23,42,0.08)' }}>
+              <div className="flex items-center gap-2 mb-3">
+                <FileText size={14} style={{ color: accent }} />
+                <span className="font-body text-[10px] tracking-[0.18em] uppercase font-semibold" style={{ color: accent }}>
+                  File Requirements
+                </span>
               </div>
-              <p className="text-sm leading-relaxed text-ivory-300/60">
-                {product.short_description || 'Premium quality print service.'}
-              </p>
-            </div>
 
-            <div className="bg-ink-800 border border-white/[0.07] rounded-sm p-5">
-              <div className="text-[10px] uppercase tracking-widest text-ivory-300/35 mb-3">
-                Quick Details
-              </div>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between gap-3">
-                  <span className="text-ivory-300/35">Min. Qty</span>
-                  <span className="text-white">
-                    {product.min_qty || 1} {product.unit || 'pcs'}
-                  </span>
-                </div>
-                <div className="flex justify-between gap-3">
-                  <span className="text-ivory-300/35">Turnaround</span>
-                  <span className="text-white text-right">{displayTurnaround}</span>
-                </div>
-                <div className="flex justify-between gap-3">
-                  <span className="text-ivory-300/35">Category</span>
-                  <span className="text-white text-right">
-                    {product.categories?.name || 'General'}
-                  </span>
-                </div>
-                <div className="flex justify-between gap-3">
-                  <span className="text-ivory-300/35">Delivery</span>
-                  <span className="text-white text-right">
-                    {deliveryMethod === 'deliver' ? 'Deliver (+₱500)' : 'Pick up'}
-                  </span>
-                </div>
-              </div>
-            </div>
+              <ul className="space-y-2">
+                {[
+                  'PDF, AI, or EPS format',
+                  '300 DPI resolution',
+                  '3mm bleed on all sides',
+                  'Fonts outlined / embedded',
+                  'CMYK color mode',
+                ].map((r) => (
+                  <li key={r} className="flex items-start gap-2 text-xs text-slate-500">
+                    <CheckCircle size={11} className="shrink-0 mt-0.5" style={{ color: 'var(--wp-green)' }} />
+                    {r}
+                  </li>
+                ))}
+              </ul>
 
-            <div className="bg-ink-800 border border-white/[0.07] rounded-sm p-5">
-              <div className="text-[10px] uppercase tracking-widest text-ivory-300/35 mb-3">
-                Why choose this
-              </div>
-              <div className="space-y-3 text-sm text-ivory-300/60">
-                <div className="flex items-center gap-2">
-                  <ShieldCheck size={14} className="text-wp-green" />
-                  Quality checked before release
-                </div>
-                <div className="flex items-center gap-2">
-                  <Clock size={14} className="text-wp-cyan" />
-                  Fast and reliable turnaround
-                </div>
-                <div className="flex items-center gap-2">
-                  <Package size={14} className="text-wp-yellow" />
-                  Suitable for personal or business use
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div ref={specsRef} className="animate-on-scroll mb-14">
-          <div className="mb-5">
-            <h2
-              className="text-white text-2xl font-bold mb-2"
-              style={{ fontFamily: "'Lora', serif" }}
-            >
-              Product Details
-            </h2>
-            <p className="text-ivory-300/45 text-sm">
-              Essential information about this print product.
-            </p>
-          </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-ink-800 border border-white/[0.07] rounded-sm p-5">
-              <div className="text-[10px] uppercase tracking-widest text-ivory-300/35 mb-2">
-                Price
-              </div>
-              <div className="text-white font-semibold">
-                ₱{displayPrice.toLocaleString()}
-              </div>
-            </div>
-
-            <div className="bg-ink-800 border border-white/[0.07] rounded-sm p-5">
-              <div className="text-[10px] uppercase tracking-widest text-ivory-300/35 mb-2">
-                Minimum Quantity
-              </div>
-              <div className="text-white font-semibold">
-                {product.min_qty || 1} {product.unit || 'pcs'}
-              </div>
-            </div>
-
-            <div className="bg-ink-800 border border-white/[0.07] rounded-sm p-5">
-              <div className="text-[10px] uppercase tracking-widest text-ivory-300/35 mb-2">
-                Turnaround
-              </div>
-              <div className="text-white font-semibold">{displayTurnaround}</div>
-            </div>
-
-            <div className="bg-ink-800 border border-white/[0.07] rounded-sm p-5">
-              <div className="text-[10px] uppercase tracking-widest text-ivory-300/35 mb-2">
-                Category
-              </div>
-              <div className="text-white font-semibold">
-                {product.categories?.name || 'General'}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {relatedProducts.length > 0 && (
-          <div ref={relatedRef} className="animate-on-scroll">
-            <div className="mb-5">
-              <h2
-                className="text-white text-2xl font-bold mb-2"
-                style={{ fontFamily: "'Lora', serif" }}
+              <Link
+                to="/file-specs"
+                className="flex items-center gap-1.5 mt-4 text-[10px] font-body tracking-[0.18em] uppercase text-slate-400 hover:text-emerald-700 transition-colors"
               >
-                Related Products
-              </h2>
-              <p className="text-ivory-300/45 text-sm">
-                You may also want to explore these similar items.
-              </p>
+                Full File Spec Guide <ChevronRight size={10} />
+              </Link>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-4">
-              {relatedProducts.map((p) => (
-                <Link
-                  key={p.id}
-                  to={`/products/${p.slug}`}
-                  className="bg-ink-800 border border-white/[0.07] rounded-sm overflow-hidden group transition-all duration-300 hover:-translate-y-1"
-                >
-                  <div
-                    className="relative"
-                    style={{ aspectRatio: '4 / 3', background: '#1A1A1A' }}
-                  >
-                    {p.thumbnail_url ? (
-                      <img
-                        src={p.thumbnail_url}
-                        alt={p.name}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
-                    ) : (
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <ImagePlus
-                          size={22}
-                          style={{ color: 'rgba(216,216,216,0.20)' }}
-                        />
-                      </div>
-                    )}
-                  </div>
+            <div className="rounded-[22px] border bg-white p-5 shadow-sm" style={{ borderColor: 'rgba(15,23,42,0.08)' }}>
+              <div className="flex items-center gap-2 mb-3">
+                <ShieldCheck size={14} className="text-emerald-600" />
+                <span className="font-body text-[10px] tracking-[0.18em] uppercase text-slate-500 font-semibold">
+                  Our Promise
+                </span>
+              </div>
 
-                  <div className="p-4">
-                    <h3
-                      className="text-white text-sm font-semibold mb-1 line-clamp-2"
-                      style={{ fontFamily: "'Lora', serif" }}
-                    >
-                      {p.name}
-                    </h3>
-                    <p className="text-ivory-300/40 text-xs mb-3 line-clamp-2">
-                      {p.short_description}
-                    </p>
-                    <div className="text-white font-bold">
-                      ₱{Number(p.base_price || 0).toLocaleString()}
-                    </div>
+              <div className="space-y-3">
+                {[
+                  { text: 'Color accuracy guaranteed', color: 'var(--wp-green)' },
+                  { text: 'Reprint if we make an error', color: 'var(--wp-green)' },
+                  { text: 'Backed by Espiel-Bereso Group', color: 'var(--wp-cyan)' },
+                ].map(({ text, color }) => (
+                  <div key={text} className="flex items-center gap-2.5 text-xs text-slate-500">
+                    <CheckCircle size={13} style={{ color, flexShrink: 0 }} />
+                    {text}
                   </div>
-                </Link>
-              ))}
+                ))}
+              </div>
+            </div>
+
+            {related.length > 0 && (
+              <div ref={relRef} className="animate-on-scroll">
+                <div className="font-body text-[10px] tracking-[0.18em] uppercase text-slate-400 mb-3">
+                  Also in {cat}
+                </div>
+                <div className="space-y-2">
+                  {related.map(([s, p]) => (
+                    <RelatedCard key={s} slug={s} product={p} />
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Specs */}
+        <div ref={specsRef} className="animate-on-scroll mb-12">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="h-px w-8" style={{ background: accent }} />
+            <span className="font-body text-[10px] tracking-[0.25em] uppercase font-semibold" style={{ color: accent }}>
+              Product Specifications
+            </span>
+          </div>
+
+          <div className="rounded-[24px] overflow-hidden border bg-white shadow-sm" style={{ borderColor: 'rgba(15,23,42,0.08)' }}>
+            {specs.map((s, i) => (
+              <div
+                key={s.label}
+                className={`grid grid-cols-3 sm:grid-cols-4 gap-4 px-6 py-4 ${i % 2 !== 0 ? 'bg-slate-50/70' : ''}`}
+              >
+                <div className="font-body text-[10px] tracking-[0.18em] uppercase text-slate-400 col-span-1">
+                  {s.label}
+                </div>
+                <div className="text-slate-700 text-sm col-span-2 sm:col-span-3">{s.value}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Description + FAQ */}
+        <div className="grid lg:grid-cols-12 gap-10">
+          <div className="lg:col-span-7">
+            <div className="mb-12">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="h-px w-8" style={{ background: accent }} />
+                <span className="font-body text-[10px] tracking-[0.25em] uppercase font-semibold" style={{ color: accent }}>
+                  Product Overview
+                </span>
+              </div>
+
+              <div className="rounded-[24px] border bg-white p-7 shadow-sm" style={{ borderColor: 'rgba(15,23,42,0.08)' }}>
+                <p className="text-slate-600 leading-relaxed text-[0.96rem]">{displayDesc}</p>
+              </div>
             </div>
           </div>
-        )}
+
+          <div className="lg:col-span-5">
+            <div ref={faqRef} className="animate-on-scroll">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="h-px w-8" style={{ background: accent }} />
+                <span className="font-body text-[10px] tracking-[0.25em] uppercase font-semibold" style={{ color: accent }}>
+                  FAQs
+                </span>
+              </div>
+
+              <div className="rounded-[24px] border bg-white px-6 shadow-sm" style={{ borderColor: 'rgba(15,23,42,0.08)' }}>
+                {faqs.map((f) => (
+                  <FAQ key={f.q} q={f.q} a={f.a} />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   )

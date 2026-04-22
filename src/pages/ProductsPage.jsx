@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import PageHero from '../components/ui/PageHero'
 import { useProducts, useCategories } from '../hooks/useProducts'
@@ -15,7 +15,6 @@ import {
   RefreshCw,
   SlidersHorizontal,
   Sparkles,
-  ChevronLeft,
 } from 'lucide-react'
 
 const COLORS = {
@@ -36,10 +35,9 @@ function useScrollReveal(deps = []) {
       const els = document.querySelectorAll('.animate-on-scroll:not(.visible)')
       if (!els.length) return
       const io = new IntersectionObserver(
-        (entries) =>
-          entries.forEach((e) => {
-            if (e.isIntersecting) e.target.classList.add('visible')
-          }),
+        (entries) => entries.forEach((e) => {
+          if (e.isIntersecting) e.target.classList.add('visible')
+        }),
         { threshold: 0.05 }
       )
       els.forEach((el) => io.observe(el))
@@ -58,249 +56,7 @@ const SORT_OPTIONS = [
   { value: 'price_desc', label: 'Price: High → Low' },
 ]
 
-function ProductPreviewModal({ product, onClose }) {
-  const images = useMemo(() => {
-    if (!product) return []
-    return [
-      ...(product?.thumbnail_url ? [product.thumbnail_url] : []),
-      ...(Array.isArray(product?.images) ? product.images : []),
-    ]
-  }, [product])
-
-  const [activeIndex, setActiveIndex] = useState(0)
-
-  useEffect(() => {
-    setActiveIndex(0)
-  }, [product])
-
-  useEffect(() => {
-    if (!product) return
-
-    const handleKeyDown = (e) => {
-      if (e.key === 'Escape') onClose()
-      if (images.length > 1 && e.key === 'ArrowRight') {
-        setActiveIndex((prev) => (prev + 1) % images.length)
-      }
-      if (images.length > 1 && e.key === 'ArrowLeft') {
-        setActiveIndex((prev) => (prev - 1 + images.length) % images.length)
-      }
-    }
-
-    document.body.style.overflow = 'hidden'
-    window.addEventListener('keydown', handleKeyDown)
-
-    return () => {
-      document.body.style.overflow = ''
-      window.removeEventListener('keydown', handleKeyDown)
-    }
-  }, [product, images.length, onClose])
-
-  if (!product) return null
-
-  const activeImage = images[activeIndex]
-
-  return (
-    <div
-      className="fixed inset-0 z-[80] flex items-center justify-center p-4"
-      style={{
-        background: 'rgba(2, 6, 23, 0.75)',
-        backdropFilter: 'blur(8px)',
-      }}
-      onClick={onClose}
-    >
-      <div
-        className="w-full max-w-5xl rounded-[28px] overflow-hidden border bg-white shadow-[0_28px_90px_rgba(15,23,42,0.28)]"
-        style={{ borderColor: 'rgba(15,23,42,0.08)' }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
-          <div className="min-w-0">
-            <p className="text-[10px] uppercase tracking-[0.22em] font-semibold text-slate-400 mb-1">
-              Product Preview
-            </p>
-            <h3
-              className="text-lg font-semibold truncate text-slate-900"
-              style={{ fontFamily: "'Lora', serif" }}
-            >
-              {product.name}
-            </h3>
-          </div>
-
-          <button
-            onClick={onClose}
-            className="w-10 h-10 rounded-[14px] flex items-center justify-center transition-all bg-slate-50 border border-slate-200 text-slate-500 hover:bg-slate-100 hover:text-slate-700"
-          >
-            <X size={16} />
-          </button>
-        </div>
-
-        <div className="grid lg:grid-cols-[1.3fr_0.7fr]">
-          <div className="p-5">
-            <div
-              className="relative rounded-[22px] overflow-hidden border"
-              style={{
-                aspectRatio: '1 / 1',
-                background: '#f8fafc',
-                borderColor: 'rgba(15,23,42,0.08)',
-              }}
-            >
-              {activeImage ? (
-                <img
-                  src={activeImage}
-                  alt={product.name}
-                  className="w-full h-full object-contain"
-                />
-              ) : (
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
-                  <ImagePlus size={28} className="text-slate-400" />
-                  <span className="text-[10px] uppercase tracking-[0.2em] text-slate-300 font-semibold">
-                    No Image
-                  </span>
-                </div>
-              )}
-
-              {images.length > 1 && (
-                <>
-                  <button
-                    onClick={() =>
-                      setActiveIndex((prev) => (prev - 1 + images.length) % images.length)
-                    }
-                    className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full flex items-center justify-center transition-all"
-                    style={{
-                      background: 'rgba(255,255,255,0.92)',
-                      border: '1px solid rgba(15,23,42,0.08)',
-                      color: '#475569',
-                    }}
-                  >
-                    <ChevronLeft size={18} />
-                  </button>
-
-                  <button
-                    onClick={() =>
-                      setActiveIndex((prev) => (prev + 1) % images.length)
-                    }
-                    className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full flex items-center justify-center transition-all"
-                    style={{
-                      background: 'rgba(255,255,255,0.92)',
-                      border: '1px solid rgba(15,23,42,0.08)',
-                      color: '#475569',
-                    }}
-                  >
-                    <ChevronRight size={18} />
-                  </button>
-                </>
-              )}
-            </div>
-
-            {images.length > 1 && (
-              <div className="grid grid-cols-4 sm:grid-cols-6 gap-3 mt-4">
-                {images.map((img, index) => (
-                  <button
-                    key={`${img}-${index}`}
-                    onClick={() => setActiveIndex(index)}
-                    className="rounded-[16px] overflow-hidden border transition-all"
-                    style={{
-                      aspectRatio: '1 / 1',
-                      borderColor:
-                        activeIndex === index ? COLORS.green : 'rgba(15,23,42,0.08)',
-                      boxShadow:
-                        activeIndex === index ? '0 0 0 1px rgba(22,163,74,0.18)' : 'none',
-                      background: '#f8fafc',
-                    }}
-                  >
-                    <img src={img} alt="" className="w-full h-full object-cover" />
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <div className="border-l border-slate-100 p-6 flex flex-col justify-between">
-            <div>
-              <span
-                className="inline-flex text-[9px] font-bold px-2.5 py-1 rounded-full tracking-wide uppercase mb-3"
-                style={{
-                  background: 'rgba(25,147,210,0.10)',
-                  color: COLORS.cyan,
-                  border: '1px solid rgba(25,147,210,0.20)',
-                }}
-              >
-                {product.categories?.name || 'Print Product'}
-              </span>
-
-              <h3
-                className="text-[1.35rem] font-semibold leading-tight text-slate-900 mb-2"
-                style={{ fontFamily: "'Lora', serif" }}
-              >
-                {product.name}
-              </h3>
-
-              <p className="text-sm leading-relaxed text-slate-500 mb-5">
-                {product.short_description || 'Premium quality printing service.'}
-              </p>
-
-              <div
-                className="rounded-[20px] border p-4 mb-5"
-                style={{
-                  background: '#f8fafc',
-                  borderColor: 'rgba(15,23,42,0.08)',
-                }}
-              >
-                <div className="text-[10px] uppercase tracking-[0.2em] text-slate-400 font-semibold mb-1">
-                  Starting Price
-                </div>
-                <div
-                  className="text-[1.6rem] font-bold text-slate-900"
-                  style={{ fontFamily: "'Lora', serif" }}
-                >
-                  {formatPHP(product.base_price)}
-                </div>
-              </div>
-
-              <div className="space-y-2 text-xs text-slate-500">
-                {product.turnaround_days && (
-                  <div className="flex items-center gap-2">
-                    <Clock size={12} />
-                    {product.turnaround_days} day turnaround
-                  </div>
-                )}
-
-                {product.min_qty && (
-                  <div>
-                    Minimum order: {product.min_qty} {product.unit ?? 'pcs'}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="pt-6 flex flex-col gap-3">
-              <Link
-                to={`/products/${product.slug}`}
-                className="inline-flex items-center justify-center gap-2 rounded-[16px] px-5 py-3 text-sm font-semibold text-white transition-all duration-200 hover:scale-[1.01]"
-                style={{
-                  background: `linear-gradient(135deg, ${COLORS.green} 0%, ${COLORS.greenDk} 100%)`,
-                  boxShadow: '0 12px 24px rgba(22,163,74,0.16)',
-                }}
-              >
-                Order Now <ArrowRight size={14} />
-              </Link>
-
-              <button
-                onClick={onClose}
-                className="inline-flex items-center justify-center gap-2 rounded-[16px] px-5 py-3 text-sm font-semibold transition-all duration-200 bg-white border text-slate-600 hover:text-slate-800"
-                style={{ borderColor: 'rgba(15,23,42,0.08)' }}
-              >
-                Close Preview
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function ProductCard({ product, view, onPreview }) {
+function ProductCard({ product, view }) {
   const {
     slug,
     name,
@@ -317,15 +73,12 @@ function ProductCard({ product, view, onPreview }) {
 
   if (view === 'list') {
     return (
-<<<<<<< HEAD
       <div
         className="group rounded-[24px] border bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.06)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_46px_rgba(15,23,42,0.10)]"
         style={{ borderColor: 'rgba(15,23,42,0.08)' }}
       >
         <div className="flex gap-5">
-          <button
-            type="button"
-            onClick={() => onPreview(product)}
+          <div
             className="relative w-24 h-24 rounded-[18px] overflow-hidden shrink-0 flex items-center justify-center"
             style={{
               background: '#f8fafc',
@@ -337,7 +90,7 @@ function ProductCard({ product, view, onPreview }) {
             ) : (
               <ImagePlus size={20} style={{ color: '#94a3b8' }} />
             )}
-          </button>
+          </div>
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1.5 flex-wrap">
@@ -357,23 +110,6 @@ function ProductCard({ product, view, onPreview }) {
                 }}
               >
                 {categoryName}
-=======
-      <Link to={`/products/${slug}`} className="card-press flex gap-5 p-5 group">
-        <div className="w-20 h-20 rounded-sm overflow-hidden shrink-0 flex items-center justify-center"
-          style={{ background: 'var(--surface-raised)', border: '1px solid var(--border-subtle)' }}>
-          {thumbnail_url
-            ? <img src={thumbnail_url} alt={name} className="w-full h-full object-cover" />
-            : <ImagePlus size={20} style={{ color: 'var(--text-faint)' }} />}
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1 flex-wrap">
-            <h3 className="text-sm font-semibold group-hover:text-wp-green transition-colors"
-              style={{ fontFamily: "'Lora', serif", color: 'var(--text-primary)' }}>{name}</h3>
-            {categories?.name && (
-              <span className="text-[9px] font-body px-2 py-0.5 rounded-sm"
-                style={{ background: 'rgba(25,147,210,0.10)', color: '#1993D2', border: '1px solid rgba(25,147,210,0.2)' }}>
-                {categories.name}
->>>>>>> a5d91e36c677cee500593d29c92d9ae63d16399d
               </span>
             </div>
 
@@ -407,39 +143,23 @@ function ProductCard({ product, view, onPreview }) {
               <div className="text-[9px] mt-0.5 text-slate-400">starting price</div>
             </div>
 
-            <div className="flex items-center gap-2 justify-end mt-3">
-              <button
-                type="button"
-                onClick={() => onPreview(product)}
-                className="inline-flex items-center justify-center gap-1.5 rounded-[14px] px-4 py-2.5 text-[11px] font-semibold text-slate-700 bg-white border transition-all duration-200 hover:bg-slate-50"
-                style={{ borderColor: 'rgba(15,23,42,0.08)' }}
-              >
-                Preview
-              </button>
-
-              <Link
-                to={`/products/${slug}`}
-                className="inline-flex items-center justify-center gap-1.5 rounded-[14px] px-4 py-2.5 text-[11px] font-semibold text-white transition-all duration-200 hover:scale-[1.02]"
-                style={{
-                  background: `linear-gradient(135deg, ${COLORS.green} 0%, ${COLORS.greenDk} 100%)`,
-                  boxShadow: '0 10px 24px rgba(22,163,74,0.18)',
-                }}
-              >
-                Order Now
-              </Link>
-            </div>
+            <Link
+              to={`/products/${slug}`}
+              className="inline-flex items-center justify-center gap-1.5 rounded-[14px] px-4 py-2.5 text-[11px] font-semibold text-white mt-3 transition-all duration-200 hover:scale-[1.02]"
+              style={{
+                background: `linear-gradient(135deg, ${COLORS.green} 0%, ${COLORS.greenDk} 100%)`,
+                boxShadow: '0 10px 24px rgba(22,163,74,0.18)',
+              }}
+            >
+              Order Now
+            </Link>
           </div>
-<<<<<<< HEAD
-=======
-          <span className="btn-press text-xs py-2 px-4 whitespace-nowrap mt-3">Order Now</span>
->>>>>>> a5d91e36c677cee500593d29c92d9ae63d16399d
         </div>
-      </Link>
+      </div>
     )
   }
 
   return (
-<<<<<<< HEAD
     <div
       className="group rounded-[24px] border bg-white overflow-hidden shadow-[0_10px_30px_rgba(15,23,42,0.06)] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_22px_56px_rgba(15,23,42,0.10)]"
       style={{ borderColor: 'rgba(15,23,42,0.08)' }}
@@ -452,13 +172,6 @@ function ProductCard({ product, view, onPreview }) {
           borderBottom: '1px solid rgba(15,23,42,0.06)',
         }}
       >
-        <button
-          type="button"
-          onClick={() => onPreview(product)}
-          className="absolute inset-0 z-10"
-          aria-label={`Preview ${name}`}
-        />
-
         {thumbnail_url ? (
           <img
             src={thumbnail_url}
@@ -470,47 +183,11 @@ function ProductCard({ product, view, onPreview }) {
             <ImagePlus size={26} style={{ color: '#94a3b8' }} />
             <span className="text-[10px] uppercase tracking-[0.2em] text-slate-300 font-semibold">
               Product Image
-=======
-    <Link to={`/products/${slug}`} className="card-press flex flex-col overflow-hidden group cursor-pointer">
-      <div className="relative" style={{ aspectRatio: '4/3', background: 'var(--surface-raised)', borderBottom: '1px solid var(--border-subtle)' }}>
-        {thumbnail_url
-          ? <img src={thumbnail_url} alt={name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-          : (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
-              <ImagePlus size={26} style={{ color: 'var(--text-faint)', opacity: 0.5 }} />
-              <span className="font-body text-[8px] tracking-widest uppercase" style={{ color: 'var(--text-faint)' }}>No Photo</span>
-            </div>
-          )}
-        {categories?.name && (
-          <div className="absolute top-3 left-3 px-2 py-0.5 text-[8px] font-body font-bold tracking-wider uppercase rounded-sm"
-            style={{ background: 'rgba(25,147,210,0.18)', color: '#1993D2', border: '1px solid rgba(25,147,210,0.3)', backdropFilter: 'blur(4px)' }}>
-            {categories.name}
-          </div>
-        )}
-        {turnaround_days && (
-          <div className="absolute top-3 right-3 px-2 py-0.5 text-[8px] font-body tracking-wide rounded-sm flex items-center gap-1"
-            style={{ background: 'rgba(0,0,0,0.55)', color: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(4px)' }}>
-            <Clock size={8} /> {turnaround_days}d
-          </div>
-        )}
-      </div>
-      <div className="p-5 flex flex-col flex-1">
-        <h3 className="text-sm font-semibold mb-1.5 leading-snug group-hover:text-wp-green transition-colors"
-          style={{ fontFamily: "'Lora', serif", color: 'var(--text-primary)' }}>{name}</h3>
-        <p className="text-xs leading-relaxed mb-4 line-clamp-2 flex-1" style={{ color: 'var(--text-muted)' }}>
-          {short_description || 'Premium quality printing service.'}
-        </p>
-        {min_qty && (
-          <div className="mb-4">
-            <span className="text-[9px] font-body px-2 py-0.5 rounded-sm"
-              style={{ background: 'var(--surface-raised)', color: 'var(--text-faint)', border: '1px solid var(--border-subtle)' }}>
-              Min. {min_qty} {unit ?? 'pcs'}
->>>>>>> a5d91e36c677cee500593d29c92d9ae63d16399d
             </span>
           </div>
         )}
 
-        <div className="absolute top-4 left-4 z-20">
+        <div className="absolute top-4 left-4">
           <span
             className="text-[9px] font-bold px-2.5 py-1 rounded-full tracking-wide uppercase backdrop-blur-sm"
             style={{
@@ -521,47 +198,6 @@ function ProductCard({ product, view, onPreview }) {
           >
             {categoryName}
           </span>
-        </div>
-
-        <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
-          {turnaround_days && (
-            <div
-              className="px-2.5 py-1 text-[8px] tracking-wide rounded-full flex items-center gap-1"
-              style={{
-                background: 'rgba(255,255,255,0.88)',
-                color: '#64748b',
-                border: '1px solid rgba(15,23,42,0.08)',
-              }}
-            >
-              <Clock size={8} /> {turnaround_days}d
-            </div>
-          )}
-        </div>
-
-        <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-[11]" />
-
-        <div className="absolute bottom-3 left-3 right-3 z-20 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0 flex gap-2">
-          <button
-            type="button"
-            onClick={() => onPreview(product)}
-            className="flex-1 py-2 rounded-[14px] text-[10px] font-bold transition-all"
-            style={{
-              background: 'rgba(255,255,255,0.94)',
-              color: '#0f172a',
-            }}
-          >
-            Preview
-          </button>
-
-          <Link
-            to={`/products/${slug}`}
-            className="flex-1 inline-flex items-center justify-center gap-1.5 py-2 rounded-[14px] text-[10px] font-bold text-white"
-            style={{
-              background: `linear-gradient(135deg, ${COLORS.green} 0%, ${COLORS.greenDk} 100%)`,
-            }}
-          >
-            Order <ArrowRight size={10} />
-          </Link>
         </div>
       </div>
 
@@ -602,7 +238,6 @@ function ProductCard({ product, view, onPreview }) {
             </div>
             <div className="text-[9px] mt-0.5 text-slate-400">starting price</div>
           </div>
-<<<<<<< HEAD
 
           <Link
             to={`/products/${slug}`}
@@ -615,14 +250,9 @@ function ProductCard({ product, view, onPreview }) {
             Order
             <ArrowRight size={10} />
           </Link>
-=======
-          <span className="btn-press text-[10px] py-2 px-3 shrink-0 flex items-center gap-1">
-            Order <ArrowRight size={11} />
-          </span>
->>>>>>> a5d91e36c677cee500593d29c92d9ae63d16399d
         </div>
       </div>
-    </Link>
+    </div>
   )
 }
 
@@ -654,8 +284,8 @@ function ProductSkeleton({ view }) {
         <div className="h-3 rounded-full w-full bg-slate-100" />
         <div className="h-3 rounded-full w-2/3 bg-slate-100" />
         <div className="flex justify-between items-end pt-3">
-          <div className="w-20 h-6 rounded-full bg-slate-100" />
-          <div className="w-16 h-9 rounded-[14px] bg-slate-100" />
+          <div className="h-6 w-20 rounded-full bg-slate-100" />
+          <div className="h-9 w-20 rounded-[14px] bg-slate-100" />
         </div>
       </div>
     </div>
@@ -667,7 +297,6 @@ export default function ProductsPage() {
   const [catSlug, setCatSlug] = useState(null)
   const [sortBy, setSortBy] = useState('name_asc')
   const [view, setView] = useState('grid')
-  const [previewProduct, setPreviewProduct] = useState(null)
 
   const { products, loading, error, refetch } = useProducts({
     categorySlug: catSlug,
@@ -679,28 +308,21 @@ export default function ProductsPage() {
   useScrollReveal([products])
 
   return (
-    <div className="min-h-screen bg-[#f8fafc]">
-      {/* HERO */}
+    <div className="min-h-screen bg-[#f4f6f4]">
       <PageHero
-        eyebrow="WELLPrint Products"
-        title="Premium Prints for Everyday Brands"
-        subtitle="Explore a polished lineup of print solutions built for businesses, events, and personal projects — designed to look sharp and delivered with care."
-        breadcrumbItems={[
-          { label: 'Home', href: '/' },
-          { label: 'Products' },
-        ]}
+        label="Catalog"
+        title="Our"
+        titleAccent="Products"
+        subtitle="Premium printing, delivered fast. Browse our full catalog — every product is crafted to make your brand look its best."
       />
 
-      {/* TOOLBAR */}
-      <div className="sticky top-16 z-30 backdrop-blur-xl border-b bg-white/90" style={{ borderColor: 'rgba(15,23,42,0.06)' }}>
+      {/* FILTER BAR */}
+      <div className="sticky top-16 z-30 border-b backdrop-blur-xl bg-white/88" style={{ borderColor: 'rgba(15,23,42,0.06)' }}>
         <div className="max-w-7xl mx-auto px-6 py-4">
-          <div
-            className="rounded-[24px] border bg-white p-4 shadow-[0_10px_30px_rgba(15,23,42,0.05)]"
-            style={{ borderColor: 'rgba(15,23,42,0.08)' }}
-          >
+          <div className="flex flex-col gap-4">
             <div className="flex items-center gap-3 flex-wrap">
               {/* Search */}
-              <div className="relative min-w-[220px] flex-1 max-w-sm">
+              <div className="relative flex-1 min-w-[220px] max-w-sm">
                 <Search
                   size={14}
                   className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400"
@@ -764,7 +386,7 @@ export default function ProductsPage() {
             </div>
 
             {/* Category pills */}
-            <div className="flex items-center gap-2 flex-wrap mt-4">
+            <div className="flex items-center gap-2 flex-wrap">
               <button
                 onClick={() => setCatSlug(null)}
                 className="text-[10px] font-semibold px-3.5 py-1.5 rounded-full border transition-all duration-200"
@@ -895,7 +517,7 @@ export default function ProductsPage() {
           >
             {products.map((p) => (
               <div key={p.id} className="animate-on-scroll">
-                <ProductCard product={p} view={view} onPreview={setPreviewProduct} />
+                <ProductCard product={p} view={view} />
               </div>
             ))}
           </div>
@@ -956,13 +578,6 @@ export default function ProductsPage() {
             </div>
           </div>
         </section>
-      )}
-
-      {previewProduct && (
-        <ProductPreviewModal
-          product={previewProduct}
-          onClose={() => setPreviewProduct(null)}
-        />
       )}
     </div>
   )
