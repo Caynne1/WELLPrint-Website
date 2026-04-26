@@ -77,19 +77,16 @@ export function AuthProvider({ children }) {
 
       // allow login via username or email
       if (!email.includes('@')) {
-        const { data: profile, error: profileErr } = await supabase
-          .from('staff_profiles')
-          .select('email')
-          .eq('username', email.toLowerCase())
-          .single()
+        const { data: foundEmail, error: rpcErr } = await supabase
+          .rpc('lookup_staff_email', { p_username: email.toLowerCase() })
 
-        if (profileErr || !profile) {
+        if (rpcErr || !foundEmail) {
           setError('Username not found.')
           setLoading(false)
           return { ok: false }
         }
 
-        email = profile.email
+        email = foundEmail
       }
 
       const { error: authErr } = await supabase.auth.signInWithPassword({

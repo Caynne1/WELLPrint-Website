@@ -1,595 +1,299 @@
-import { useMemo, useState } from 'react'
-import { supabase } from '../../lib/supabase'
+import { Link } from 'react-router-dom'
 import {
-  Search,
-  Package,
-  CheckCircle,
-  Circle,
-  Clock3,
-  User,
-  FileText,
-  Truck,
-  Store,
-  Loader2,
-  AlertCircle,
+  Mail,
+  Phone,
+  MapPin,
+  ArrowUpRight,
+  Facebook,
+  Instagram,
+  Clock,
+  Printer,
 } from 'lucide-react'
 
-const STATUS_FLOW = ['pending', 'processing', 'printing', 'ready', 'completed']
+const YEAR = new Date().getFullYear()
 
-const STATUS_LABELS = {
-  pending: 'Pending',
-  processing: 'Processing',
-  printing: 'Printing',
-  ready: 'Ready',
-  completed: 'Completed',
-  cancelled: 'Cancelled',
-}
+const QUICK_LINKS = [
+  { label: 'About Us',     to: '/about' },
+  { label: 'Services',     to: '/services' },
+  { label: 'Products',     to: '/products' },
+  { label: 'Contact',      to: '/contact' },
+]
 
-const COLORS = {
-  green: '#16a34a',
-  cyan: '#1993D2',
-  amber: '#f59e0b',
-  violet: '#8b5cf6',
-  red: '#dc2626',
-  slate: '#94a3b8',
-}
+const CUSTOMER_LINKS = [
+  { label: 'Track Order',       to: '/track-order' },
+  { label: 'Shopping Cart',     to: '/cart' },
+  { label: 'FAQs',              to: '/faq' },
+  { label: 'File Specs',        to: '/file-specs' },
+]
 
-function formatPeso(value) {
-  return `₱${Number(value || 0).toLocaleString()}`
-}
+const SERVICES = [
+  'Digital Printing',
+  'Offset Printing',
+  'Tarpaulin & Banners',
+  'Packaging & Labels',
+]
 
-function formatDateTime(value) {
-  if (!value) return '—'
-  try {
-    return new Date(value).toLocaleString()
-  } catch {
-    return '—'
-  }
-}
-
-function formatDate(value) {
-  if (!value) return '—'
-  try {
-    return new Date(value).toLocaleDateString()
-  } catch {
-    return '—'
-  }
-}
-
-function getStepColor(status, active) {
-  if (!active) return COLORS.slate
-
-  switch (status) {
-    case 'pending':
-      return COLORS.cyan
-    case 'processing':
-      return COLORS.amber
-    case 'printing':
-      return COLORS.violet
-    case 'ready':
-      return COLORS.cyan
-    case 'completed':
-      return COLORS.green
-    default:
-      return COLORS.slate
-  }
-}
-
-function getFulfillmentText(items) {
-  const item = items?.find((x) => x?.delivery_method)
-  if (!item) return '—'
-
-  return item.delivery_method === 'deliver'
-    ? `Delivery (+${formatPeso(item.delivery_fee || 0)})`
-    : 'Pickup'
-}
-
-export default function TrackOrderPage() {
-  const [orderId, setOrderId] = useState('')
-  const [customerName, setCustomerName] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [searched, setSearched] = useState(false)
-  const [error, setError] = useState('')
-  const [order, setOrder] = useState(null)
-
-  const items = useMemo(() => {
-    if (!order?.items) return []
-    if (Array.isArray(order.items)) return order.items
-    try {
-      return typeof order.items === 'string' ? JSON.parse(order.items) : []
-    } catch {
-      return []
-    }
-  }, [order?.items])
-
-  const currentIndex = useMemo(() => {
-    if (!order?.status) return -1
-    return STATUS_FLOW.indexOf(order.status)
-  }, [order?.status])
-
-  async function handleTrackOrder(e) {
-    e.preventDefault()
-
-    if (!orderId.trim()) {
-      setError('Please enter your Order ID.')
-      setOrder(null)
-      setSearched(true)
-      return
-    }
-
-    if (!customerName.trim()) {
-      setError('Please enter the customer name used in the order.')
-      setOrder(null)
-      setSearched(true)
-      return
-    }
-
-    setLoading(true)
-    setError('')
-    setOrder(null)
-    setSearched(true)
-
-    const normalizedOrderId = orderId.trim().toUpperCase()
-    const normalizedName = customerName.trim()
-
-    const { data, error: fetchError } = await supabase
-      .from('orders')
-      .select('*')
-      .eq('id', normalizedOrderId)
-      .ilike('customer_name', `%${normalizedName}%`)
-      .limit(1)
-
-    if (fetchError) {
-      console.error('Track order error:', fetchError)
-      setError('Something went wrong while searching for your order.')
-      setLoading(false)
-      return
-    }
-
-    if (!data || data.length === 0) {
-      setError('No matching order found. Please check the Order ID and customer name.')
-      setOrder(null)
-      setLoading(false)
-      return
-    }
-
-    setOrder(data[0])
-    setLoading(false)
-  }
-
+export default function Footer() {
   return (
-    <section className="min-h-screen bg-ink-900 py-16">
-      <div className="max-w-6xl mx-auto px-6">
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-3 mb-4">
-            <div className="h-px w-8 bg-wp-green" />
-            <span className="font-body text-[10px] tracking-[0.25em] uppercase text-wp-green">
-              Track Order
-            </span>
-            <div className="h-px w-8 bg-wp-green" />
-          </div>
+    <footer className="relative" style={{ background: '#080f1c' }}>
+      {/* CMYK strip */}
+      <div className="cmyk-bar" aria-hidden="true" />
 
-          <h1
-            className="text-white text-[clamp(2rem,4vw,3.5rem)] font-bold leading-none mb-3"
-            style={{ fontFamily: "'Lora', serif" }}
-          >
-            Track Your <span style={{ color: 'var(--wp-green)' }}>Order</span>
-          </h1>
+      {/* Main footer content */}
+      <div className="max-w-7xl mx-auto px-6 pt-16 pb-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-y-12 gap-x-8">
 
-          <p className="text-ivory-300/45 text-sm max-w-2xl mx-auto leading-relaxed">
-            Enter your Order ID and customer name to check the latest status of your print order.
-          </p>
-        </div>
-
-        <div className="grid lg:grid-cols-12 gap-8">
+          {/* ── Brand column ────────────────────────────────── */}
           <div className="lg:col-span-4">
-            <div
-              className="rounded-[28px] border p-6"
-              style={{
-                background: '#0b1730',
-                borderColor: 'rgba(255,255,255,0.08)',
-                boxShadow: '0 20px 50px rgba(0,0,0,0.22)',
-              }}
-            >
-              <div className="flex items-center gap-3 mb-6">
-                <div
-                  className="w-11 h-11 rounded-2xl flex items-center justify-center"
-                  style={{
-                    background: 'rgba(25,147,210,0.12)',
-                    border: '1px solid rgba(25,147,210,0.20)',
-                  }}
-                >
-                  <Search size={17} style={{ color: 'var(--wp-cyan)' }} />
-                </div>
-                <div>
-                  <h2 className="text-white text-lg font-semibold">Find Order</h2>
-                  <p className="text-ivory-300/35 text-xs">
-                    Use the details from your order confirmation
-                  </p>
-                </div>
-              </div>
-
-              <form onSubmit={handleTrackOrder} className="space-y-5">
-                <div>
-                  <label className="block font-body text-[10px] tracking-widest uppercase text-ivory-300/40 mb-2">
-                    Order ID
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="ORD-12345678"
-                    value={orderId}
-                    onChange={(e) => setOrderId(e.target.value.toUpperCase())}
-                    className="w-full rounded-[18px] border px-4 py-3 text-sm text-white outline-none"
-                    style={{
-                      background: '#081225',
-                      borderColor: 'rgba(255,255,255,0.10)',
-                    }}
-                  />
-                </div>
-
-                <div>
-                  <label className="block font-body text-[10px] tracking-widest uppercase text-ivory-300/40 mb-2">
-                    Customer Name
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Enter full name"
-                    value={customerName}
-                    onChange={(e) => setCustomerName(e.target.value)}
-                    className="w-full rounded-[18px] border px-4 py-3 text-sm text-white outline-none"
-                    style={{
-                      background: '#081225',
-                      borderColor: 'rgba(255,255,255,0.10)',
-                    }}
-                  />
-                </div>
-
-                {error && (
-                  <div
-                    className="flex items-start gap-2 rounded-[18px] px-4 py-3 text-sm"
-                    style={{
-                      background: 'rgba(205,27,110,0.10)',
-                      border: '1px solid rgba(205,27,110,0.20)',
-                      color: '#f9a8d4',
-                    }}
-                  >
-                    <AlertCircle size={15} className="shrink-0 mt-0.5" />
-                    <span>{error}</span>
-                  </div>
-                )}
-
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="btn-press w-full flex items-center justify-center gap-2 text-sm py-3.5 disabled:opacity-60 disabled:cursor-not-allowed"
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 size={15} className="animate-spin" />
-                      Tracking...
-                    </>
-                  ) : (
-                    <>
-                      Track Order
-                      <Search size={14} />
-                    </>
-                  )}
-                </button>
-              </form>
-
+            <Link to="/" className="inline-flex items-center gap-3 mb-5 group">
               <div
-                className="mt-6 rounded-[18px] border p-4"
+                className="w-10 h-10 rounded-xl flex items-center justify-center transition-transform duration-300 group-hover:scale-105"
                 style={{
-                  background: 'rgba(255,255,255,0.02)',
-                  borderColor: 'rgba(255,255,255,0.08)',
+                  background: 'rgba(22,163,74,0.12)',
+                  border: '1px solid rgba(22,163,74,0.20)',
                 }}
               >
-                <p className="text-ivory-300/45 text-xs leading-relaxed">
-                  Your Order ID is shown after checkout. Please enter the same name used when placing the order.
-                </p>
+                <Printer size={18} style={{ color: '#16a34a' }} />
+              </div>
+              <div>
+                <span
+                  className="text-white text-lg font-bold tracking-tight block leading-none"
+                  style={{ fontFamily: "'Lora', serif" }}
+                >
+                  WELLPrint
+                </span>
+                <span
+                  className="text-[9px] uppercase tracking-[0.18em] font-semibold block mt-0.5"
+                  style={{ color: '#1993D2' }}
+                >
+                  Espiel-Bereso Group
+                </span>
+              </div>
+            </Link>
+
+            <p
+              className="text-sm leading-relaxed mb-6 max-w-xs"
+              style={{ color: 'rgba(148,163,184,0.65)' }}
+            >
+              Your trusted partner for commercial printing — from business cards
+              to large-format banners. Quality you can see, service you can count on.
+            </p>
+
+            {/* Contact info */}
+            <div className="space-y-3">
+              <a
+                href="mailto:hello@wellprint.com.ph"
+                className="flex items-center gap-3 text-sm transition-colors group"
+                style={{ color: 'rgba(148,163,184,0.55)' }}
+                onMouseEnter={e => (e.currentTarget.style.color = '#1993D2')}
+                onMouseLeave={e => (e.currentTarget.style.color = 'rgba(148,163,184,0.55)')}
+              >
+                <Mail size={14} className="shrink-0" style={{ color: '#1993D2' }} />
+                hello@wellprint.com.ph
+              </a>
+
+              <a
+                href="tel:+6328XXXXXXXX"
+                className="flex items-center gap-3 text-sm transition-colors"
+                style={{ color: 'rgba(148,163,184,0.55)' }}
+                onMouseEnter={e => (e.currentTarget.style.color = '#16a34a')}
+                onMouseLeave={e => (e.currentTarget.style.color = 'rgba(148,163,184,0.55)')}
+              >
+                <Phone size={14} className="shrink-0" style={{ color: '#16a34a' }} />
+                +63 (2) 8XXX-XXXX
+              </a>
+
+              <div
+                className="flex items-center gap-3 text-sm"
+                style={{ color: 'rgba(148,163,184,0.55)' }}
+              >
+                <MapPin size={14} className="shrink-0" style={{ color: '#fdc010' }} />
+                Cebu City, Philippines
+              </div>
+
+              <div
+                className="flex items-center gap-3 text-sm"
+                style={{ color: 'rgba(148,163,184,0.45)' }}
+              >
+                <Clock size={14} className="shrink-0" style={{ color: 'rgba(148,163,184,0.35)' }} />
+                Mon–Fri 8AM–6PM · Sat 9AM–1PM
               </div>
             </div>
           </div>
 
-          <div className="lg:col-span-8">
-            {!searched && (
-              <div
-                className="rounded-[28px] border p-10 text-center"
-                style={{
-                  background: '#0b1730',
-                  borderColor: 'rgba(255,255,255,0.08)',
-                  boxShadow: '0 20px 50px rgba(0,0,0,0.22)',
-                }}
-              >
-                <div
-                  className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-5"
-                  style={{
-                    background: 'rgba(25,147,210,0.10)',
-                    border: '1px solid rgba(25,147,210,0.18)',
-                  }}
-                >
-                  <Package size={28} style={{ color: 'var(--wp-cyan)' }} />
-                </div>
+          {/* ── Quick Links ─────────────────────────────────── */}
+          <div className="lg:col-span-2 lg:col-start-6">
+            <h4
+              className="text-[10px] font-bold uppercase tracking-[0.2em] mb-5"
+              style={{ color: 'rgba(148,163,184,0.45)' }}
+            >
+              Company
+            </h4>
 
-                <h3
-                  className="text-white text-2xl font-bold mb-3"
-                  style={{ fontFamily: "'Lora', serif" }}
-                >
-                  Your order status will appear here
-                </h3>
+            <ul className="space-y-3">
+              {QUICK_LINKS.map(link => (
+                <li key={link.to}>
+                  <Link
+                    to={link.to}
+                    className="text-sm transition-colors inline-flex items-center gap-1 group"
+                    style={{ color: 'rgba(248,250,252,0.55)' }}
+                    onMouseEnter={e => (e.currentTarget.style.color = '#f8fafc')}
+                    onMouseLeave={e => (e.currentTarget.style.color = 'rgba(248,250,252,0.55)')}
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-                <p className="text-ivory-300/40 text-sm max-w-md mx-auto leading-relaxed">
-                  Once you search for your order, you’ll see the current status, timeline, and order summary.
-                </p>
-              </div>
-            )}
+          {/* ── Customer Links ──────────────────────────────── */}
+          <div className="lg:col-span-2">
+            <h4
+              className="text-[10px] font-bold uppercase tracking-[0.2em] mb-5"
+              style={{ color: 'rgba(148,163,184,0.45)' }}
+            >
+              Customer
+            </h4>
 
-            {searched && order && (
-              <div className="space-y-6">
-                <div
-                  className="rounded-[28px] border p-6"
-                  style={{
-                    background: '#0b1730',
-                    borderColor: 'rgba(255,255,255,0.08)',
-                    boxShadow: '0 20px 50px rgba(0,0,0,0.22)',
-                  }}
-                >
-                  <div className="flex items-start justify-between gap-4 flex-wrap mb-6">
-                    <div>
-                      <div className="text-[10px] tracking-[0.25em] uppercase text-ivory-300/35 mb-2">
-                        Order Found
-                      </div>
-                      <h2
-                        className="text-white text-2xl font-bold"
-                        style={{ fontFamily: "'Lora', serif" }}
-                      >
-                        {order.id}
-                      </h2>
-                    </div>
+            <ul className="space-y-3">
+              {CUSTOMER_LINKS.map(link => (
+                <li key={link.to}>
+                  <Link
+                    to={link.to}
+                    className="text-sm transition-colors inline-flex items-center gap-1"
+                    style={{ color: 'rgba(248,250,252,0.55)' }}
+                    onMouseEnter={e => (e.currentTarget.style.color = '#f8fafc')}
+                    onMouseLeave={e => (e.currentTarget.style.color = 'rgba(248,250,252,0.55)')}
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-                    <div
-                      className="px-4 py-2 rounded-full text-sm font-semibold"
-                      style={{
-                        background:
-                          order.status === 'completed'
-                            ? 'rgba(22,163,74,0.12)'
-                            : order.status === 'processing'
-                            ? 'rgba(245,158,11,0.12)'
-                            : order.status === 'printing'
-                            ? 'rgba(139,92,246,0.12)'
-                            : 'rgba(25,147,210,0.12)',
-                        color:
-                          order.status === 'completed'
-                            ? COLORS.green
-                            : order.status === 'processing'
-                            ? COLORS.amber
-                            : order.status === 'printing'
-                            ? COLORS.violet
-                            : COLORS.cyan,
-                        border: '1px solid rgba(255,255,255,0.08)',
-                      }}
-                    >
-                      {STATUS_LABELS[order.status] || order.status}
-                    </div>
-                  </div>
+          {/* ── Services ────────────────────────────────────── */}
+          <div className="lg:col-span-2">
+            <h4
+              className="text-[10px] font-bold uppercase tracking-[0.2em] mb-5"
+              style={{ color: 'rgba(148,163,184,0.45)' }}
+            >
+              Services
+            </h4>
 
-                  <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
-                    <div
-                      className="rounded-[18px] border p-4"
-                      style={{
-                        background: 'rgba(255,255,255,0.02)',
-                        borderColor: 'rgba(255,255,255,0.08)',
-                      }}
-                    >
-                      <div className="text-ivory-300/35 text-xs mb-2">Customer</div>
-                      <div className="text-white font-medium flex items-center gap-2">
-                        <User size={14} className="text-ivory-300/40" />
-                        {order.customer_name || '—'}
-                      </div>
-                    </div>
+            <ul className="space-y-3">
+              {SERVICES.map(service => (
+                <li key={service}>
+                  <Link
+                    to="/services"
+                    className="text-sm transition-colors"
+                    style={{ color: 'rgba(248,250,252,0.55)' }}
+                    onMouseEnter={e => (e.currentTarget.style.color = '#f8fafc')}
+                    onMouseLeave={e => (e.currentTarget.style.color = 'rgba(248,250,252,0.55)')}
+                  >
+                    {service}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
 
-                    <div
-                      className="rounded-[18px] border p-4"
-                      style={{
-                        background: 'rgba(255,255,255,0.02)',
-                        borderColor: 'rgba(255,255,255,0.08)',
-                      }}
-                    >
-                      <div className="text-ivory-300/35 text-xs mb-2">Placed On</div>
-                      <div className="text-white font-medium">{formatDate(order.created_at)}</div>
-                    </div>
+        {/* ── Divider ───────────────────────────────────────── */}
+        <div
+          className="mt-14 mb-8 h-px"
+          style={{
+            background: 'linear-gradient(90deg, transparent, rgba(148,163,184,0.15), transparent)',
+          }}
+        />
 
-                    <div
-                      className="rounded-[18px] border p-4"
-                      style={{
-                        background: 'rgba(255,255,255,0.02)',
-                        borderColor: 'rgba(255,255,255,0.08)',
-                      }}
-                    >
-                      <div className="text-ivory-300/35 text-xs mb-2">Fulfillment</div>
-                      <div className="text-white font-medium flex items-center gap-2">
-                        {getFulfillmentText(items).toLowerCase().includes('delivery') ? (
-                          <Truck size={14} className="text-ivory-300/40" />
-                        ) : (
-                          <Store size={14} className="text-ivory-300/40" />
-                        )}
-                        {getFulfillmentText(items)}
-                      </div>
-                    </div>
+        {/* ── Bottom bar ────────────────────────────────────── */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p
+            className="text-xs text-center sm:text-left"
+            style={{ color: 'rgba(148,163,184,0.35)' }}
+          >
+            &copy; {YEAR} WELLPrint · Espiel-Bereso Group of Companies.
+            All rights reserved.
+          </p>
 
-                    <div
-                      className="rounded-[18px] border p-4"
-                      style={{
-                        background: 'rgba(255,255,255,0.02)',
-                        borderColor: 'rgba(255,255,255,0.08)',
-                      }}
-                    >
-                      <div className="text-ivory-300/35 text-xs mb-2">Estimated Total</div>
-                      <div className="text-white font-semibold">
-                        {formatPeso(order.total_amount || order.estimated_total)}
-                      </div>
-                    </div>
-                  </div>
-                </div>
+          <div className="flex items-center gap-3">
+            <a
+              href="https://facebook.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Facebook"
+              className="w-9 h-9 rounded-xl flex items-center justify-center transition-all"
+              style={{
+                background: 'rgba(255,255,255,0.04)',
+                border: '1px solid rgba(255,255,255,0.08)',
+                color: 'rgba(148,163,184,0.5)',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = 'rgba(25,147,210,0.12)'
+                e.currentTarget.style.borderColor = 'rgba(25,147,210,0.25)'
+                e.currentTarget.style.color = '#1993D2'
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = 'rgba(255,255,255,0.04)'
+                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'
+                e.currentTarget.style.color = 'rgba(148,163,184,0.5)'
+              }}
+            >
+              <Facebook size={15} />
+            </a>
 
-                <div
-                  className="rounded-[28px] border p-6"
-                  style={{
-                    background: '#0b1730',
-                    borderColor: 'rgba(255,255,255,0.08)',
-                    boxShadow: '0 20px 50px rgba(0,0,0,0.22)',
-                  }}
-                >
-                  <div className="flex items-center gap-2 mb-6">
-                    <Clock3 size={16} style={{ color: 'var(--wp-cyan)' }} />
-                    <span className="text-[10px] font-semibold tracking-[0.22em] uppercase text-ivory-300/35">
-                      Progress Timeline
-                    </span>
-                  </div>
+            <a
+              href="https://instagram.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Instagram"
+              className="w-9 h-9 rounded-xl flex items-center justify-center transition-all"
+              style={{
+                background: 'rgba(255,255,255,0.04)',
+                border: '1px solid rgba(255,255,255,0.08)',
+                color: 'rgba(148,163,184,0.5)',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = 'rgba(205,27,110,0.12)'
+                e.currentTarget.style.borderColor = 'rgba(205,27,110,0.25)'
+                e.currentTarget.style.color = '#cd1b6e'
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = 'rgba(255,255,255,0.04)'
+                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'
+                e.currentTarget.style.color = 'rgba(148,163,184,0.5)'
+              }}
+            >
+              <Instagram size={15} />
+            </a>
 
-                  <div className="relative overflow-x-auto">
-                    <div className="min-w-[700px] relative px-2 pt-1">
-                      <div className="absolute top-4 left-4 right-4 h-[3px] bg-white/10 rounded-full" />
-
-                      <div
-                        className="absolute top-4 left-4 h-[3px] rounded-full transition-all duration-700"
-                        style={{
-                          background: COLORS.green,
-                          width: `${currentIndex <= 0 ? 0 : (currentIndex / (STATUS_FLOW.length - 1)) * 100}%`,
-                        }}
-                      />
-
-                      <div className="grid grid-cols-5 gap-4 relative z-10">
-                        {STATUS_FLOW.map((status, index) => {
-                          const active = index <= currentIndex
-                          const color = getStepColor(status, active)
-                          const time = order.status_timestamps?.[status]
-
-                          return (
-                            <div key={status} className="text-center">
-                              <div
-                                className="w-9 h-9 rounded-full flex items-center justify-center mx-auto border transition-all duration-500"
-                                style={{
-                                  background: active ? color : '#081225',
-                                  borderColor: active ? color : 'rgba(255,255,255,0.12)',
-                                  color: active ? '#FFFFFF' : '#94a3b8',
-                                }}
-                              >
-                                {active ? <CheckCircle size={14} /> : <Circle size={12} />}
-                              </div>
-
-                              <p className="text-xs text-white mt-3 font-medium">
-                                {STATUS_LABELS[status]}
-                              </p>
-
-                              <p className="text-[10px] text-ivory-300/35 mt-1 min-h-[28px]">
-                                {time ? formatDateTime(time) : '—'}
-                              </p>
-                            </div>
-                          )
-                        })}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div
-                  className="rounded-[28px] border p-6"
-                  style={{
-                    background: '#0b1730',
-                    borderColor: 'rgba(255,255,255,0.08)',
-                    boxShadow: '0 20px 50px rgba(0,0,0,0.22)',
-                  }}
-                >
-                  <div className="flex items-center gap-2 mb-6">
-                    <FileText size={16} style={{ color: 'var(--wp-cyan)' }} />
-                    <span className="text-[10px] font-semibold tracking-[0.22em] uppercase text-ivory-300/35">
-                      Order Items
-                    </span>
-                  </div>
-
-                  {items.length === 0 ? (
-                    <p className="text-ivory-300/35 text-sm">No order items available.</p>
-                  ) : (
-                    <div className="space-y-3">
-                      {items.map((item, index) => (
-                        <div
-                          key={index}
-                          className="rounded-[20px] border p-4"
-                          style={{
-                            background: 'rgba(255,255,255,0.02)',
-                            borderColor: 'rgba(255,255,255,0.08)',
-                          }}
-                        >
-                          <div className="flex items-start justify-between gap-4 flex-wrap">
-                            <div>
-                              <p className="text-white font-medium">
-                                {item.name || item.product_name || `Item ${index + 1}`}
-                              </p>
-                              <p className="text-ivory-300/35 text-sm mt-1">
-                                Qty: {item.qty || item.quantity || 1}
-                              </p>
-                            </div>
-
-                            <div className="text-right">
-                              <p className="text-white font-semibold">
-                                {formatPeso(
-                                  item.total ||
-                                    item.subtotal ||
-                                    item.price ||
-                                    (item.unit_price || 0) * (item.qty || 1)
-                                )}
-                              </p>
-                              <p className="text-ivory-300/30 text-xs mt-1">
-                                {item.unit_price ? `${formatPeso(item.unit_price)} / unit` : ''}
-                              </p>
-                            </div>
-                          </div>
-
-                          {(item.delivery_method || item.design_option) && (
-                            <div className="flex flex-wrap gap-2 mt-3">
-                              {item.design_option && (
-                                <span
-                                  className="px-2.5 py-1 rounded-full text-[11px]"
-                                  style={{
-                                    background: 'rgba(22,163,74,0.12)',
-                                    color: COLORS.green,
-                                  }}
-                                >
-                                  Design:{' '}
-                                  {item.design_option === 'upload'
-                                    ? 'Uploaded'
-                                    : item.design_option === 'email'
-                                    ? 'Will Email'
-                                    : 'Needs Layout'}
-                                </span>
-                              )}
-
-                              {item.delivery_method && (
-                                <span
-                                  className="px-2.5 py-1 rounded-full text-[11px]"
-                                  style={{
-                                    background: 'rgba(139,92,246,0.12)',
-                                    color: COLORS.violet,
-                                  }}
-                                >
-                                  {item.delivery_method === 'deliver'
-                                    ? `Delivery (+${formatPeso(item.delivery_fee || 0)})`
-                                    : 'Pickup'}
-                                </span>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
+            <a
+              href="mailto:hello@wellprint.com.ph"
+              aria-label="Email us"
+              className="w-9 h-9 rounded-xl flex items-center justify-center transition-all"
+              style={{
+                background: 'rgba(255,255,255,0.04)',
+                border: '1px solid rgba(255,255,255,0.08)',
+                color: 'rgba(148,163,184,0.5)',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = 'rgba(22,163,74,0.12)'
+                e.currentTarget.style.borderColor = 'rgba(22,163,74,0.25)'
+                e.currentTarget.style.color = '#16a34a'
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = 'rgba(255,255,255,0.04)'
+                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'
+                e.currentTarget.style.color = 'rgba(148,163,184,0.5)'
+              }}
+            >
+              <Mail size={15} />
+            </a>
           </div>
         </div>
       </div>
-    </section>
+    </footer>
   )
 }

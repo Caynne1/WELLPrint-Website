@@ -1,39 +1,63 @@
+import { lazy, Suspense } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from './context/AuthContext'
-
+import ErrorBoundary from './components/common/ErrorBoundary'
 import Layout from './components/layout/Layout'
+import { Loader2 } from 'lucide-react'
 
-import HomePage from './pages/HomePage'
-import ServicesPage from './pages/ServicesPage'
-import AboutPage from './pages/AboutPage'
-import ContactPage from './pages/ContactPage'
-import ProductsPage from './pages/ProductsPage'
-import ProductDetailPage from './pages/ProductDetailPage'
-import CartPage from './pages/CartPage'
-import PlaceholderPage from './pages/PlaceholderPage'
-import LoginPage from './pages/LoginPage'
-import TrackOrderPage from './pages/TrackOrderPage'
+// ─── Lazy-loaded pages ─────────────────────────────────────────
+// Public pages
+const HomePage          = lazy(() => import('./pages/HomePage'))
+const ServicesPage      = lazy(() => import('./pages/ServicesPage'))
+const AboutPage         = lazy(() => import('./pages/AboutPage'))
+const ContactPage       = lazy(() => import('./pages/ContactPage'))
+const ProductsPage      = lazy(() => import('./pages/ProductsPage'))
+const ProductDetailPage = lazy(() => import('./pages/ProductDetailPage'))
+const CartPage          = lazy(() => import('./pages/CartPage'))
+const TrackOrderPage    = lazy(() => import('./pages/TrackOrderPage'))
+const LoginPage         = lazy(() => import('./pages/LoginPage'))
+const PlaceholderPage   = lazy(() => import('./pages/PlaceholderPage'))
 
-import AdminDashboardPage from './pages/dashboard/AdminDashboardPage'
-import StaffDashboardPage from './pages/dashboard/StaffDashboardPage'
-import AdminOrdersPage from './pages/dashboard/AdminOrdersPage'
-import AdminOrderDetailPage from './pages/dashboard/AdminOrderDetailPage'
-import AdminStaffPage from './pages/dashboard/AdminStaffPage'
-import AdminProductsPage from './pages/dashboard/AdminProductsPage'
-import AdminAnalyticsPage from './pages/dashboard/AdminAnalyticsPage'
-import AdminCategoriesPage from './pages/dashboard/AdminCategoriesPage'
-import InboxPage from './pages/dashboard/InboxPage'
+// Dashboard pages (heavier — kept out of public bundle)
+const AdminDashboardPage  = lazy(() => import('./pages/dashboard/AdminDashboardPage'))
+const StaffDashboardPage  = lazy(() => import('./pages/dashboard/StaffDashboardPage'))
+const AdminOrdersPage     = lazy(() => import('./pages/dashboard/AdminOrdersPage'))
+const AdminOrderDetailPage= lazy(() => import('./pages/dashboard/AdminOrderDetailPage'))
+const AdminStaffPage      = lazy(() => import('./pages/dashboard/AdminStaffPage'))
+const AdminProductsPage   = lazy(() => import('./pages/dashboard/AdminProductsPage'))
+const AdminAnalyticsPage  = lazy(() => import('./pages/dashboard/AdminAnalyticsPage'))
+const AdminCategoriesPage = lazy(() => import('./pages/dashboard/AdminCategoriesPage'))
+const InboxPage           = lazy(() => import('./pages/dashboard/InboxPage'))
 
+// ─── Loading fallback ──────────────────────────────────────────
+function PageLoader() {
+  return (
+    <div className="min-h-[60vh] flex items-center justify-center">
+      <div className="flex flex-col items-center gap-3">
+        <Loader2
+          size={28}
+          className="animate-spin"
+          style={{ color: 'var(--wp-green)' }}
+        />
+        <span className="text-ivory-300/40 text-xs font-body tracking-widest uppercase">
+          Loading…
+        </span>
+      </div>
+    </div>
+  )
+}
+
+// ─── Auth guards ───────────────────────────────────────────────
 function RequireAuth({ children }) {
   const { user, loading } = useAuth()
-  if (loading) return null
+  if (loading) return <PageLoader />
   if (!user) return <Navigate to="/login" replace />
   return children
 }
 
 function RequireAdmin({ children }) {
   const { user, loading } = useAuth()
-  if (loading) return null
+  if (loading) return <PageLoader />
   if (!user) return <Navigate to="/login" replace />
   if (user.role !== 'admin') return <Navigate to="/dashboard" replace />
   return children
@@ -41,7 +65,7 @@ function RequireAdmin({ children }) {
 
 function RequirePermission({ permission, children }) {
   const { user, loading, hasPermission } = useAuth()
-  if (loading) return null
+  if (loading) return <PageLoader />
   if (!user) return <Navigate to="/login" replace />
   if (!hasPermission(permission)) return <Navigate to="/dashboard?denied=1" replace />
   return children
@@ -49,7 +73,7 @@ function RequirePermission({ permission, children }) {
 
 function DashboardRedirect() {
   const { user, loading } = useAuth()
-  if (loading) return null
+  if (loading) return <PageLoader />
   if (!user) return <Navigate to="/login" replace />
   if (user.role === 'admin') return <AdminDashboardPage />
   return <StaffDashboardPage />
@@ -57,202 +81,70 @@ function DashboardRedirect() {
 
 function GuestOnly({ children }) {
   const { user, loading } = useAuth()
-  if (loading) return null
+  if (loading) return <PageLoader />
   if (user) return <Navigate to="/dashboard" replace />
   return children
 }
 
-function PublicLayout({ children }) {
-  return <Layout>{children}</Layout>
+// ─── Layout wrappers ───────────────────────────────────────────
+function PublicPage({ children }) {
+  return (
+    <Layout>
+      <ErrorBoundary>
+        <Suspense fallback={<PageLoader />}>{children}</Suspense>
+      </ErrorBoundary>
+    </Layout>
+  )
 }
 
+function DashboardPage({ children }) {
+  return (
+    <ErrorBoundary>
+      <Suspense fallback={<PageLoader />}>{children}</Suspense>
+    </ErrorBoundary>
+  )
+}
+
+// ─── App ───────────────────────────────────────────────────────
 export default function App() {
   return (
     <Routes>
       {/* Public pages */}
-      <Route
-        path="/"
-        element={
-          <PublicLayout>
-            <HomePage />
-          </PublicLayout>
-        }
-      />
-      <Route
-        path="/products"
-        element={
-          <PublicLayout>
-            <ProductsPage />
-          </PublicLayout>
-        }
-      />
-      <Route
-        path="/products/:slug"
-        element={
-          <PublicLayout>
-            <ProductDetailPage />
-          </PublicLayout>
-        }
-      />
-      <Route
-        path="/services"
-        element={
-          <PublicLayout>
-            <ServicesPage />
-          </PublicLayout>
-        }
-      />
-      <Route
-        path="/cart"
-        element={
-          <PublicLayout>
-            <CartPage />
-          </PublicLayout>
-        }
-      />
-      <Route
-        path="/checkout"
-        element={
-          <PublicLayout>
-            <PlaceholderPage title="Checkout" phase="Phase 3" />
-          </PublicLayout>
-        }
-      />
-      <Route
-        path="/track"
-        element={
-          <PublicLayout>
-            <PlaceholderPage title="Track Your Order" phase="Phase 3" />
-          </PublicLayout>
-        }
-      />
-      <Route
-        path="/track-order"
-        element={
-          <PublicLayout>
-            <TrackOrderPage />
-          </PublicLayout>
-        }
-      />
-      <Route
-        path="/about"
-        element={
-          <PublicLayout>
-            <AboutPage />
-          </PublicLayout>
-        }
-      />
-      <Route
-        path="/contact"
-        element={
-          <PublicLayout>
-            <ContactPage />
-          </PublicLayout>
-        }
-      />
-      <Route
-        path="/faq"
-        element={
-          <PublicLayout>
-            <PlaceholderPage title="FAQs" phase="Phase 5" />
-          </PublicLayout>
-        }
-      />
-      <Route
-        path="/file-specs"
-        element={
-          <PublicLayout>
-            <PlaceholderPage title="File Specifications" phase="Phase 5" />
-          </PublicLayout>
-        }
-      />
+      <Route path="/" element={<PublicPage><HomePage /></PublicPage>} />
+      <Route path="/products" element={<PublicPage><ProductsPage /></PublicPage>} />
+      <Route path="/products/:slug" element={<PublicPage><ProductDetailPage /></PublicPage>} />
+      <Route path="/services" element={<PublicPage><ServicesPage /></PublicPage>} />
+      <Route path="/cart" element={<PublicPage><CartPage /></PublicPage>} />
+      <Route path="/track-order" element={<PublicPage><TrackOrderPage /></PublicPage>} />
+      <Route path="/about" element={<PublicPage><AboutPage /></PublicPage>} />
+      <Route path="/contact" element={<PublicPage><ContactPage /></PublicPage>} />
+
+      {/* Placeholder pages */}
+      <Route path="/checkout" element={<PublicPage><PlaceholderPage title="Checkout" phase="Phase 3" /></PublicPage>} />
+      <Route path="/track" element={<PublicPage><PlaceholderPage title="Track Your Order" phase="Phase 3" /></PublicPage>} />
+      <Route path="/faq" element={<PublicPage><PlaceholderPage title="FAQs" phase="Phase 5" /></PublicPage>} />
+      <Route path="/file-specs" element={<PublicPage><PlaceholderPage title="File Specifications" phase="Phase 5" /></PublicPage>} />
 
       {/* Auth */}
-      <Route
-        path="/login"
-        element={
-          <GuestOnly>
-            <LoginPage />
-          </GuestOnly>
-        }
-      />
+      <Route path="/login" element={<GuestOnly><Suspense fallback={<PageLoader />}><LoginPage /></Suspense></GuestOnly>} />
+
+      {/* Dashboard entry */}
+      <Route path="/dashboard" element={<RequireAuth><DashboardPage><DashboardRedirect /></DashboardPage></RequireAuth>} />
+
+      {/* Permission-gated dashboard pages */}
+      <Route path="/dashboard/orders" element={<RequirePermission permission="view_orders"><DashboardPage><AdminOrdersPage /></DashboardPage></RequirePermission>} />
+      <Route path="/dashboard/orders/:id" element={<RequirePermission permission="view_orders"><DashboardPage><AdminOrderDetailPage /></DashboardPage></RequirePermission>} />
+      <Route path="/dashboard/products" element={<RequirePermission permission="view_products"><DashboardPage><AdminProductsPage /></DashboardPage></RequirePermission>} />
+      <Route path="/dashboard/categories" element={<RequirePermission permission="manage_categories"><DashboardPage><AdminCategoriesPage /></DashboardPage></RequirePermission>} />
+      <Route path="/dashboard/analytics" element={<RequirePermission permission="view_analytics"><DashboardPage><AdminAnalyticsPage /></DashboardPage></RequirePermission>} />
+      <Route path="/dashboard/inbox" element={<RequireAuth><DashboardPage><InboxPage /></DashboardPage></RequireAuth>} />
+
+      {/* Admin-only */}
+      <Route path="/dashboard/staff" element={<RequireAdmin><DashboardPage><AdminStaffPage /></DashboardPage></RequireAdmin>} />
 
       {/* Legacy redirects */}
       <Route path="/admin/login" element={<Navigate to="/login" replace />} />
       <Route path="/admin" element={<Navigate to="/dashboard" replace />} />
-
-      {/* Dashboard entry */}
-      <Route
-        path="/dashboard"
-        element={
-          <RequireAuth>
-            <DashboardRedirect />
-          </RequireAuth>
-        }
-      />
-
-      {/* Shared permission-based pages */}
-      <Route
-        path="/dashboard/orders"
-        element={
-          <RequirePermission permission="view_orders">
-            <AdminOrdersPage />
-          </RequirePermission>
-        }
-      />
-      <Route
-        path="/dashboard/orders/:id"
-        element={
-          <RequirePermission permission="view_orders">
-            <AdminOrderDetailPage />
-          </RequirePermission>
-        }
-      />
-      <Route
-        path="/dashboard/products"
-        element={
-          <RequirePermission permission="view_products">
-            <AdminProductsPage />
-          </RequirePermission>
-        }
-      />
-      <Route
-        path="/dashboard/categories"
-        element={
-          <RequirePermission permission="manage_categories">
-            <AdminCategoriesPage />
-          </RequirePermission>
-        }
-      />
-      <Route
-        path="/dashboard/analytics"
-        element={
-          <RequirePermission permission="view_analytics">
-            <AdminAnalyticsPage />
-          </RequirePermission>
-        }
-      />
-
-      {/* Admin-only pages */}
-      <Route
-        path="/dashboard/staff"
-        element={
-          <RequireAdmin>
-            <AdminStaffPage />
-          </RequireAdmin>
-        }
-      />
-
-      <Route
-        path="/dashboard/inbox"
-        element={
-          <RequireAuth>
-            <InboxPage />
-          </RequireAuth>
-        }
-      />
-
-      {/* Legacy dashboard redirects */}
       <Route path="/admin/dashboard" element={<Navigate to="/dashboard" replace />} />
       <Route path="/admin/orders" element={<Navigate to="/dashboard/orders" replace />} />
       <Route path="/admin/orders/:id" element={<Navigate to="/dashboard/orders/:id" replace />} />
@@ -261,14 +153,7 @@ export default function App() {
       <Route path="/admin/staff" element={<Navigate to="/dashboard/staff" replace />} />
 
       {/* 404 */}
-      <Route
-        path="*"
-        element={
-          <PublicLayout>
-            <PlaceholderPage title="404 — Page Not Found" phase="Error" />
-          </PublicLayout>
-        }
-      />
+      <Route path="*" element={<PublicPage><PlaceholderPage title="404 — Page Not Found" phase="Error" /></PublicPage>} />
     </Routes>
   )
 }

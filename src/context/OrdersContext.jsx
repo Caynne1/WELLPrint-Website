@@ -1,111 +1,157 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react'
+import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 
 const OrdersContext = createContext(null)
 
-export const ORDER_STATUSES = {
-  new:             { label: 'New',            color: '#CD1B6E', bg: 'rgba(236,0,140,0.12)' },
-  quoted:          { label: 'Quoted',         color: '#FDC010', bg: 'rgba(251,176,59,0.12)' },
-  artwork_pending: { label: 'Artwork Needed', color: '#1993D2', bg: 'rgba(25,147,210,0.12)' },
-  printing:        { label: 'Printing',       color: '#13A150', bg: 'rgba(19,161,80,0.12)'  },
-  completed:       { label: 'Completed',      color: '#888',    bg: 'rgba(136,136,136,0.10)' },
-  cancelled:       { label: 'Cancelled',      color: '#555',    bg: 'rgba(85,85,85,0.10)'   },
+// ─── Normalizer ────────────────────────────────────────────────
+function normalizeOrder(o) {
+  return {
+    id:             o.id,
+    createdAt:      o.created_at,
+    status:         o.status,
+    orderType:      o.order_type,
+    notes:          o.notes ?? '',
+    estimatedTotal: o.estimated_total ?? 0,
+    customer: {
+      name:    o.customer_name,
+      email:   o.customer_email,
+      phone:   o.customer_phone ?? '',
+      company: o.customer_company ?? '',
+    },
+    items: (o.order_items ?? []).map(i => ({
+      name:      i.name,
+      qty:       i.qty,
+      unit:      i.unit,
+      unitPrice: i.unit_price,
+    })),
+    emailThread: (o.email_threads ?? [])
+      .sort((a, b) => new Date(a.sent_at) - new Date(b.sent_at))
+      .map(e => ({
+        from:    e.from_role,
+        by:      e.sent_by,
+        at:      e.sent_at,
+        subject: e.subject,
+        body:    e.body,
+      })),
+  }
 }
+
+const ORDER_SELECT = `
+  id, created_at, status, order_type, notes, estimated_total,
+  customer_name, customer_email, customer_phone, customer_company,
+  order_items ( id, name, qty, unit, unit_price ),
+  email_threads ( id, from_role, sent_by, sent_at, subject, body )
+`
 
 export function OrdersProvider({ children }) {
   const [orders, setOrders]   = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError]     = useState(null)
+  const fetchIdRef = useRef(0)
 
+  // ── Full fetch (initial load or forced refresh) ─────────────
   const fetchOrders = useCallback(async () => {
+    const id = ++fetchIdRef.current
     setLoading(true)
     setError(null)
+
     try {
       const { data, error: err } = await supabase
         .from('orders')
-        .select(`
-          id,
-          created_at,
-          status,
-          order_type,
-          notes,
-          estimated_total,
-          customer_name,
-          customer_email,
-          customer_phone,
-          customer_company,
-          order_items ( id, name, qty, unit, unit_price ),
-          email_threads ( id, from_role, sent_by, sent_at, subject, body )
-        `)
+        .select(ORDER_SELECT)
         .order('created_at', { ascending: false })
 
+      if (id !== fetchIdRef.current) return // stale
       if (err) throw err
 
-      // Normalize to the shape the UI expects
-      const normalized = (data ?? []).map(o => ({
-        id:             o.id,
-        createdAt:      o.created_at,
-        status:         o.status,
-        orderType:      o.order_type,
-        notes:          o.notes ?? '',
-        estimatedTotal: o.estimated_total ?? 0,
-        customer: {
-          name:    o.customer_name,
-          email:   o.customer_email,
-          phone:   o.customer_phone ?? '',
-          company: o.customer_company ?? '',
-        },
-        items: (o.order_items ?? []).map(i => ({
-          name:      i.name,
-          qty:       i.qty,
-          unit:      i.unit,
-          unitPrice: i.unit_price,
-        })),
-        emailThread: (o.email_threads ?? [])
-          .sort((a, b) => new Date(a.sent_at) - new Date(b.sent_at))
-          .map(e => ({
-            from:    e.from_role,
-            by:      e.sent_by,
-            at:      e.sent_at,
-            subject: e.subject,
-            body:    e.body,
-          })),
-      }))
-
-      setOrders(normalized)
+      setOrders((data ?? []).map(normalizeOrder))
     } catch (e) {
-      setError(e.message)
+      if (id === fetchIdRef.current) setError(e.message)
     } finally {
-      setLoading(false)
+      if (id === fetchIdRef.current) setLoading(false)
     }
   }, [])
 
   useEffect(() => { fetchOrders() }, [fetchOrders])
 
-  // Real-time: re-fetch whenever a new order is inserted or updated
+  // ── Incremental realtime updates ────────────────────────────
+  // Instead of re-fetching ALL orders on every change, we handle
+  // INSERT/UPDATE/DELETE individually and only fetch the single
+  // changed record when needed.
+
   useEffect(() => {
     const channel = supabase
-      .channel('orders-realtime')
+      .channel('orders-realtime-v2')
       .on(
         'postgres_changes',
-        { event: '*', schema: 'public', table: 'orders' },
-        () => { fetchOrders() }
+        { event: 'INSERT', schema: 'public', table: 'orders' },
+        async (payload) => {
+          // Fetch the full record with joins
+          const { data } = await supabase
+            .from('orders')
+            .select(ORDER_SELECT)
+            .eq('id', payload.new.id)
+            .single()
+
+          if (data) {
+            setOrders(prev => [normalizeOrder(data), ...prev])
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'orders' },
+        async (payload) => {
+          const { data } = await supabase
+            .from('orders')
+            .select(ORDER_SELECT)
+            .eq('id', payload.new.id)
+            .single()
+
+          if (data) {
+            const updated = normalizeOrder(data)
+            setOrders(prev =>
+              prev.map(o => o.id === updated.id ? updated : o)
+            )
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'DELETE', schema: 'public', table: 'orders' },
+        (payload) => {
+          setOrders(prev => prev.filter(o => o.id !== payload.old.id))
+        }
       )
       .subscribe()
 
     return () => { supabase.removeChannel(channel) }
-  }, [fetchOrders])
+  }, [])
+
+  // ── Mutations ───────────────────────────────────────────────
 
   async function updateStatus(id, status) {
     // Optimistic update
     setOrders(prev => prev.map(o => o.id === id ? { ...o, status } : o))
+
     const { error } = await supabase
       .from('orders')
       .update({ status })
       .eq('id', id)
+
     if (error) {
       console.error('Failed to update status:', error.message)
-      fetchOrders() // revert on failure
+      // Revert just this order, not a full refetch
+      const { data } = await supabase
+        .from('orders')
+        .select(ORDER_SELECT)
+        .eq('id', id)
+        .single()
+
+      if (data) {
+        const reverted = normalizeOrder(data)
+        setOrders(prev => prev.map(o => o.id === id ? reverted : o))
+      }
     }
   }
 
@@ -114,6 +160,7 @@ export function OrdersProvider({ children }) {
     setOrders(prev => prev.map(o =>
       o.id === id ? { ...o, emailThread: [...o.emailThread, emailEntry] } : o
     ))
+
     const { error } = await supabase
       .from('email_threads')
       .insert({
@@ -124,14 +171,29 @@ export function OrdersProvider({ children }) {
         subject:   emailEntry.subject,
         body:      emailEntry.body,
       })
+
     if (error) {
       console.error('Failed to save email thread:', error.message)
-      fetchOrders() // revert on failure
+      // Revert
+      const { data } = await supabase
+        .from('orders')
+        .select(ORDER_SELECT)
+        .eq('id', id)
+        .single()
+
+      if (data) {
+        const reverted = normalizeOrder(data)
+        setOrders(prev => prev.map(o => o.id === id ? reverted : o))
+      }
     }
   }
 
   return (
-    <OrdersContext.Provider value={{ orders, loading, error, updateStatus, addEmailToThread, refetch: fetchOrders }}>
+    <OrdersContext.Provider value={{
+      orders, loading, error,
+      updateStatus, addEmailToThread,
+      refetch: fetchOrders,
+    }}>
       {children}
     </OrdersContext.Provider>
   )
