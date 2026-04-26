@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import AdminLayout from '../../components/admin/AdminLayout'
 import { supabase } from '../../lib/supabase'
-import { useTheme } from '../../context/ThemeContext'
+import { useTheme } from '../../context/DashboardThemeContext'
 import {
   CheckCircle,
   Circle,

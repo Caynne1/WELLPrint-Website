@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import AdminLayout from '../../components/admin/AdminLayout'
 import { supabase } from '../../lib/supabase'
-import { useTheme } from '../../context/ThemeContext'
+import { useTheme } from '../../context/DashboardThemeContext'
 import {
   Package,
   Search,
@@ -458,13 +458,17 @@ export default function AdminOrdersPage() {
                   onChange={(e) => setStatusFilter(e.target.value)}
                   className="appearance-none rounded-[16px] border pl-4 pr-10 py-3 text-sm outline-none w-full"
                   style={{
-                    background: softBg,
+                    background: isLight ? '#f8fafc' : '#1a2744',
                     borderColor: softBorder,
                     color: heading,
                   }}
                 >
                   {STATUS_OPTIONS.map((option) => (
-                    <option key={option.key} value={option.key}>
+                    <option
+                      key={option.key}
+                      value={option.key}
+                      style={{ background: isLight ? '#ffffff' : '#1a2744', color: isLight ? '#0f172a' : '#f8fafc' }}
+                    >
                       {option.label}
                     </option>
                   ))}
@@ -620,13 +624,17 @@ export default function AdminOrdersPage() {
                             disabled={changingStatusId === order.id}
                             className="appearance-none rounded-[14px] border pl-3 pr-9 py-2.5 text-sm outline-none w-full"
                             style={{
-                              background: softBg,
+                              background: isLight ? '#f8fafc' : '#1a2744',
                               borderColor: softBorder,
                               color: heading,
                             }}
                           >
                             {QUICK_STATUS_OPTIONS.map((status) => (
-                              <option key={status} value={status}>
+                              <option
+                                key={status}
+                                value={status}
+                                style={{ background: isLight ? '#ffffff' : '#1a2744', color: isLight ? '#0f172a' : '#f8fafc' }}
+                              >
                                 {STATUS_STYLES[status]?.label || status}
                               </option>
                             ))}

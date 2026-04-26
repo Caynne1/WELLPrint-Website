@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import AdminLayout from '../../components/admin/AdminLayout'
-import { useTheme } from '../../context/ThemeContext'
+import { useTheme } from '../../context/DashboardThemeContext'
 import {
   Search,
   Plus,
@@ -366,6 +366,7 @@ export default function AdminProductsPage() {
                   background: softBg,
                   borderColor: softBorder,
                   color: heading,
+                  colorScheme: isLight ? 'light' : 'dark',
                 }}
               />
             </div>
@@ -381,14 +382,18 @@ export default function AdminProductsPage() {
                 onChange={(e) => setCategoryFilter(e.target.value)}
                 className="appearance-none rounded-[16px] border pl-9 pr-10 py-3 text-sm outline-none w-full"
                 style={{
-                  background: softBg,
+                  background: isLight ? '#f8fafc' : '#1a2744',
                   borderColor: softBorder,
                   color: heading,
                 }}
               >
-                <option value="all">All Categories</option>
+                <option value="all" style={{ background: isLight ? '#ffffff' : '#1a2744', color: isLight ? '#0f172a' : '#f8fafc' }}>All Categories</option>
                 {categories.map((cat) => (
-                  <option key={cat.id || cat.name} value={cat.name}>
+                  <option
+                    key={cat.id || cat.name}
+                    value={cat.name}
+                    style={{ background: isLight ? '#ffffff' : '#1a2744', color: isLight ? '#0f172a' : '#f8fafc' }}
+                  >
                     {cat.name}
                   </option>
                 ))}
@@ -910,14 +915,18 @@ export default function AdminProductsPage() {
                     onChange={(e) => setForm((prev) => ({ ...prev, category: e.target.value }))}
                     className="w-full rounded-[16px] border px-4 py-3 text-sm outline-none"
                     style={{
-                      background: softBg,
+                      background: isLight ? '#f8fafc' : '#1a2744',
                       borderColor: softBorder,
                       color: heading,
                     }}
                   >
-                    <option value="">Select category</option>
+                    <option value="" style={{ background: isLight ? '#ffffff' : '#1a2744', color: isLight ? '#0f172a' : '#f8fafc' }}>Select category</option>
                     {categories.map((cat) => (
-                      <option key={cat.id || cat.name} value={cat.name}>
+                      <option
+                        key={cat.id || cat.name}
+                        value={cat.name}
+                        style={{ background: isLight ? '#ffffff' : '#1a2744', color: isLight ? '#0f172a' : '#f8fafc' }}
+                      >
                         {cat.name}
                       </option>
                     ))}

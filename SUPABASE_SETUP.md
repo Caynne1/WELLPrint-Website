@@ -136,7 +136,54 @@ CREATE TABLE order_updates (
 CREATE INDEX idx_order_updates_order_id ON order_updates(order_id);
 ```
 
-### 7. Fees Configuration Table
+### 7. Contact Messages Table
+
+```sql
+create table if not exists public.contact_messages (
+  id            uuid        primary key default gen_random_uuid(),
+  full_name     text        not null,
+  email         text        not null,
+  phone         text,
+  concern_type  text        not null,
+  order_id      text,
+  message       text        not null,
+  is_read       boolean     not null default false,
+  is_resolved   boolean     not null default false,
+  created_at    timestamptz not null default now()
+);
+
+-- Indexes
+create index if not exists idx_contact_messages_created_at  on public.contact_messages (created_at desc);
+create index if not exists idx_contact_messages_is_read     on public.contact_messages (is_read);
+create index if not exists idx_contact_messages_is_resolved on public.contact_messages (is_resolved);
+
+-- Enable RLS
+alter table public.contact_messages enable row level security;
+
+-- Anyone (including anonymous visitors) can submit a message
+create policy "public can insert contact messages"
+  on public.contact_messages
+  for insert
+  to anon, authenticated
+  with check (true);
+
+-- Only authenticated staff/admins can read messages
+create policy "authenticated users can read contact messages"
+  on public.contact_messages
+  for select
+  to authenticated
+  using (true);
+
+-- Only authenticated staff/admins can mark read / resolved
+create policy "authenticated users can update contact messages"
+  on public.contact_messages
+  for update
+  to authenticated
+  using (true)
+  with check (true);
+```
+
+### 8. Fees Configuration Table
 
 ```sql
 CREATE TABLE fees_config (

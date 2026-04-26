@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { useTheme } from '../context/ThemeContext'
 import {
   Mail,
   Phone,
@@ -13,6 +14,7 @@ import {
 
 const concernOptions = [
   'General Inquiry',
+  'Request Quote',
   'Order Follow-up',
   'Cancel Order Request',
   'Change Layout Request',
@@ -21,10 +23,33 @@ const concernOptions = [
   'Other',
 ]
 
-const inputClass =
-  'w-full rounded-[18px] border px-4 py-3 text-sm outline-none transition-all duration-200'
-
 export default function ContactPage() {
+  const { theme } = useTheme()
+  const isDark = theme === 'dark'
+
+  // ── Color tokens ──────────────────────────────────────────────
+  const pageBg        = isDark ? '#060c14'                       : '#f1f5f9'
+  const cardBg        = isDark ? '#0b1730'                       : '#ffffff'
+  const cardBorder    = isDark ? 'rgba(255,255,255,0.08)'        : 'rgba(15,23,42,0.08)'
+  const cardShadow    = isDark ? '0 20px 50px rgba(0,0,0,0.22)' : '0 8px 24px rgba(15,23,42,0.07)'
+  const heading       = isDark ? '#ffffff'                        : '#0f172a'
+  const headingMd     = isDark ? '#ffffff'                        : '#1e293b'
+  const subText       = isDark ? 'rgba(203,213,225,0.45)'        : '#64748b'
+  const labelColor    = isDark ? 'rgba(203,213,225,0.40)'        : '#64748b'
+  const mutedText     = isDark ? 'rgba(203,213,225,0.35)'        : '#94a3b8'
+  const tinyText      = isDark ? 'rgba(203,213,225,0.30)'        : '#cbd5e1'
+  const inputBg       = isDark ? '#081225'                        : '#f8fafc'
+  const inputBorder   = isDark ? 'rgba(255,255,255,0.10)'        : 'rgba(15,23,42,0.12)'
+  const inputColor    = isDark ? '#ffffff'                        : '#0f172a'
+  const errorBorder   = isDark ? 'rgba(205,27,110,0.45)'         : 'rgba(205,27,110,0.35)'
+  const errorText     = isDark ? '#f9a8d4'                        : '#9f1239'
+  const successText   = isDark ? '#bbf7d0'                        : '#15803d'
+  const successBg     = isDark ? 'rgba(22,163,74,0.10)'          : 'rgba(22,163,74,0.08)'
+  const successBorder = isDark ? 'rgba(22,163,74,0.20)'          : 'rgba(22,163,74,0.28)'
+
+  const inputClass = `w-full rounded-[18px] border px-4 py-3 text-sm outline-none transition-all duration-200`
+
+  // ── Form state ────────────────────────────────────────────────
   const [form, setForm] = useState({
     full_name: '',
     email: '',
@@ -33,76 +58,58 @@ export default function ContactPage() {
     order_id: '',
     message: '',
   })
-
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
   const [fieldErrors, setFieldErrors] = useState({})
 
-  const setField = (key) => (e) => {
+  const setField = (key) => (e) =>
     setForm((prev) => ({ ...prev, [key]: e.target.value }))
-  }
 
   function validate() {
     const errs = {}
-
     if (!form.full_name.trim()) errs.full_name = 'Full name is required.'
     if (!form.email.trim()) errs.email = 'Email is required.'
     else if (!/\S+@\S+\.\S+/.test(form.email)) errs.email = 'Enter a valid email.'
     if (!form.concern_type.trim()) errs.concern_type = 'Please select a concern type.'
     if (!form.message.trim()) errs.message = 'Message is required.'
-
     return errs
   }
 
   async function handleSubmit(e) {
     e.preventDefault()
-
     const errs = validate()
     setFieldErrors(errs)
     setError('')
     setSuccess(false)
-
     if (Object.keys(errs).length > 0) return
 
     setLoading(true)
-
     const payload = {
-      full_name: form.full_name.trim(),
-      email: form.email.trim().toLowerCase(),
-      phone: form.phone.trim() || null,
+      full_name:    form.full_name.trim(),
+      email:        form.email.trim().toLowerCase(),
+      phone:        form.phone.trim() || null,
       concern_type: form.concern_type,
-      order_id: form.order_id.trim().toUpperCase() || null,
-      message: form.message.trim(),
+      order_id:     form.order_id.trim().toUpperCase() || null,
+      message:      form.message.trim(),
     }
-
-    const { error: insertError } = await supabase
-      .from('contact_messages')
-      .insert([payload])
-
+    const { error: insertError } = await supabase.from('contact_messages').insert([payload])
     if (insertError) {
-      console.error('Contact form error:', insertError)
       setError(insertError.message || 'Failed to send your message. Please try again.')
       setLoading(false)
       return
     }
-
     setSuccess(true)
     setLoading(false)
-    setForm({
-      full_name: '',
-      email: '',
-      phone: '',
-      concern_type: '',
-      order_id: '',
-      message: '',
-    })
+    setForm({ full_name: '', email: '', phone: '', concern_type: '', order_id: '', message: '' })
     setFieldErrors({})
   }
 
   return (
-    <section className="min-h-screen bg-ink-900 py-16">
+    <section className="min-h-screen py-16" style={{ background: pageBg }}>
       <div className="max-w-6xl mx-auto px-6">
+
+        {/* ── Header ── */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-3 mb-4">
             <div className="h-px w-8 bg-wp-green" />
@@ -113,42 +120,41 @@ export default function ContactPage() {
           </div>
 
           <h1
-            className="text-white text-[clamp(2rem,4vw,3.5rem)] font-bold leading-none mb-3"
-            style={{ fontFamily: "'Lora', serif" }}
+            className="text-[clamp(2rem,4vw,3.5rem)] font-bold leading-none mb-3"
+            style={{ fontFamily: "'Lora', serif", color: heading }}
           >
-            Concerns, Requests, <span style={{ color: 'var(--wp-green)' }}>Follow-ups & Inquiries</span>
+            Concerns, Requests,{' '}
+            <span style={{ color: 'var(--wp-green)' }}>Follow-ups & Inquiries</span>
           </h1>
 
-          <p className="text-ivory-300/45 text-sm max-w-2xl mx-auto leading-relaxed">
-            For inquiries, concerns, follow-ups, or requests related to your order, please send us a message below.
-            If your message is about an existing order, include your{' '}
-            <span className="text-white font-medium">Order ID</span> so we can trace it faster.
+          <p className="text-sm max-w-2xl mx-auto leading-relaxed" style={{ color: subText }}>
+            For inquiries, concerns, follow-ups, or requests related to your order, please send us
+            a message below. If your message is about an existing order, include your{' '}
+            <span style={{ color: heading, fontWeight: 600 }}>Order ID</span> so we can trace it faster.
           </p>
         </div>
 
+        {/* ── Grid ── */}
         <div className="grid lg:grid-cols-12 gap-8">
+
+          {/* ── Left column ── */}
           <div className="lg:col-span-4 space-y-6">
+
+            {/* Contact details card */}
             <div
               className="rounded-[28px] border p-6"
-              style={{
-                background: '#0b1730',
-                borderColor: 'rgba(255,255,255,0.08)',
-                boxShadow: '0 20px 50px rgba(0,0,0,0.22)',
-              }}
+              style={{ background: cardBg, borderColor: cardBorder, boxShadow: cardShadow }}
             >
               <div className="flex items-center gap-3 mb-5">
                 <div
                   className="w-11 h-11 rounded-2xl flex items-center justify-center"
-                  style={{
-                    background: 'rgba(25,147,210,0.12)',
-                    border: '1px solid rgba(25,147,210,0.20)',
-                  }}
+                  style={{ background: 'rgba(25,147,210,0.12)', border: '1px solid rgba(25,147,210,0.20)' }}
                 >
                   <MessageSquare size={18} style={{ color: 'var(--wp-cyan)' }} />
                 </div>
                 <div>
-                  <h2 className="text-white text-lg font-semibold">Contact Details</h2>
-                  <p className="text-ivory-300/35 text-xs">We’re here to assist you</p>
+                  <h2 className="text-lg font-semibold" style={{ color: heading }}>Contact Details</h2>
+                  <p className="text-xs" style={{ color: mutedText }}>We're here to assist you</p>
                 </div>
               </div>
 
@@ -156,59 +162,51 @@ export default function ContactPage() {
                 <div className="flex items-start gap-3">
                   <MapPin size={16} className="text-wp-green mt-0.5" />
                   <div>
-                    <p className="text-white font-medium">Address</p>
-                    <p className="text-ivory-300/45">Ormoc City, Philippines</p>
+                    <p className="font-medium" style={{ color: headingMd }}>Address</p>
+                    <p style={{ color: subText }}>Ormoc City, Philippines 6541</p>
                   </div>
-                </div>
-
+                </div>  
                 <div className="flex items-start gap-3">
                   <Phone size={16} className="text-wp-green mt-0.5" />
                   <div>
-                    <p className="text-white font-medium">Phone</p>
-                    <p className="text-ivory-300/45">+63 9XX XXX XXXX</p>
+                    <p className="font-medium" style={{ color: headingMd }}>Phone</p>
+                    <p style={{ color: subText }}>0920 578 5304</p>
                   </div>
                 </div>
-
                 <div className="flex items-start gap-3">
                   <Mail size={16} className="text-wp-green mt-0.5" />
                   <div>
-                    <p className="text-white font-medium">Email</p>
-                    <p className="text-ivory-300/45">wellprintormoc@gmail.com</p>
+                    <p className="font-medium" style={{ color: headingMd }}>Email</p>
+                    <p style={{ color: subText }}>wellprint.6972@gmail.com</p>
                   </div>
                 </div>
               </div>
             </div>
 
+            {/* Helpful tip card */}
             <div
               className="rounded-[28px] border p-6"
-              style={{
-                background: '#0b1730',
-                borderColor: 'rgba(255,255,255,0.08)',
-                boxShadow: '0 20px 50px rgba(0,0,0,0.22)',
-              }}
+              style={{ background: cardBg, borderColor: cardBorder, boxShadow: cardShadow }}
             >
               <div className="flex items-center gap-3 mb-4">
                 <div
                   className="w-11 h-11 rounded-2xl flex items-center justify-center"
-                  style={{
-                    background: 'rgba(22,163,74,0.12)',
-                    border: '1px solid rgba(22,163,74,0.20)',
-                  }}
+                  style={{ background: 'rgba(22,163,74,0.12)', border: '1px solid rgba(22,163,74,0.20)' }}
                 >
                   <FileText size={18} style={{ color: 'var(--wp-green)' }} />
                 </div>
                 <div>
-                  <h2 className="text-white text-lg font-semibold">Helpful Tip</h2>
-                  <p className="text-ivory-300/35 text-xs">For faster assistance</p>
+                  <h2 className="text-lg font-semibold" style={{ color: heading }}>Helpful Tip</h2>
+                  <p className="text-xs" style={{ color: mutedText }}>For faster assistance</p>
                 </div>
               </div>
 
-              <p className="text-ivory-300/45 text-sm leading-relaxed">
+              <p className="text-sm leading-relaxed" style={{ color: subText }}>
                 If your concern or inquiry is about an existing order, include the{' '}
-                <span className="text-white font-medium">Order ID</span>, your name, and a clear message such as:
+                <span style={{ color: heading, fontWeight: 600 }}>Order ID</span>, your name, and a clear message such as:
               </p>
 
-              <ul className="mt-4 space-y-2 text-sm text-ivory-300/45">
+              <ul className="mt-4 space-y-2 text-sm" style={{ color: subText }}>
                 <li>• Request to cancel order</li>
                 <li>• Request to change layout or design</li>
                 <li>• Request to change pickup or delivery</li>
@@ -218,31 +216,33 @@ export default function ContactPage() {
             </div>
           </div>
 
+          {/* ── Right column — form ── */}
           <div className="lg:col-span-8">
             <div
               className="rounded-[28px] border p-6 sm:p-8"
-              style={{
-                background: '#0b1730',
-                borderColor: 'rgba(255,255,255,0.08)',
-                boxShadow: '0 20px 50px rgba(0,0,0,0.22)',
-              }}
+              style={{ background: cardBg, borderColor: cardBorder, boxShadow: cardShadow }}
             >
               <div className="mb-6">
                 <h2
-                  className="text-white text-2xl font-bold mb-2"
-                  style={{ fontFamily: "'Lora', serif" }}
+                  className="text-2xl font-bold mb-2"
+                  style={{ fontFamily: "'Lora', serif", color: heading }}
                 >
                   Send Us a Message
                 </h2>
-                <p className="text-ivory-300/40 text-sm">
+                <p className="text-sm" style={{ color: mutedText }}>
                   Fill out the form below for concerns, requests, follow-ups, or inquiries.
                 </p>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-5">
+
+                {/* Row 1: name + email */}
                 <div className="grid sm:grid-cols-2 gap-5">
                   <div>
-                    <label className="block text-[10px] tracking-[0.18em] uppercase text-ivory-300/40 mb-2">
+                    <label
+                      className="block text-[10px] tracking-[0.18em] uppercase mb-2"
+                      style={{ color: labelColor }}
+                    >
                       Full Name *
                     </label>
                     <input
@@ -252,20 +252,21 @@ export default function ContactPage() {
                       placeholder="Enter your full name"
                       className={inputClass}
                       style={{
-                        background: '#081225',
-                        borderColor: fieldErrors.full_name
-                          ? 'rgba(205,27,110,0.45)'
-                          : 'rgba(255,255,255,0.10)',
-                        color: '#fff',
+                        background: inputBg,
+                        borderColor: fieldErrors.full_name ? errorBorder : inputBorder,
+                        color: inputColor,
                       }}
                     />
                     {fieldErrors.full_name && (
-                      <p className="text-pink-300 text-xs mt-2">{fieldErrors.full_name}</p>
+                      <p className="text-xs mt-2" style={{ color: errorText }}>{fieldErrors.full_name}</p>
                     )}
                   </div>
 
                   <div>
-                    <label className="block text-[10px] tracking-[0.18em] uppercase text-ivory-300/40 mb-2">
+                    <label
+                      className="block text-[10px] tracking-[0.18em] uppercase mb-2"
+                      style={{ color: labelColor }}
+                    >
                       Email *
                     </label>
                     <input
@@ -275,22 +276,24 @@ export default function ContactPage() {
                       placeholder="Enter your email"
                       className={inputClass}
                       style={{
-                        background: '#081225',
-                        borderColor: fieldErrors.email
-                          ? 'rgba(205,27,110,0.45)'
-                          : 'rgba(255,255,255,0.10)',
-                        color: '#fff',
+                        background: inputBg,
+                        borderColor: fieldErrors.email ? errorBorder : inputBorder,
+                        color: inputColor,
                       }}
                     />
                     {fieldErrors.email && (
-                      <p className="text-pink-300 text-xs mt-2">{fieldErrors.email}</p>
+                      <p className="text-xs mt-2" style={{ color: errorText }}>{fieldErrors.email}</p>
                     )}
                   </div>
                 </div>
 
+                {/* Row 2: phone + concern */}
                 <div className="grid sm:grid-cols-2 gap-5">
                   <div>
-                    <label className="block text-[10px] tracking-[0.18em] uppercase text-ivory-300/40 mb-2">
+                    <label
+                      className="block text-[10px] tracking-[0.18em] uppercase mb-2"
+                      style={{ color: labelColor }}
+                    >
                       Phone Number
                     </label>
                     <input
@@ -299,16 +302,15 @@ export default function ContactPage() {
                       onChange={setField('phone')}
                       placeholder="Enter your phone number"
                       className={inputClass}
-                      style={{
-                        background: '#081225',
-                        borderColor: 'rgba(255,255,255,0.10)',
-                        color: '#fff',
-                      }}
+                      style={{ background: inputBg, borderColor: inputBorder, color: inputColor }}
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[10px] tracking-[0.18em] uppercase text-ivory-300/40 mb-2">
+                    <label
+                      className="block text-[10px] tracking-[0.18em] uppercase mb-2"
+                      style={{ color: labelColor }}
+                    >
                       Concern / Inquiry Type *
                     </label>
                     <select
@@ -316,83 +318,87 @@ export default function ContactPage() {
                       onChange={setField('concern_type')}
                       className={inputClass}
                       style={{
-                        background: '#081225',
-                        borderColor: fieldErrors.concern_type
-                          ? 'rgba(205,27,110,0.45)'
-                          : 'rgba(255,255,255,0.10)',
-                        color: '#fff',
+                        background: inputBg,
+                        borderColor: fieldErrors.concern_type ? errorBorder : inputBorder,
+                        color: form.concern_type ? inputColor : mutedText,
                       }}
                     >
-                      <option value="">Select concern type</option>
+                      <option value="" style={{ background: isDark ? '#081225' : '#ffffff', color: inputColor }}>
+                        Select concern type
+                      </option>
                       {concernOptions.map((option) => (
-                        <option key={option} value={option}>
+                        <option
+                          key={option}
+                          value={option}
+                          style={{ background: isDark ? '#081225' : '#ffffff', color: inputColor }}
+                        >
                           {option}
                         </option>
                       ))}
                     </select>
                     {fieldErrors.concern_type && (
-                      <p className="text-pink-300 text-xs mt-2">{fieldErrors.concern_type}</p>
+                      <p className="text-xs mt-2" style={{ color: errorText }}>{fieldErrors.concern_type}</p>
                     )}
                   </div>
                 </div>
 
+                {/* Order ID */}
                 <div>
-                  <label className="block text-[10px] tracking-[0.18em] uppercase text-ivory-300/40 mb-2">
+                  <label
+                    className="block text-[10px] tracking-[0.18em] uppercase mb-2"
+                    style={{ color: labelColor }}
+                  >
                     Order ID
                   </label>
                   <input
                     type="text"
                     value={form.order_id}
                     onChange={(e) =>
-                      setForm((prev) => ({
-                        ...prev,
-                        order_id: e.target.value.toUpperCase(),
-                      }))
+                      setForm((prev) => ({ ...prev, order_id: e.target.value.toUpperCase() }))
                     }
                     placeholder="Example: ORD-12345678"
                     className={inputClass}
-                    style={{
-                      background: '#081225',
-                      borderColor: 'rgba(255,255,255,0.10)',
-                      color: '#fff',
-                    }}
+                    style={{ background: inputBg, borderColor: inputBorder, color: inputColor }}
                   />
-                  <p className="text-ivory-300/30 text-xs mt-2">
+                  <p className="text-xs mt-2" style={{ color: tinyText }}>
                     Include the Order ID if your message is about an existing order so we can assist you faster.
                   </p>
                 </div>
 
+                {/* Message */}
                 <div>
-                  <label className="block text-[10px] tracking-[0.18em] uppercase text-ivory-300/40 mb-2">
+                  <label
+                    className="block text-[10px] tracking-[0.18em] uppercase mb-2"
+                    style={{ color: labelColor }}
+                  >
                     Message *
                   </label>
                   <textarea
                     rows={6}
                     value={form.message}
                     onChange={setField('message')}
-                    placeholder="Type your concern, request, follow-up, or inquiry here. Example: I would like to request cancellation of my order / I want to change the layout / I need to update delivery details / I have an inquiry about your printing services."
+                    placeholder="Type your concern, request, follow-up, or inquiry here."
                     className={inputClass}
                     style={{
-                      background: '#081225',
-                      borderColor: fieldErrors.message
-                        ? 'rgba(205,27,110,0.45)'
-                        : 'rgba(255,255,255,0.10)',
-                      color: '#fff',
+                      background: inputBg,
+                      borderColor: fieldErrors.message ? errorBorder : inputBorder,
+                      color: inputColor,
                       resize: 'none',
                     }}
                   />
                   {fieldErrors.message && (
-                    <p className="text-pink-300 text-xs mt-2">{fieldErrors.message}</p>
+                    <p className="text-xs mt-2" style={{ color: errorText }}>{fieldErrors.message}</p>
                   )}
                 </div>
 
+                {/* Error banner */}
                 {error && (
                   <div
                     className="rounded-[18px] px-4 py-3 text-sm flex items-start gap-2"
                     style={{
                       background: 'rgba(205,27,110,0.10)',
                       border: '1px solid rgba(205,27,110,0.20)',
-                      color: '#f9a8d4',
+                      color: errorText,
                     }}
                   >
                     <AlertCircle size={16} className="shrink-0 mt-0.5" />
@@ -400,14 +406,11 @@ export default function ContactPage() {
                   </div>
                 )}
 
+                {/* Success banner */}
                 {success && (
                   <div
                     className="rounded-[18px] px-4 py-3 text-sm flex items-start gap-2"
-                    style={{
-                      background: 'rgba(22,163,74,0.10)',
-                      border: '1px solid rgba(22,163,74,0.20)',
-                      color: '#bbf7d0',
-                    }}
+                    style={{ background: successBg, border: `1px solid ${successBorder}`, color: successText }}
                   >
                     <CheckCircle size={16} className="shrink-0 mt-0.5" />
                     <span>

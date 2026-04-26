@@ -5,7 +5,6 @@ import {
   MapPin,
   ArrowUpRight,
   Facebook,
-  Instagram,
   Clock,
   Printer,
 } from 'lucide-react'
@@ -66,7 +65,7 @@ export default function Footer() {
                   className="text-[9px] uppercase tracking-[0.18em] font-semibold block mt-0.5"
                   style={{ color: '#1993D2' }}
                 >
-                  Espiel-Bereso Group
+                  EBGC
                 </span>
               </div>
             </Link>
@@ -82,25 +81,25 @@ export default function Footer() {
             {/* Contact info */}
             <div className="space-y-3">
               <a
-                href="mailto:hello@wellprint.com.ph"
+                href="mailto:wellprint.6972@gmail.com"
                 className="flex items-center gap-3 text-sm transition-colors group"
                 style={{ color: 'rgba(148,163,184,0.55)' }}
                 onMouseEnter={e => (e.currentTarget.style.color = '#1993D2')}
                 onMouseLeave={e => (e.currentTarget.style.color = 'rgba(148,163,184,0.55)')}
               >
                 <Mail size={14} className="shrink-0" style={{ color: '#1993D2' }} />
-                hello@wellprint.com.ph
+                wellprint.6972@gmail.com
               </a>
 
               <a
-                href="tel:+6328XXXXXXXX"
+                href="0920 578 5304"
                 className="flex items-center gap-3 text-sm transition-colors"
                 style={{ color: 'rgba(148,163,184,0.55)' }}
                 onMouseEnter={e => (e.currentTarget.style.color = '#16a34a')}
                 onMouseLeave={e => (e.currentTarget.style.color = 'rgba(148,163,184,0.55)')}
               >
-                <Phone size={14} className="shrink-0" style={{ color: '#16a34a' }} />
-                +63 (2) 8XXX-XXXX
+                <Phone size={14} className="shrink-0" style={{ color: '#16a34a' }} />               
+                0920 578 5304
               </a>
 
               <div
@@ -108,7 +107,7 @@ export default function Footer() {
                 style={{ color: 'rgba(148,163,184,0.55)' }}
               >
                 <MapPin size={14} className="shrink-0" style={{ color: '#fdc010' }} />
-                Cebu City, Philippines
+                Ormoc City, Philippines, 6541
               </div>
 
               <div
@@ -220,7 +219,7 @@ export default function Footer() {
 
           <div className="flex items-center gap-3">
             <a
-              href="https://facebook.com"
+              href="https://www.facebook.com/wellprintormoc"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Facebook"
@@ -242,54 +241,6 @@ export default function Footer() {
               }}
             >
               <Facebook size={15} />
-            </a>
-
-            <a
-              href="https://instagram.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Instagram"
-              className="w-9 h-9 rounded-xl flex items-center justify-center transition-all"
-              style={{
-                background: 'rgba(255,255,255,0.04)',
-                border: '1px solid rgba(255,255,255,0.08)',
-                color: 'rgba(148,163,184,0.5)',
-              }}
-              onMouseEnter={e => {
-                e.currentTarget.style.background = 'rgba(205,27,110,0.12)'
-                e.currentTarget.style.borderColor = 'rgba(205,27,110,0.25)'
-                e.currentTarget.style.color = '#cd1b6e'
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.background = 'rgba(255,255,255,0.04)'
-                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'
-                e.currentTarget.style.color = 'rgba(148,163,184,0.5)'
-              }}
-            >
-              <Instagram size={15} />
-            </a>
-
-            <a
-              href="mailto:hello@wellprint.com.ph"
-              aria-label="Email us"
-              className="w-9 h-9 rounded-xl flex items-center justify-center transition-all"
-              style={{
-                background: 'rgba(255,255,255,0.04)',
-                border: '1px solid rgba(255,255,255,0.08)',
-                color: 'rgba(148,163,184,0.5)',
-              }}
-              onMouseEnter={e => {
-                e.currentTarget.style.background = 'rgba(22,163,74,0.12)'
-                e.currentTarget.style.borderColor = 'rgba(22,163,74,0.25)'
-                e.currentTarget.style.color = '#16a34a'
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.background = 'rgba(255,255,255,0.04)'
-                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'
-                e.currentTarget.style.color = 'rgba(148,163,184,0.5)'
-              }}
-            >
-              <Mail size={15} />
             </a>
           </div>
         </div>

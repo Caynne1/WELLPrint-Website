@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import AdminLayout from '../../components/admin/AdminLayout'
 import { supabase } from '../../lib/supabase'
-import { useTheme } from '../../context/ThemeContext'
+import { useTheme } from '../../context/DashboardThemeContext'
 import {
   Mail,
   Search,
@@ -21,6 +21,11 @@ const TYPE_COLORS = {
     bg: 'rgba(25,147,210,0.10)',
     border: 'rgba(25,147,210,0.20)',
     color: '#1993D2',
+  },
+  'Request Quote': {
+    bg: 'rgba(22,163,74,0.10)',
+    border: 'rgba(22,163,74,0.20)',
+    color: '#16a34a',
   },
   'Order Follow-up': {
     bg: 'rgba(245,158,11,0.10)',
@@ -137,6 +142,33 @@ export default function InboxPage() {
 
   useEffect(() => {
     fetchMessages()
+
+    const channel = supabase
+      .channel('inbox-realtime')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'contact_messages' },
+        (payload) => {
+          setMessages((prev) => [payload.new, ...prev])
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'contact_messages' },
+        (payload) => {
+          setMessages((prev) =>
+            prev.map((m) => (m.id === payload.new.id ? payload.new : m))
+          )
+          setSelected((prev) =>
+            prev?.id === payload.new.id ? payload.new : prev
+          )
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
   }, [])
 
   async function fetchMessages() {

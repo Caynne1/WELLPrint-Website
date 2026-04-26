@@ -70,7 +70,7 @@ const STATS = [
   { value: '10+',  label: 'Years of Service', color: P.blue },
   { value: '500+', label: 'Happy Customers',  color: P.green },
   { value: '98%',  label: 'Satisfaction Rate', color: P.yellow },
-  { value: '3',    label: 'Group Companies',   color: P.blue },
+  { value: '7',    label: 'Group Companies',   color: P.blue },
 ]
 
 function Stat({ value, label, color }) {
@@ -234,7 +234,7 @@ export default function AboutPage() {
       <PageHero
         label="Who We Are"
         title="The Printing Arm of"
-        titleAccent="Espiel-Bereso Group"
+        titleAccent="Espiel-Bereso Group of Companies"
         subtitle="WELLPRINT was established to serve the printing needs of WELLife and has since grown into a comprehensive printing service provider, combining institutional backing with agile, client-first delivery."
       />
 
@@ -574,7 +574,7 @@ export default function AboutPage() {
             <HighlightCard
               icon={Users}
               title="Backed by a Strong Group"
-              body="As part of Espiel-Bereso Group, WELLPRINT benefits from structure, scale, and long-term stability."
+              body="As part of Espiel-Bereso Group of Companies, WELLPRINT benefits from structure, scale, and long-term stability."
               accent="yellow"
             />
           </div>

@@ -128,19 +128,35 @@ export default function HomePage() {
       {/* ── HERO ── */}
       <section className="relative overflow-hidden min-h-[760px] flex flex-col">
         <div className="absolute inset-0">
-          <img src="/images/print.png" alt="WELLPrint" className="w-full h-full object-cover" />
-          {isDark ? (
-            <>
-              <div className="absolute inset-0 bg-black/55" />
-              <div className="absolute inset-0 bg-[linear-gradient(105deg,rgba(0,0,0,0.82)_0%,rgba(0,0,0,0.55)_42%,rgba(0,0,0,0.18)_75%,transparent_100%)]" />
-              <div className="absolute left-0 top-0 bottom-0 w-1/2 bg-[linear-gradient(90deg,rgba(22,163,74,0.07)_0%,transparent_100%)]" />
-            </>
-          ) : (
-            <>
-              <div className="absolute inset-0 bg-white/40" />
-              <div className="absolute inset-0 bg-[linear-gradient(105deg,rgba(255,255,255,0.92)_0%,rgba(255,255,255,0.65)_42%,rgba(255,255,255,0.20)_75%,transparent_100%)]" />
-            </>
-          )}
+          <img
+            src={isDark ? '/images/print.png' : '/images/print 2.png'}
+            alt="WELLPrint"
+            className="w-full h-full object-cover"
+            style={{ objectPosition: 'center center' }}
+          />
+          {/* Thin base tone — barely tints center/right so logo stays visible */}
+          <div
+            className="absolute inset-0"
+            style={{ background: isDark ? 'rgba(0,0,0,0.50)' : 'rgba(255,255,255,0.06)' }}
+          />
+          {/* Left-side fade — heavy only where the text lives, clears out fast */}
+          <div
+            className="absolute inset-0"
+            style={{
+              background: isDark
+                ? 'linear-gradient(105deg,rgba(0,0,0,0.82) 0%,rgba(0,0,0,0.52) 42%,rgba(0,0,0,0.16) 72%,transparent 100%)'
+                : 'linear-gradient(105deg,rgba(255,255,255,0.88) 0%,rgba(255,255,255,0.42) 33%,rgba(255,255,255,0.08) 55%,transparent 70%)',
+            }}
+          />
+          {/* Subtle green accent tint on left — same width, same opacity */}
+          <div
+            className="absolute left-0 top-0 bottom-0 w-1/2"
+            style={{
+              background: isDark
+                ? 'linear-gradient(90deg,rgba(22,163,74,0.07) 0%,transparent 100%)'
+                : 'linear-gradient(90deg,rgba(22,163,74,0.04) 0%,transparent 100%)',
+            }}
+          />
         </div>
 
         {/* Hero content */}
@@ -257,7 +273,7 @@ export default function HomePage() {
       </section>
 
       {/* ── PROCESS ── */}
-      <section ref={processRef} className="reveal-up py-20" style={{ background: isDark ? '#080f18' : '#ffffff' }}>
+      <section ref={processRef} className="reveal-up py-20" style={{ background: isDark ? '#080f18' : '#f1f5f9' }}>
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex flex-col items-center text-center mb-14">
             <div
@@ -289,7 +305,7 @@ export default function HomePage() {
                   ${
                     isDark
                       ? 'bg-white/[0.04] border-white/[0.08] hover:border-green-500/25 hover:bg-white/[0.06]'
-                      : 'bg-white border-slate-100 hover:border-green-200 shadow-[0_8px_32px_rgba(0,0,0,0.06)] hover:shadow-[0_16px_48px_rgba(22,163,74,0.10)]'
+                      : 'bg-white border-slate-200 hover:border-green-300 shadow-[0_4px_24px_rgba(0,0,0,0.09)] hover:shadow-[0_16px_48px_rgba(22,163,74,0.14)]'
                   }`}
               >
                 <div
@@ -320,8 +336,8 @@ export default function HomePage() {
                     <span
                       className="text-[9px] font-bold uppercase tracking-[0.22em] px-2.5 py-1 rounded-full"
                       style={{
-                        background: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(15,23,42,0.05)',
-                        color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(15,23,42,0.4)',
+                        background: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(22,163,74,0.08)',
+                        color: isDark ? 'rgba(255,255,255,0.4)' : COLORS.green,
                       }}
                     >
                       Step {i + 1}
@@ -343,7 +359,7 @@ export default function HomePage() {
       </section>
 
       {/* ── TRUST / TESTIMONIALS ── */}
-      <section ref={trustRef} className="reveal-up py-20" style={{ background: isDark ? '#060c14' : '#f4f6f4' }}>
+      <section ref={trustRef} className="reveal-up py-20" style={{ background: isDark ? '#060c14' : '#ffffff' }}>
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-[340px_1fr_260px] items-start">
             <div className="flex flex-col gap-5">
@@ -370,7 +386,7 @@ export default function HomePage() {
                   <Star key={i} size={16} fill="#f59e0b" stroke="none" />
                 ))}
               </div>
-              <p className={`text-sm ${isDark ? 'text-white/50' : 'text-slate-400'}`}>4.9 / 5 from 500+ customers</p>
+              <p className={`text-sm ${isDark ? 'text-white/50' : 'text-slate-500'}`}>4.9 / 5 from 500+ customers</p>
 
               <div className="flex items-center gap-2 mt-2">
                 {testimonials.map((_, i) => (
@@ -400,7 +416,7 @@ export default function HomePage() {
                       ${
                         isDark
                           ? 'bg-white/[0.04] border-white/[0.09]'
-                          : 'bg-white border-slate-100 shadow-[0_12px_40px_rgba(0,0,0,0.07)]'
+                          : 'bg-white border-slate-200 shadow-[0_4px_24px_rgba(0,0,0,0.10)]'
                       }`}
                     >
                       <div
@@ -424,7 +440,7 @@ export default function HomePage() {
                         </div>
                         <div>
                           <p className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-slate-800'}`}>{item.name}</p>
-                          <p className={`text-xs ${isDark ? 'text-white/45' : 'text-slate-400'}`}>{item.role}</p>
+                          <p className={`text-xs ${isDark ? 'text-white/45' : 'text-slate-500'}`}>{item.role}</p>
                         </div>
                       </div>
                     </div>
@@ -435,7 +451,7 @@ export default function HomePage() {
 
             <div
               className={`flex flex-col items-center justify-center rounded-[22px] border p-8 text-center
-              ${isDark ? 'bg-white/[0.04] border-white/[0.09]' : 'bg-white border-slate-100 shadow-[0_12px_40px_rgba(0,0,0,0.07)]'}`}
+              ${isDark ? 'bg-white/[0.04] border-white/[0.09]' : 'bg-white border-slate-200 shadow-[0_4px_24px_rgba(0,0,0,0.10)]'}`}
             >
               <div
                 className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4"
@@ -446,10 +462,10 @@ export default function HomePage() {
               <p className="text-5xl font-bold leading-none mb-2" style={{ fontFamily: "'Lora', serif", color: COLORS.green }}>
                 500+
               </p>
-              <p className={`text-sm ${isDark ? 'text-white/50' : 'text-slate-400'}`}>Happy Customers</p>
+              <p className={`text-sm ${isDark ? 'text-white/50' : 'text-slate-500'}`}>Happy Customers</p>
               <div className="mt-5 pt-5 w-full border-t" style={{ borderColor: isDark ? 'rgba(255,255,255,0.07)' : '#f1f5f9' }}>
                 <p className="text-3xl font-bold" style={{ fontFamily: "'Lora', serif", color: COLORS.cyan }}>98%</p>
-                <p className={`text-xs mt-1 ${isDark ? 'text-white/50' : 'text-slate-400'}`}>Satisfaction Rate</p>
+                <p className={`text-xs mt-1 ${isDark ? 'text-white/50' : 'text-slate-500'}`}>Satisfaction Rate</p>
               </div>
             </div>
           </div>

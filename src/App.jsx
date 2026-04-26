@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from './context/AuthContext'
+import { DashboardThemeProvider } from './context/DashboardThemeContext'
 import ErrorBoundary from './components/common/ErrorBoundary'
 import Layout from './components/layout/Layout'
 import { Loader2 } from 'lucide-react'
@@ -28,6 +29,7 @@ const AdminProductsPage   = lazy(() => import('./pages/dashboard/AdminProductsPa
 const AdminAnalyticsPage  = lazy(() => import('./pages/dashboard/AdminAnalyticsPage'))
 const AdminCategoriesPage = lazy(() => import('./pages/dashboard/AdminCategoriesPage'))
 const InboxPage           = lazy(() => import('./pages/dashboard/InboxPage'))
+const AdminCustomersPage  = lazy(() => import('./pages/dashboard/AdminCustomersPage'))
 
 // ─── Loading fallback ──────────────────────────────────────────
 function PageLoader() {
@@ -99,9 +101,11 @@ function PublicPage({ children }) {
 
 function DashboardPage({ children }) {
   return (
-    <ErrorBoundary>
-      <Suspense fallback={<PageLoader />}>{children}</Suspense>
-    </ErrorBoundary>
+    <DashboardThemeProvider>
+      <ErrorBoundary>
+        <Suspense fallback={<PageLoader />}>{children}</Suspense>
+      </ErrorBoundary>
+    </DashboardThemeProvider>
   )
 }
 
@@ -133,6 +137,7 @@ export default function App() {
 
       {/* Permission-gated dashboard pages */}
       <Route path="/dashboard/orders" element={<RequirePermission permission="view_orders"><DashboardPage><AdminOrdersPage /></DashboardPage></RequirePermission>} />
+      <Route path="/dashboard/customers" element={<RequirePermission permission="view_orders"><DashboardPage><AdminCustomersPage /></DashboardPage></RequirePermission>} />
       <Route path="/dashboard/orders/:id" element={<RequirePermission permission="view_orders"><DashboardPage><AdminOrderDetailPage /></DashboardPage></RequirePermission>} />
       <Route path="/dashboard/products" element={<RequirePermission permission="view_products"><DashboardPage><AdminProductsPage /></DashboardPage></RequirePermission>} />
       <Route path="/dashboard/categories" element={<RequirePermission permission="manage_categories"><DashboardPage><AdminCategoriesPage /></DashboardPage></RequirePermission>} />

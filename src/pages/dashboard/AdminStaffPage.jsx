@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import AdminLayout from '../../components/admin/AdminLayout'
 import { useAuth, ALL_PERMISSIONS, PERMISSION_LABELS } from '../../context/AuthContext'
-import { useTheme } from '../../context/ThemeContext'
+import { useTheme } from '../../context/DashboardThemeContext'
 import { supabase } from '../../lib/supabase'
 import {
   Users,

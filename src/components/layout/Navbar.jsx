@@ -10,6 +10,8 @@ import {
   ChevronDown,
   User,
   Search,
+  Sun,
+  Moon,
 } from 'lucide-react'
 import clsx from 'clsx'
 import { useCart } from '../../context/CartContext'
@@ -38,7 +40,7 @@ export default function Navbar() {
   const navigate = useNavigate()
   const { totalItems } = useCart()
   const { user, logout } = useAuth()
-  const { theme } = useTheme()
+  const { theme, toggleTheme } = useTheme()
   const userMenuRef = useRef(null)
 
   const isDark = theme === 'dark'
@@ -102,41 +104,12 @@ export default function Navbar() {
         backdropFilter: 'blur(14px)',
       }
 
-  const desktopTextColor = transparentHeroMode
-    ? '#ffffff'
-    : isDark
-      ? '#ffffff'
-      : '#0f172a'
-
-  const mutedTextColor = transparentHeroMode
-    ? 'rgba(255,255,255,0.78)'
-    : isDark
-      ? 'rgba(255,255,255,0.70)'
-      : '#475569'
-
-  const searchBg = transparentHeroMode
-    ? 'rgba(255,255,255,0.10)'
-    : isDark
-      ? 'rgba(255,255,255,0.06)'
-      : 'rgba(255,255,255,0.96)'
-
-  const searchBorder = transparentHeroMode
-    ? 'rgba(255,255,255,0.16)'
-    : isDark
-      ? 'rgba(255,255,255,0.10)'
-      : 'rgba(0,44,95,0.10)'
-
-  const searchText = transparentHeroMode
-    ? '#ffffff'
-    : isDark
-      ? '#ffffff'
-      : '#0f172a'
-
-  const searchPlaceholder = transparentHeroMode
-    ? 'rgba(255,255,255,0.58)'
-    : isDark
-      ? 'rgba(255,255,255,0.45)'
-      : '#94a3b8'
+  const desktopTextColor = isDark ? '#ffffff' : '#0f172a'
+  const mutedTextColor = isDark ? 'rgba(255,255,255,0.70)' : '#475569'
+  const searchBg = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.96)'
+  const searchBorder = isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,44,95,0.10)'
+  const searchText = isDark ? '#ffffff' : '#0f172a'
+  const searchPlaceholder = isDark ? 'rgba(255,255,255,0.50)' : '#94a3b8'
 
   return (
     <>
@@ -145,11 +118,7 @@ export default function Navbar() {
           <div className="flex items-center gap-4 min-w-0 flex-1">
             <Link to="/" className="flex items-center group shrink-0" aria-label="WELLPrint Home">
               <img
-                src={
-                  transparentHeroMode || isDark
-                    ? '/logos/horizontal/main-dark.svg'
-                    : '/logos/horizontal/main-light.svg'
-                }
+                src={isDark ? '/logos/horizontal/main-dark.svg' : '/logos/horizontal/main-light.svg'}
                 alt="WELLPrint"
                 className="h-9 w-auto object-contain transition-transform duration-300 group-hover:scale-[1.02]"
               />
@@ -207,6 +176,21 @@ export default function Navbar() {
           </ul>
 
           <div className="hidden md:flex items-center gap-3 shrink-0">
+            {/* Theme toggle */}
+            <button
+              onClick={toggleTheme}
+              title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+              aria-label={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+              className="p-2 rounded-full transition-all duration-200 flex items-center justify-center"
+              style={{
+                background: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,44,95,0.06)',
+                border: `1px solid ${isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,44,95,0.10)'}`,
+                color: isDark ? 'rgba(255,255,255,0.80)' : '#64748b',
+              }}
+            >
+              {isDark ? <Sun size={16} /> : <Moon size={16} />}
+            </button>
+
             <Link
               to="/cart"
               className="relative p-2 transition-colors"
@@ -234,17 +218,9 @@ export default function Navbar() {
                   onClick={() => setUserMenuOpen((v) => !v)}
                   className="flex items-center gap-2 px-3 py-2 rounded-full border transition-all duration-200 text-sm font-medium"
                   style={{
-                    borderColor: transparentHeroMode
-                      ? 'rgba(255,255,255,0.14)'
-                      : isDark
-                        ? 'rgba(255,255,255,0.10)'
-                        : 'rgba(0,44,95,0.10)',
-                    color: transparentHeroMode || isDark ? '#ffffff' : '#0f172a',
-                    background: transparentHeroMode
-                      ? 'rgba(255,255,255,0.08)'
-                      : isDark
-                        ? 'rgba(255,255,255,0.05)'
-                        : 'rgba(255,255,255,0.75)',
+                    borderColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,44,95,0.10)',
+                    color: isDark ? '#ffffff' : '#0f172a',
+                    background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.75)',
                     backdropFilter: 'blur(10px)',
                   }}
                 >
@@ -253,10 +229,8 @@ export default function Navbar() {
                   <span
                     className="text-[9px] font-body uppercase px-1.5 py-0.5 rounded-full"
                     style={{
-                      background: transparentHeroMode || isDark
-                        ? 'rgba(25,147,210,0.16)'
-                        : 'rgba(0,99,24,0.10)',
-                      color: transparentHeroMode || isDark ? COLORS.blue : COLORS.green,
+                      background: isDark ? 'rgba(25,147,210,0.16)' : 'rgba(0,99,24,0.10)',
+                      color: isDark ? COLORS.blue : COLORS.green,
                     }}
                   >
                     {user.role}
@@ -326,40 +300,20 @@ export default function Navbar() {
                 to="/admin/login"
                 className="flex items-center gap-1.5 px-4 py-2 rounded-full border text-sm font-medium transition-all duration-200"
                 style={{
-                  borderColor: transparentHeroMode
-                    ? 'rgba(255,255,255,0.16)'
-                    : isDark
-                      ? 'rgba(255,255,255,0.10)'
-                      : 'rgba(0,44,95,0.10)',
-                  color: transparentHeroMode || isDark ? '#ffffff' : '#0f172a',
-                  background: transparentHeroMode
-                    ? 'rgba(255,255,255,0.08)'
-                    : isDark
-                      ? 'rgba(255,255,255,0.05)'
-                      : 'rgba(255,255,255,0.82)',
+                  borderColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,44,95,0.10)',
+                  color: isDark ? '#ffffff' : '#0f172a',
+                  background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.82)',
                   backdropFilter: 'blur(10px)',
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.borderColor = COLORS.green
                   e.currentTarget.style.color = COLORS.green
-                  e.currentTarget.style.background = transparentHeroMode
-                    ? 'rgba(0,99,24,0.10)'
-                    : isDark
-                      ? 'rgba(0,99,24,0.10)'
-                      : 'rgba(0,99,24,0.06)'
+                  e.currentTarget.style.background = isDark ? 'rgba(0,99,24,0.10)' : 'rgba(0,99,24,0.06)'
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = transparentHeroMode
-                    ? 'rgba(255,255,255,0.16)'
-                    : isDark
-                      ? 'rgba(255,255,255,0.10)'
-                      : 'rgba(0,44,95,0.10)'
-                  e.currentTarget.style.color = transparentHeroMode || isDark ? '#ffffff' : '#0f172a'
-                  e.currentTarget.style.background = transparentHeroMode
-                    ? 'rgba(255,255,255,0.08)'
-                    : isDark
-                      ? 'rgba(255,255,255,0.05)'
-                      : 'rgba(255,255,255,0.82)'
+                  e.currentTarget.style.borderColor = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,44,95,0.10)'
+                  e.currentTarget.style.color = isDark ? '#ffffff' : '#0f172a'
+                  e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.82)'
                 }}
               >
                 <LogIn size={14} />
@@ -472,6 +426,30 @@ export default function Navbar() {
               </li>
             ))}
           </ul>
+
+          {/* Mobile theme toggle */}
+          <div
+            className="flex items-center justify-between px-4 py-3 mb-4 rounded-2xl"
+            style={{
+              background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,44,95,0.04)',
+              border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,44,95,0.08)'}`,
+            }}
+          >
+            <span className="text-sm font-medium" style={{ color: isDark ? 'rgba(255,255,255,0.65)' : '#64748b' }}>
+              {isDark ? 'Dark Mode' : 'Light Mode'}
+            </span>
+            <button
+              onClick={toggleTheme}
+              aria-label={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+              className="p-2 rounded-full transition-all duration-200"
+              style={{
+                background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,44,95,0.07)',
+                color: isDark ? 'rgba(255,255,255,0.80)' : '#64748b',
+              }}
+            >
+              {isDark ? <Sun size={15} /> : <Moon size={15} />}
+            </button>
+          </div>
 
           <div className="mt-2">
             {user ? (
