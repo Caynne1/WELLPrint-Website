@@ -29,7 +29,7 @@ const STATUS_LABELS = {
 }
 
 const COLORS = {
-  green: '#16a34a',
+  green: '#13A150',
   cyan: '#1993D2',
   amber: '#f59e0b',
   violet: '#8b5cf6',

@@ -28,24 +28,24 @@ export default function ContactPage() {
   const isDark = theme === 'dark'
 
   // ── Color tokens ──────────────────────────────────────────────
-  const pageBg        = isDark ? '#060c14'                       : '#f1f5f9'
-  const cardBg        = isDark ? '#0b1730'                       : '#ffffff'
-  const cardBorder    = isDark ? 'rgba(255,255,255,0.08)'        : 'rgba(15,23,42,0.08)'
-  const cardShadow    = isDark ? '0 20px 50px rgba(0,0,0,0.22)' : '0 8px 24px rgba(15,23,42,0.07)'
-  const heading       = isDark ? '#ffffff'                        : '#0f172a'
-  const headingMd     = isDark ? '#ffffff'                        : '#1e293b'
-  const subText       = isDark ? 'rgba(203,213,225,0.45)'        : '#64748b'
-  const labelColor    = isDark ? 'rgba(203,213,225,0.40)'        : '#64748b'
-  const mutedText     = isDark ? 'rgba(203,213,225,0.35)'        : '#94a3b8'
-  const tinyText      = isDark ? 'rgba(203,213,225,0.30)'        : '#cbd5e1'
-  const inputBg       = isDark ? '#081225'                        : '#f8fafc'
-  const inputBorder   = isDark ? 'rgba(255,255,255,0.10)'        : 'rgba(15,23,42,0.12)'
-  const inputColor    = isDark ? '#ffffff'                        : '#0f172a'
+  const pageBg        = isDark ? '#0c1829'                       : '#f0f6ff'
+  const cardBg        = isDark ? '#112240'                       : '#ffffff'
+  const cardBorder    = isDark ? 'rgba(255,255,255,0.08)'        : 'rgba(13,31,60,0.07)'
+  const cardShadow    = isDark ? '0 20px 50px rgba(0,0,0,0.32)' : '0 4px 20px rgba(13,31,60,0.07)'
+  const heading       = isDark ? '#f0f4ff'                        : '#0d1f3c'
+  const headingMd     = isDark ? '#f0f4ff'                        : '#1e3a5f'
+  const subText       = isDark ? 'rgba(168,190,217,0.65)'        : '#5a7a9a'
+  const labelColor    = isDark ? 'rgba(168,190,217,0.55)'        : '#5a7a9a'
+  const mutedText     = isDark ? 'rgba(168,190,217,0.45)'        : '#8aabcc'
+  const tinyText      = isDark ? 'rgba(168,190,217,0.35)'        : '#a8c4d8'
+  const inputBg       = isDark ? '#1a2f52'                        : '#f7f9ff'
+  const inputBorder   = isDark ? 'rgba(255,255,255,0.10)'        : 'rgba(13,31,60,0.10)'
+  const inputColor    = isDark ? '#f0f4ff'                        : '#0d1f3c'
   const errorBorder   = isDark ? 'rgba(205,27,110,0.45)'         : 'rgba(205,27,110,0.35)'
   const errorText     = isDark ? '#f9a8d4'                        : '#9f1239'
-  const successText   = isDark ? '#bbf7d0'                        : '#15803d'
-  const successBg     = isDark ? 'rgba(22,163,74,0.10)'          : 'rgba(22,163,74,0.08)'
-  const successBorder = isDark ? 'rgba(22,163,74,0.20)'          : 'rgba(22,163,74,0.28)'
+  const successText   = isDark ? '#86efac'                        : '#13A150'
+  const successBg     = isDark ? 'rgba(19,161,80,0.10)'          : 'rgba(19,161,80,0.08)'
+  const successBorder = isDark ? 'rgba(19,161,80,0.22)'          : 'rgba(19,161,80,0.28)'
 
   const inputClass = `w-full rounded-[18px] border px-4 py-3 text-sm outline-none transition-all duration-200`
 
@@ -106,11 +106,11 @@ export default function ContactPage() {
   }
 
   return (
-    <section className="min-h-screen py-16" style={{ background: pageBg }}>
-      <div className="max-w-6xl mx-auto px-6">
+    <section className="min-h-screen pt-10 pb-16 sm:pt-12 sm:pb-20" style={{ background: pageBg }}>
+      <div className="max-w-6xl mx-auto px-4 sm:px-6">
 
         {/* ── Header ── */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-8 sm:mb-10">
           <div className="inline-flex items-center gap-3 mb-4">
             <div className="h-px w-8 bg-wp-green" />
             <span className="font-body text-[10px] tracking-[0.25em] uppercase text-wp-green">
@@ -225,7 +225,7 @@ export default function ContactPage() {
               <div className="mb-6">
                 <h2
                   className="text-2xl font-bold mb-2"
-                  style={{ fontFamily: "'Lora', serif", color: heading }}
+                  style={{ fontFamily: "'Poppins', san serif", color: heading }}
                 >
                   Send Us a Message
                 </h2>

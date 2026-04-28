@@ -26,8 +26,8 @@ const NAV_LINKS = [
 ]
 
 const COLORS = {
-  green: '#006318',
-  navy: '#002C5F',
+  green: '#13A150',
+  navy: '#0d1f3c',
   blue: '#1993D2',
 }
 
@@ -94,27 +94,27 @@ export default function Navbar() {
         backdropFilter: 'none',
       }
     : {
-        background: isDark ? 'rgba(7, 11, 16, 0.78)' : 'rgba(255, 255, 255, 0.82)',
+        background: isDark ? 'rgba(12,24,41,0.88)' : 'rgba(240,246,255,0.90)',
         borderBottom: isDark
           ? '1px solid rgba(255,255,255,0.08)'
-          : '1px solid rgba(0,44,95,0.08)',
+          : '1px solid rgba(13,31,60,0.08)',
         boxShadow: isDark
-          ? '0 12px 30px rgba(0,0,0,0.22)'
-          : '0 10px 30px rgba(15,23,42,0.08)',
+          ? '0 12px 32px rgba(0,0,0,0.30)'
+          : '0 10px 28px rgba(13,31,60,0.08)',
         backdropFilter: 'blur(14px)',
       }
 
-  const desktopTextColor = isDark ? '#ffffff' : '#0f172a'
-  const mutedTextColor = isDark ? 'rgba(255,255,255,0.70)' : '#475569'
-  const searchBg = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.96)'
-  const searchBorder = isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,44,95,0.10)'
-  const searchText = isDark ? '#ffffff' : '#0f172a'
-  const searchPlaceholder = isDark ? 'rgba(255,255,255,0.50)' : '#94a3b8'
+  const desktopTextColor = isDark ? '#f0f4ff' : '#0d1f3c'
+  const mutedTextColor = isDark ? 'rgba(240,244,255,0.65)' : '#5a7a9a'
+  const searchBg = isDark ? 'rgba(17,34,64,0.90)' : 'rgba(255,255,255,0.96)'
+  const searchBorder = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(13,31,60,0.10)'
+  const searchText = isDark ? '#f0f4ff' : '#0d1f3c'
+  const searchPlaceholder = isDark ? 'rgba(168,190,217,0.50)' : '#8aabcc'
 
   return (
     <>
       <header className={headerClass} style={headerStyle}>
-        <nav className="max-w-7xl mx-auto px-6 flex items-center justify-between gap-4">
+        <nav className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between gap-4">
           <div className="flex items-center gap-4 min-w-0 flex-1">
             <Link to="/" className="flex items-center group shrink-0" aria-label="WELLPrint Home">
               <img
@@ -245,11 +245,11 @@ export default function Navbar() {
                   <div
                     className="absolute right-0 top-full mt-2 w-52 rounded-2xl border shadow-xl z-50 overflow-hidden"
                     style={{
-                      background: isDark ? '#0f172a' : '#ffffff',
-                      borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,44,95,0.08)',
+                      background: isDark ? '#112240' : '#ffffff',
+                      borderColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(13,31,60,0.08)',
                       boxShadow: isDark
-                        ? '0 20px 50px rgba(0,0,0,0.34)'
-                        : '0 20px 50px rgba(15,23,42,0.12)',
+                        ? '0 20px 50px rgba(0,0,0,0.45)'
+                        : '0 20px 50px rgba(13,31,60,0.12)',
                     }}
                   >
                     <Link
@@ -349,7 +349,7 @@ export default function Navbar() {
           </div>
         </nav>
 
-        <div className="lg:hidden max-w-7xl mx-auto px-6 pt-3 pb-1">
+        <div className="lg:hidden max-w-7xl mx-auto px-4 sm:px-6 pt-3 pb-1">
           <form onSubmit={handleSearchSubmit} className="relative">
             <Search
               size={16}
@@ -392,8 +392,8 @@ export default function Navbar() {
             menuOpen ? 'translate-x-0' : 'translate-x-full'
           )}
           style={{
-            background: isDark ? '#08111f' : '#ffffff',
-            borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,44,95,0.08)',
+            background: isDark ? '#0c1829' : '#ffffff',
+            borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(13,31,60,0.08)',
           }}
         >
           <div className="mb-8 flex justify-center">

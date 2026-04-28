@@ -2,7 +2,9 @@ import { lazy, Suspense } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from './context/AuthContext'
 import { DashboardThemeProvider } from './context/DashboardThemeContext'
+import { NotificationProvider } from './context/NotificationContext'
 import ErrorBoundary from './components/common/ErrorBoundary'
+import ScrollToTop from './components/common/ScrollToTop'
 import Layout from './components/layout/Layout'
 import { Loader2 } from 'lucide-react'
 
@@ -102,9 +104,11 @@ function PublicPage({ children }) {
 function DashboardPage({ children }) {
   return (
     <DashboardThemeProvider>
-      <ErrorBoundary>
-        <Suspense fallback={<PageLoader />}>{children}</Suspense>
-      </ErrorBoundary>
+      <NotificationProvider>
+        <ErrorBoundary>
+          <Suspense fallback={<PageLoader />}>{children}</Suspense>
+        </ErrorBoundary>
+      </NotificationProvider>
     </DashboardThemeProvider>
   )
 }
@@ -112,7 +116,9 @@ function DashboardPage({ children }) {
 // ─── App ───────────────────────────────────────────────────────
 export default function App() {
   return (
-    <Routes>
+    <>
+      <ScrollToTop />
+      <Routes>
       {/* Public pages */}
       <Route path="/" element={<PublicPage><HomePage /></PublicPage>} />
       <Route path="/products" element={<PublicPage><ProductsPage /></PublicPage>} />
@@ -160,5 +166,6 @@ export default function App() {
       {/* 404 */}
       <Route path="*" element={<PublicPage><PlaceholderPage title="404 — Page Not Found" phase="Error" /></PublicPage>} />
     </Routes>
+    </>
   )
 }

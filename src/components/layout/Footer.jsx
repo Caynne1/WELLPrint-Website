@@ -34,12 +34,12 @@ const SERVICES = [
 
 export default function Footer() {
   return (
-    <footer className="relative" style={{ background: '#080f1c' }}>
+    <footer className="relative" style={{ background: '#080f1c', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
       {/* CMYK strip */}
       <div className="cmyk-bar" aria-hidden="true" />
 
       {/* Main footer content */}
-      <div className="max-w-7xl mx-auto px-6 pt-16 pb-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-16 pb-10">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-y-12 gap-x-8">
 
           {/* ── Brand column ────────────────────────────────── */}
@@ -52,7 +52,7 @@ export default function Footer() {
                   border: '1px solid rgba(22,163,74,0.20)',
                 }}
               >
-                <Printer size={18} style={{ color: '#16a34a' }} />
+                <Printer size={18} style={{ color: '#13A150' }} />
               </div>
               <div>
                 <span
@@ -95,10 +95,10 @@ export default function Footer() {
                 href="0920 578 5304"
                 className="flex items-center gap-3 text-sm transition-colors"
                 style={{ color: 'rgba(148,163,184,0.55)' }}
-                onMouseEnter={e => (e.currentTarget.style.color = '#16a34a')}
+                onMouseEnter={e => (e.currentTarget.style.color = '#13A150')}
                 onMouseLeave={e => (e.currentTarget.style.color = 'rgba(148,163,184,0.55)')}
               >
-                <Phone size={14} className="shrink-0" style={{ color: '#16a34a' }} />               
+                <Phone size={14} className="shrink-0" style={{ color: '#13A150' }} />               
                 0920 578 5304
               </a>
 

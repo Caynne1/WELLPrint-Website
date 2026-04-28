@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import AdminLayout from '../../components/admin/AdminLayout'
 import { useTheme } from '../../context/DashboardThemeContext'
@@ -20,6 +20,8 @@ import {
   Save,
   RefreshCw,
   ChevronDown,
+  Upload,
+  ImageIcon,
 } from 'lucide-react'
 
 function formatPeso(value) {
@@ -41,13 +43,14 @@ function emptyForm() {
   return {
     id: null,
     name: '',
-    description: '',
-    price: '',
+    short_description: '',
+    base_price: '',
     unit: '',
-    turnaround_time: '',
-    category: '',
-    image_url: '',
-    is_active: true,
+    turnaround_days: '',
+    category_id: '',
+    thumbnail_url: '',
+    images: [],
+    status: 'active',
   }
 }
 
@@ -111,6 +114,11 @@ export default function AdminProductsPage() {
   const [menuOpenId, setMenuOpenId] = useState(null)
   const [showModal, setShowModal] = useState(false)
   const [form, setForm] = useState(emptyForm())
+  const [uploading, setUploading] = useState(false)
+  const [dragOver, setDragOver] = useState(false)
+  const [uploadingSlot, setUploadingSlot] = useState(null)
+  const fileInputRef = useRef(null)
+  const sampleFileInputRef = useRef(null)
 
   useEffect(() => {
     fetchData()
@@ -121,7 +129,7 @@ export default function AdminProductsPage() {
 
     const [{ data: productsData, error: productsError }, { data: categoriesData }] =
       await Promise.all([
-        supabase.from('products').select('*').order('created_at', { ascending: false }),
+        supabase.from('products').select('*, categories(id, name)').order('created_at', { ascending: false }),
         supabase.from('categories').select('*').order('name', { ascending: true }),
       ])
 
@@ -145,13 +153,14 @@ export default function AdminProductsPage() {
     setForm({
       id: product.id,
       name: product.name || '',
-      description: product.description || '',
-      price: product.price ?? '',
+      short_description: product.short_description || '',
+      base_price: product.base_price ?? '',
       unit: product.unit || '',
-      turnaround_time: product.turnaround_time || '',
-      category: product.category || '',
-      image_url: product.image_url || '',
-      is_active: !!product.is_active,
+      turnaround_days: product.turnaround_days || '',
+      category_id: product.category_id || '',
+      thumbnail_url: product.thumbnail_url || '',
+      images: Array.isArray(product.images) ? product.images : [],
+      status: product.status || 'active',
     })
     setShowModal(true)
     setMenuOpenId(null)
@@ -169,13 +178,14 @@ export default function AdminProductsPage() {
     const payload = {
       name: form.name.trim(),
       slug: slugify(form.name),
-      description: form.description.trim() || null,
-      price: Number(form.price || 0),
+      short_description: form.short_description.trim() || null,
+      base_price: Number(form.base_price || 0),
       unit: form.unit.trim() || null,
-      turnaround_time: form.turnaround_time.trim() || null,
-      category: form.category || null,
-      image_url: form.image_url.trim() || null,
-      is_active: !!form.is_active,
+      turnaround_days: form.turnaround_days || null,
+      category_id: form.category_id || null,
+      thumbnail_url: form.thumbnail_url || null,
+      images: form.images.filter(Boolean).length > 0 ? form.images.filter(Boolean) : null,
+      status: form.status || 'active',
     }
 
     if (!payload.name) {
@@ -211,7 +221,7 @@ export default function AdminProductsPage() {
   async function toggleProductStatus(product) {
     const { error } = await supabase
       .from('products')
-      .update({ is_active: !product.is_active })
+      .update({ status: product.status === 'active' ? 'archived' : 'active' })
       .eq('id', product.id)
 
     if (error) {
@@ -242,19 +252,98 @@ export default function AdminProductsPage() {
     fetchData()
   }
 
+  async function uploadImage(file) {
+    if (!file) return
+    setUploading(true)
+    const ext = file.name.split('.').pop()
+    const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+
+    const { error } = await supabase.storage
+      .from('product-images')
+      .upload(fileName, file, { upsert: true })
+
+    if (error) {
+      console.error('Image upload error:', error)
+      setUploading(false)
+      return
+    }
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('product-images')
+      .getPublicUrl(fileName)
+
+    setForm((prev) => ({ ...prev, thumbnail_url: publicUrl }))
+    setUploading(false)
+  }
+
+  function handleFileChange(e) {
+    const file = e.target.files?.[0]
+    if (file) uploadImage(file)
+  }
+
+  function handleDrop(e) {
+    e.preventDefault()
+    setDragOver(false)
+    const file = e.dataTransfer.files?.[0]
+    if (file) uploadImage(file)
+  }
+
+  async function uploadSampleImage(file, slotIndex) {
+    if (!file) return
+    setUploadingSlot(slotIndex)
+    const ext = file.name.split('.').pop()
+    const fileName = `samples/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+
+    const { error } = await supabase.storage
+      .from('product-images')
+      .upload(fileName, file, { upsert: true })
+
+    if (error) {
+      console.error('Sample image upload error:', error)
+      setUploadingSlot(null)
+      return
+    }
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('product-images')
+      .getPublicUrl(fileName)
+
+    setForm((prev) => {
+      const newImages = [...prev.images]
+      newImages[slotIndex] = publicUrl
+      return { ...prev, images: newImages }
+    })
+    setUploadingSlot(null)
+  }
+
+  function handleSampleFileChange(e) {
+    const file = e.target.files?.[0]
+    const slot = parseInt(e.target.dataset.slot || '0')
+    if (file) uploadSampleImage(file, slot)
+    e.target.value = ''
+  }
+
+  function removeSampleImage(slotIndex) {
+    setForm((prev) => {
+      const newImages = [...prev.images]
+      newImages[slotIndex] = ''
+      return { ...prev, images: newImages }
+    })
+  }
+
   const filteredProducts = useMemo(() => {
     let result = [...products]
 
     if (categoryFilter !== 'all') {
-      result = result.filter((p) => p.category === categoryFilter)
+      result = result.filter((p) => (p.categories?.name || '') === categoryFilter)
     }
 
     if (search.trim()) {
       const keyword = search.trim().toLowerCase()
       result = result.filter((p) => {
         const name = (p.name || '').toLowerCase()
-        const description = (p.description || '').toLowerCase()
-        const category = (p.category || '').toLowerCase()
+        const description = (p.short_description || '').toLowerCase()
+        const category = (p.categories?.name || '').toLowerCase()
         return (
           name.includes(keyword) ||
           description.includes(keyword) ||
@@ -269,8 +358,8 @@ export default function AdminProductsPage() {
   const summary = useMemo(() => {
     return {
       total: products.length,
-      active: products.filter((p) => p.is_active).length,
-      archived: products.filter((p) => !p.is_active).length,
+      active: products.filter((p) => p.status === 'active').length,
+      archived: products.filter((p) => p.status !== 'active').length,
     }
   }, [products])
 
@@ -500,9 +589,9 @@ export default function AdminProductsPage() {
                     background: softBg,
                   }}
                 >
-                  {product.image_url ? (
+                  {product.thumbnail_url ? (
                     <img
-                      src={product.image_url}
+                      src={product.thumbnail_url}
                       alt={product.name}
                       className="w-full h-full object-cover"
                     />
@@ -517,7 +606,7 @@ export default function AdminProductsPage() {
                       {product.name}
                     </p>
 
-                    {product.category && (
+                    {product.categories?.name && (
                       <span
                         className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px]"
                         style={{
@@ -526,25 +615,25 @@ export default function AdminProductsPage() {
                           border: '1px solid rgba(25,147,210,0.14)',
                         }}
                       >
-                        {product.category}
+                        {product.categories.name}
                       </span>
                     )}
                   </div>
 
                   <p className="text-sm mt-1 truncate" style={{ color: muted }}>
-                    {product.description || 'No description'}
+                    {product.short_description || 'No description'}
                   </p>
                 </div>
 
                 <div className="text-right">
                   <p className="text-xl font-bold" style={{ color: heading }}>
-                    {formatPeso(product.price)}
+                    {formatPeso(product.base_price)}
                   </p>
                   <p className="text-sm" style={{ color: muted }}>
                     /{product.unit || 'unit'}
                   </p>
                   <p className="text-xs mt-1" style={{ color: muted }}>
-                    {product.turnaround_time || '—'}
+                    {product.turnaround_days ? `${product.turnaround_days} days` : '—'}
                   </p>
                 </div>
 
@@ -600,8 +689,8 @@ export default function AdminProductsPage() {
                           e.currentTarget.style.background = 'transparent'
                         }}
                       >
-                        {product.is_active ? <EyeOff size={14} /> : <Eye size={14} />}
-                        {product.is_active ? 'Archive' : 'Activate'}
+                        {product.status === 'active' ? <EyeOff size={14} /> : <Eye size={14} />}
+                        {product.status === 'active' ? 'Archive' : 'Activate'}
                       </button>
 
                       <button
@@ -649,9 +738,9 @@ export default function AdminProductsPage() {
                   borderColor: divider,
                 }}
               >
-                {product.image_url ? (
+                {product.thumbnail_url ? (
                   <img
-                    src={product.image_url}
+                    src={product.thumbnail_url}
                     alt={product.name}
                     className="w-full h-full object-cover"
                   />
@@ -667,7 +756,7 @@ export default function AdminProductsPage() {
                       {product.name}
                     </h3>
                     <p className="text-sm mt-1 line-clamp-2" style={{ color: muted }}>
-                      {product.description || 'No description'}
+                      {product.short_description || 'No description'}
                     </p>
                   </div>
 
@@ -687,7 +776,7 @@ export default function AdminProductsPage() {
                 </div>
 
                 <div className="flex items-center gap-2 flex-wrap mt-4">
-                  {product.category && (
+                  {product.categories?.name && (
                     <span
                       className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px]"
                       style={{
@@ -696,30 +785,30 @@ export default function AdminProductsPage() {
                         border: '1px solid rgba(25,147,210,0.14)',
                       }}
                     >
-                      {product.category}
+                      {product.categories.name}
                     </span>
                   )}
 
                   <span
                     className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px]"
                     style={{
-                      background: product.is_active
+                      background: product.status === 'active'
                         ? 'rgba(19,161,80,0.08)'
                         : 'rgba(100,116,139,0.10)',
-                      color: product.is_active ? '#13A150' : '#64748b',
-                      border: product.is_active
+                      color: product.status === 'active' ? '#13A150' : '#64748b',
+                      border: product.status === 'active'
                         ? '1px solid rgba(19,161,80,0.14)'
                         : '1px solid rgba(100,116,139,0.14)',
                     }}
                   >
-                    {product.is_active ? 'Active' : 'Archived'}
+                    {product.status === 'active' ? 'Active' : 'Archived'}
                   </span>
                 </div>
 
                 <div className="mt-5 flex items-end justify-between">
                   <div>
                     <p className="text-2xl font-black" style={{ color: heading }}>
-                      {formatPeso(product.price)}
+                      {formatPeso(product.base_price)}
                     </p>
                     <p className="text-sm" style={{ color: muted }}>
                       /{product.unit || 'unit'}
@@ -727,7 +816,7 @@ export default function AdminProductsPage() {
                   </div>
 
                   <p className="text-xs" style={{ color: muted }}>
-                    {product.turnaround_time || '—'}
+                    {product.turnaround_days ? `${product.turnaround_days} days` : '—'}
                   </p>
                 </div>
 
@@ -753,8 +842,8 @@ export default function AdminProductsPage() {
                       className="w-full flex items-center gap-2 px-3 py-2.5 rounded-[12px] text-sm transition-all"
                       style={{ color: heading }}
                     >
-                      {product.is_active ? <EyeOff size={14} /> : <Eye size={14} />}
-                      {product.is_active ? 'Archive' : 'Activate'}
+                      {product.status === 'active' ? <EyeOff size={14} /> : <Eye size={14} />}
+                      {product.status === 'active' ? 'Archive' : 'Activate'}
                     </button>
 
                     <button
@@ -781,8 +870,9 @@ export default function AdminProductsPage() {
       {showModal && (
         <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
           <div
-            className="w-full max-w-2xl rounded-[28px] border p-6"
+            className="w-full max-w-2xl rounded-[28px] border flex flex-col"
             style={{
+              maxHeight: '90vh',
               background: isLight ? '#FFFFFF' : 'rgba(9, 25, 53, 0.98)',
               borderColor: sectionBorder,
               boxShadow: isLight
@@ -790,204 +880,321 @@ export default function AdminProductsPage() {
                 : '0 25px 80px rgba(0,0,0,0.45)',
             }}
           >
-            <div className="flex items-start justify-between gap-3 mb-6">
+            {/* Sticky header */}
+            <div
+              className="flex items-center justify-between gap-3 px-6 pt-6 pb-5 shrink-0 border-b"
+              style={{ borderColor: divider }}
+            >
               <div>
-                <h2 className="text-2xl font-bold" style={{ color: heading }}>
+                <h2 className="text-xl font-bold" style={{ color: heading }}>
                   {form.id ? 'Edit Product' : 'Add Product'}
                 </h2>
-                <p className="text-sm mt-1" style={{ color: subText }}>
-                  Fill in the product details below.
+                <p className="text-xs mt-0.5" style={{ color: muted }}>
+                  Fill in the details below then save.
                 </p>
               </div>
-
               <button
+                type="button"
                 onClick={closeModal}
-                className="w-10 h-10 rounded-xl flex items-center justify-center"
+                className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
                 style={{
                   background: softBg,
                   border: `1px solid ${softBorder}`,
                   color: subText,
                 }}
               >
-                <X size={16} />
+                <X size={15} />
               </button>
             </div>
 
-            <form onSubmit={handleSave} className="space-y-4">
-              <div className="grid sm:grid-cols-2 gap-4">
-                <div className="sm:col-span-2">
+            {/* Scrollable body */}
+            <form onSubmit={handleSave} className="flex flex-col flex-1 min-h-0">
+              <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
+
+                {/* Product Name */}
+                <div>
                   <label className="block text-xs font-semibold mb-2" style={{ color: muted }}>
-                    Product Name
+                    Product Name <span style={{ color: '#dc2626' }}>*</span>
                   </label>
                   <input
                     type="text"
                     value={form.name}
                     onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
-                    className="w-full rounded-[16px] border px-4 py-3 text-sm outline-none"
-                    style={{
-                      background: softBg,
-                      borderColor: softBorder,
-                      color: heading,
-                    }}
+                    placeholder="e.g. Standard Business Cards"
+                    className="w-full rounded-[14px] border px-4 py-3 text-sm outline-none"
+                    style={{ background: softBg, borderColor: softBorder, color: heading }}
                     required
                   />
                 </div>
 
-                <div className="sm:col-span-2">
+                {/* Description */}
+                <div>
                   <label className="block text-xs font-semibold mb-2" style={{ color: muted }}>
                     Description
                   </label>
                   <textarea
-                    rows={4}
-                    value={form.description}
-                    onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
-                    className="w-full rounded-[16px] border px-4 py-3 text-sm outline-none resize-none"
-                    style={{
-                      background: softBg,
-                      borderColor: softBorder,
-                      color: heading,
-                    }}
+                    rows={3}
+                    value={form.short_description}
+                    onChange={(e) => setForm((prev) => ({ ...prev, short_description: e.target.value }))}
+                    placeholder="Brief description shown on the product card and detail page."
+                    className="w-full rounded-[14px] border px-4 py-3 text-sm outline-none resize-none"
+                    style={{ background: softBg, borderColor: softBorder, color: heading }}
                   />
                 </div>
 
-                <div>
-                  <label className="block text-xs font-semibold mb-2" style={{ color: muted }}>
-                    Price
-                  </label>
-                  <input
-                    type="number"
-                    value={form.price}
-                    onChange={(e) => setForm((prev) => ({ ...prev, price: e.target.value }))}
-                    className="w-full rounded-[16px] border px-4 py-3 text-sm outline-none"
-                    style={{
-                      background: softBg,
-                      borderColor: softBorder,
-                      color: heading,
-                    }}
-                    required
-                  />
+                {/* Price + Unit */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold mb-2" style={{ color: muted }}>
+                      Base Price (₱) <span style={{ color: '#dc2626' }}>*</span>
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={form.base_price}
+                      onChange={(e) => setForm((prev) => ({ ...prev, base_price: e.target.value }))}
+                      placeholder="0.00"
+                      className="w-full rounded-[14px] border px-4 py-3 text-sm outline-none"
+                      style={{ background: softBg, borderColor: softBorder, color: heading }}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold mb-2" style={{ color: muted }}>
+                      Unit
+                    </label>
+                    <input
+                      type="text"
+                      value={form.unit}
+                      onChange={(e) => setForm((prev) => ({ ...prev, unit: e.target.value }))}
+                      placeholder="e.g. pcs, sheets, sets"
+                      className="w-full rounded-[14px] border px-4 py-3 text-sm outline-none"
+                      style={{ background: softBg, borderColor: softBorder, color: heading }}
+                    />
+                  </div>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-semibold mb-2" style={{ color: muted }}>
-                    Unit
-                  </label>
-                  <input
-                    type="text"
-                    value={form.unit}
-                    onChange={(e) => setForm((prev) => ({ ...prev, unit: e.target.value }))}
-                    placeholder="e.g. pcs, sheets, sets"
-                    className="w-full rounded-[16px] border px-4 py-3 text-sm outline-none"
-                    style={{
-                      background: softBg,
-                      borderColor: softBorder,
-                      color: heading,
-                    }}
-                  />
+                {/* Turnaround + Category */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold mb-2" style={{ color: muted }}>
+                      Turnaround Days
+                    </label>
+                    <input
+                      type="text"
+                      value={form.turnaround_days}
+                      onChange={(e) => setForm((prev) => ({ ...prev, turnaround_days: e.target.value }))}
+                      placeholder="e.g. 3-5"
+                      className="w-full rounded-[14px] border px-4 py-3 text-sm outline-none"
+                      style={{ background: softBg, borderColor: softBorder, color: heading }}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold mb-2" style={{ color: muted }}>
+                      Category
+                    </label>
+                    <select
+                      value={form.category_id}
+                      onChange={(e) => setForm((prev) => ({ ...prev, category_id: e.target.value }))}
+                      className="w-full rounded-[14px] border px-4 py-3 text-sm outline-none appearance-none"
+                      style={{
+                        background: isLight ? '#f8fafc' : '#1a2744',
+                        borderColor: softBorder,
+                        color: form.category_id ? heading : muted,
+                      }}
+                    >
+                      <option value="" style={{ background: isLight ? '#fff' : '#1a2744', color: isLight ? '#0f172a' : '#f8fafc' }}>
+                        Select category
+                      </option>
+                      {categories.map((cat) => (
+                        <option
+                          key={cat.id}
+                          value={cat.id}
+                          style={{ background: isLight ? '#fff' : '#1a2744', color: isLight ? '#0f172a' : '#f8fafc' }}
+                        >
+                          {cat.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-semibold mb-2" style={{ color: muted }}>
-                    Turnaround Time
-                  </label>
-                  <input
-                    type="text"
-                    value={form.turnaround_time}
-                    onChange={(e) =>
-                      setForm((prev) => ({ ...prev, turnaround_time: e.target.value }))
-                    }
-                    placeholder="e.g. 2d turnaround"
-                    className="w-full rounded-[16px] border px-4 py-3 text-sm outline-none"
-                    style={{
-                      background: softBg,
-                      borderColor: softBorder,
-                      color: heading,
-                    }}
-                  />
-                </div>
+                {/* Divider */}
+                <div style={{ borderTop: `1px solid ${divider}` }} />
 
+                {/* Thumbnail */}
                 <div>
                   <label className="block text-xs font-semibold mb-2" style={{ color: muted }}>
-                    Category
+                    Thumbnail Image
                   </label>
-                  <select
-                    value={form.category}
-                    onChange={(e) => setForm((prev) => ({ ...prev, category: e.target.value }))}
-                    className="w-full rounded-[16px] border px-4 py-3 text-sm outline-none"
+                  <div
+                    onClick={() => !uploading && fileInputRef.current?.click()}
+                    onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}
+                    onDragLeave={() => setDragOver(false)}
+                    onDrop={handleDrop}
+                    className="relative cursor-pointer rounded-[14px] border-2 border-dashed transition-all overflow-hidden"
                     style={{
-                      background: isLight ? '#f8fafc' : '#1a2744',
-                      borderColor: softBorder,
-                      color: heading,
+                      height: form.thumbnail_url ? '140px' : '110px',
+                      borderColor: dragOver ? '#13A150' : (form.thumbnail_url ? 'rgba(19,161,80,0.35)' : softBorder),
+                      background: dragOver ? 'rgba(19,161,80,0.04)' : (form.thumbnail_url ? 'transparent' : softBg),
                     }}
                   >
-                    <option value="" style={{ background: isLight ? '#ffffff' : '#1a2744', color: isLight ? '#0f172a' : '#f8fafc' }}>Select category</option>
-                    {categories.map((cat) => (
-                      <option
-                        key={cat.id || cat.name}
-                        value={cat.name}
-                        style={{ background: isLight ? '#ffffff' : '#1a2744', color: isLight ? '#0f172a' : '#f8fafc' }}
+                    {form.thumbnail_url ? (
+                      <img
+                        src={form.thumbnail_url}
+                        alt="Thumbnail"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+                        <div
+                          className="w-9 h-9 rounded-2xl flex items-center justify-center"
+                          style={{ background: 'rgba(19,161,80,0.08)', border: '1px solid rgba(19,161,80,0.16)' }}
+                        >
+                          <Upload size={15} style={{ color: '#13A150' }} />
+                        </div>
+                        <p className="text-xs font-medium" style={{ color: subText }}>
+                          Click to upload or drag & drop
+                        </p>
+                        <p className="text-[11px]" style={{ color: muted }}>PNG, JPG, WEBP — up to 5 MB</p>
+                      </div>
+                    )}
+                    {uploading && (
+                      <div className="absolute inset-0 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.45)' }}>
+                        <Loader2 size={22} className="animate-spin" style={{ color: '#fff' }} />
+                      </div>
+                    )}
+                  </div>
+                  {form.thumbnail_url && (
+                    <div className="mt-2 flex items-center gap-2">
+                      <ImageIcon size={12} style={{ color: muted, flexShrink: 0 }} />
+                      <p className="text-xs truncate flex-1" style={{ color: muted }}>{form.thumbnail_url}</p>
+                      <button
+                        type="button"
+                        onClick={() => setForm((prev) => ({ ...prev, thumbnail_url: '' }))}
+                        className="shrink-0 w-5 h-5 flex items-center justify-center rounded-full"
+                        style={{ color: '#dc2626', background: 'rgba(220,38,38,0.08)' }}
                       >
-                        {cat.name}
-                      </option>
+                        <X size={11} />
+                      </button>
+                    </div>
+                  )}
+                  <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+                </div>
+
+                {/* Sample Images */}
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <label className="text-xs font-semibold" style={{ color: muted }}>
+                      Sample Images
+                    </label>
+                    <span
+                      className="text-[10px] px-2 py-0.5 rounded-full"
+                      style={{ background: softBg, border: `1px solid ${softBorder}`, color: muted }}
+                    >
+                      optional
+                    </span>
+                  </div>
+                  <p className="text-[11px] mb-3" style={{ color: muted }}>
+                    Shown in the product gallery so customers can see print samples.
+                  </p>
+                  <div className="grid grid-cols-3 gap-3">
+                    {[0, 1, 2].map((i) => (
+                      <div key={i} className="relative">
+                        <div
+                          onClick={() => {
+                            sampleFileInputRef.current.dataset.slot = i
+                            sampleFileInputRef.current.click()
+                          }}
+                          className="relative cursor-pointer rounded-[14px] border-2 border-dashed flex flex-col items-center justify-center gap-1.5 overflow-hidden transition-all"
+                          style={{
+                            aspectRatio: '1 / 1',
+                            borderColor: form.images[i] ? 'rgba(19,161,80,0.35)' : softBorder,
+                            background: form.images[i] ? 'transparent' : softBg,
+                          }}
+                        >
+                          {form.images[i] ? (
+                            <img src={form.images[i]} alt={`Sample ${i + 1}`} className="w-full h-full object-cover" />
+                          ) : (
+                            <>
+                              <Upload size={15} style={{ color: muted }} />
+                              <p className="text-[10px]" style={{ color: muted }}>Sample {i + 1}</p>
+                            </>
+                          )}
+                          {uploadingSlot === i && (
+                            <div className="absolute inset-0 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.45)' }}>
+                              <Loader2 size={16} className="animate-spin" style={{ color: '#fff' }} />
+                            </div>
+                          )}
+                        </div>
+                        {form.images[i] && (
+                          <button
+                            type="button"
+                            onClick={() => removeSampleImage(i)}
+                            className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full flex items-center justify-center z-10 shadow"
+                            style={{ background: '#dc2626', color: '#fff' }}
+                          >
+                            <X size={10} />
+                          </button>
+                        )}
+                      </div>
                     ))}
-                  </select>
+                  </div>
+                  <input ref={sampleFileInputRef} type="file" accept="image/*" className="hidden" onChange={handleSampleFileChange} />
                 </div>
 
-                <div className="sm:col-span-2">
-                  <label className="block text-xs font-semibold mb-2" style={{ color: muted }}>
-                    Image URL
-                  </label>
-                  <input
-                    type="text"
-                    value={form.image_url}
-                    onChange={(e) => setForm((prev) => ({ ...prev, image_url: e.target.value }))}
-                    className="w-full rounded-[16px] border px-4 py-3 text-sm outline-none"
-                    style={{
-                      background: softBg,
-                      borderColor: softBorder,
-                      color: heading,
-                    }}
-                  />
-                </div>
-
-                <div className="sm:col-span-2">
-                  <label className="inline-flex items-center gap-2 text-sm" style={{ color: heading }}>
-                    <input
-                      type="checkbox"
-                      checked={form.is_active}
-                      onChange={(e) => setForm((prev) => ({ ...prev, is_active: e.target.checked }))}
+                {/* Active toggle */}
+                <div
+                  className="flex items-center justify-between px-4 py-3 rounded-[14px] border"
+                  style={{ background: softBg, borderColor: softBorder }}
+                >
+                  <div>
+                    <p className="text-sm font-semibold" style={{ color: heading }}>Active Product</p>
+                    <p className="text-[11px] mt-0.5" style={{ color: muted }}>
+                      {form.status === 'active' ? 'Visible to customers' : 'Hidden from customers'}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setForm((prev) => ({ ...prev, status: prev.status === 'active' ? 'archived' : 'active' }))}
+                    className="relative w-11 h-6 rounded-full transition-all shrink-0"
+                    style={{ background: form.status === 'active' ? '#13A150' : (isLight ? '#cbd5e1' : 'rgba(255,255,255,0.12)') }}
+                  >
+                    <span
+                      className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform"
+                      style={{ transform: form.status === 'active' ? 'translateX(20px)' : 'translateX(0)' }}
                     />
-                    Active Product
-                  </label>
+                  </button>
                 </div>
+
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-2">
+              {/* Sticky footer */}
+              <div
+                className="flex items-center justify-end gap-3 px-6 py-4 shrink-0 border-t"
+                style={{ borderColor: divider }}
+              >
                 <button
                   type="button"
                   onClick={closeModal}
-                  className="px-4 py-3 rounded-[16px] text-sm font-semibold"
-                  style={{
-                    background: softBg,
-                    border: `1px solid ${softBorder}`,
-                    color: subText,
-                  }}
+                  className="px-4 py-2.5 rounded-[14px] text-sm font-semibold"
+                  style={{ background: softBg, border: `1px solid ${softBorder}`, color: subText }}
                 >
                   Cancel
                 </button>
-
                 <button
                   type="submit"
                   disabled={saving}
-                  className="inline-flex items-center gap-2 px-5 py-3 rounded-[16px] text-sm font-semibold transition-all"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-[14px] text-sm font-semibold transition-all"
                   style={{
                     background: 'rgba(19,161,80,0.10)',
-                    border: '1px solid rgba(19,161,80,0.20)',
+                    border: '1px solid rgba(19,161,80,0.22)',
                     color: '#13A150',
                   }}
                 >
                   {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
-                  Save Product
+                  {saving ? 'Saving…' : 'Save Product'}
                 </button>
               </div>
             </form>

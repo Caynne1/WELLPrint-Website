@@ -694,10 +694,15 @@ export default function ProductDetailPage() {
 
   const displayName = dbProduct?.name ?? name
   const displayBasePrice = dbProduct?.base_price ?? price
+  const displayUnit = dbProduct?.unit || null
   const displayDesc = dbProduct?.short_description ?? desc
   const displayTurnaround = dbProduct?.turnaround_days
     ? `${dbProduct.turnaround_days} business days`
     : turnaround
+
+  // When using DB data, base_price is the full product price — never divide by minQty.
+  // The minQty / per-piece split only applies to the hardcoded catalog entries.
+  const useDbPrice = !!dbProduct
 
   const [selections, setSelections] = useState(() =>
     Object.fromEntries(Object.entries(options).map(([k, v]) => [k, v[0]]))
@@ -727,15 +732,17 @@ export default function ProductDetailPage() {
 
   function handleAddToCart() {
     const qty = getQty()
-    const unitPrice = displayBasePrice > 0 && minQty > 1 ? displayBasePrice / minQty : displayBasePrice
+    const unitPrice = useDbPrice
+      ? displayBasePrice
+      : (displayBasePrice > 0 && minQty > 1 ? displayBasePrice / minQty : displayBasePrice)
 
     addToCart({
       slug,
       name: displayName,
       unitPrice,
-      priceNote: '/ pc',
+      priceNote: useDbPrice ? (displayUnit ? `/ ${displayUnit}` : '') : '/ pc',
       selections: { ...selections },
-      qty,
+      qty: useDbPrice ? 1 : qty,
       accent,
     })
 
@@ -752,7 +759,8 @@ export default function ProductDetailPage() {
   const relRef = useScrollReveal()
 
   const displayPrice = displayBasePrice > 0 ? `₱${Number(displayBasePrice).toLocaleString()}` : 'Get Quote'
-  const pricePerPc = displayBasePrice > 0 && minQty > 1 ? displayBasePrice / minQty : null
+  // Per-piece breakdown only for hardcoded catalog products (minQty comes from PRODUCTS object)
+  const pricePerPc = !useDbPrice && displayBasePrice > 0 && minQty > 1 ? displayBasePrice / minQty : null
 
   if (dbLoading && !dbProduct) {
     return (
@@ -872,7 +880,11 @@ export default function ProductDetailPage() {
                     >
                       {displayPrice}
                     </span>
-                    <span className="text-slate-400 text-xs font-body">{priceNote}</span>
+                    {(useDbPrice ? displayUnit : priceNote) && (
+                      <span className="text-slate-400 text-xs font-body">
+                        {useDbPrice ? (displayUnit ? `/ ${displayUnit}` : '') : priceNote}
+                      </span>
+                    )}
                   </div>
                 </>
               )}
