@@ -1,3 +1,4 @@
+import usePageTitle from '../hooks/usePageTitle'
 import { useEffect, useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import {
@@ -118,6 +119,7 @@ function FeatureBar({ isDark }) {
 }
 
 export default function HomePage() {
+  usePageTitle()
   const { theme } = useTheme()
   const isDark = theme === 'dark'
   const [activeTestimonial, setActiveTestimonial] = useState(0)

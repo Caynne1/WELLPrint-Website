@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+
+# Don't index admin/dashboard routes
+Disallow: /dashboard
+Disallow: /dashboard/
+Disallow: /login
+
+Sitemap: https://wellprint.vercel.app/sitemap.xml

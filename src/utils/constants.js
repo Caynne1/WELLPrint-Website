@@ -1,4 +1,7 @@
 // ─── Order Statuses ────────────────────────────────────────────
+// Used by admin dashboard AND customer-facing track page.
+// NOTE: 'quoted' and 'artwork_pending' are admin-only statuses;
+// the customer STATUS_FLOW skips them but they still need labels/colors.
 export const ORDER_STATUSES = {
   new:             { label: 'New',            color: '#CD1B6E', bg: 'rgba(236,0,140,0.12)' },
   pending:         { label: 'Pending',        color: '#1993D2', bg: 'rgba(25,147,210,0.10)' },
@@ -11,7 +14,23 @@ export const ORDER_STATUSES = {
   cancelled:       { label: 'Cancelled',      color: '#dc2626', bg: 'rgba(220,38,38,0.10)' },
 }
 
+// Customer-facing progress steps (shown on Track Order page).
+// 'quoted' and 'artwork_pending' are intentionally omitted — they are
+// internal admin states. When an order is in one of those states the
+// progress bar stays at 'processing' for the customer.
 export const STATUS_FLOW = ['pending', 'processing', 'printing', 'ready', 'completed']
+
+// Maps any status (including admin-only ones) to its nearest STATUS_FLOW index
+// so the customer progress bar never gets stuck.
+export function statusToFlowIndex(status) {
+  const idx = STATUS_FLOW.indexOf(status)
+  if (idx !== -1) return idx
+  // Admin-only states: map to the closest visible step
+  if (status === 'new')             return 0 // maps to pending
+  if (status === 'quoted')          return 1 // maps to processing
+  if (status === 'artwork_pending') return 1 // maps to processing
+  return -1
+}
 
 // ─── Order Types ───────────────────────────────────────────────
 export const ORDER_TYPES = [
@@ -25,12 +44,13 @@ export const ORDER_TYPES = [
 
 // ─── File Upload ───────────────────────────────────────────────
 export const ACCEPTED_FILE_TYPES = ['pdf', 'ai', 'eps', 'jpg', 'jpeg', 'png', 'tiff', 'zip']
-export const ACCEPTED_FILE_MIME = '.pdf,.ai,.eps,.jpg,.jpeg,.png,.tiff,.zip'
-export const MAX_FILE_SIZE = 20 * 1024 * 1024 // 20MB
+export const ACCEPTED_FILE_MIME  = '.pdf,.ai,.eps,.jpg,.jpeg,.png,.tiff,.zip'
+export const MAX_FILE_SIZE       = 20 * 1024 * 1024 // 20 MB
 
-// ─── Concern Types (Contact Page) ──────────────────────────────
+// ─── Concern Types (Contact & Track Order pages) ───────────────
 export const CONCERN_TYPES = [
   'General Inquiry',
+  'Request Quote',
   'Order Follow-up',
   'Cancel Order Request',
   'Change Layout Request',

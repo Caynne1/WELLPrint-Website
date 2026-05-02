@@ -1,3 +1,4 @@
+import usePageTitle from '../hooks/usePageTitle'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
@@ -512,6 +513,7 @@ function CheckoutModal({ open, onClose, cart, totalPrice, onSuccess }) {
 
 // ─── CartPage ──────────────────────────────────────────────────
 export default function CartPage() {
+  usePageTitle('Shopping Cart')
   const { cart, totalItems, totalPrice, clearCart } = useCart()
   const { theme } = useTheme()
   const isDark = theme === 'dark'

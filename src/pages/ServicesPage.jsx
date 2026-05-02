@@ -1,3 +1,4 @@
+import usePageTitle from '../hooks/usePageTitle'
 import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import {
@@ -264,6 +265,7 @@ function HighlightItem({ icon: Icon, title, body, color }) {
 }
 
 export default function ServicesPage() {
+  usePageTitle('Services')
   const introRef = useScrollReveal()
   const ctaRef = useScrollReveal()
 

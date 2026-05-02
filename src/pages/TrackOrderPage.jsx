@@ -1,3 +1,5 @@
+import usePageTitle from '../hooks/usePageTitle'
+import { CONCERN_TYPES, STATUS_FLOW, ORDER_STATUSES, statusToFlowIndex } from '../utils/constants'
 import { useMemo, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import jsPDF from 'jspdf'
@@ -20,26 +22,8 @@ import {
   ChevronDown,
 } from 'lucide-react'
 
-const STATUS_FLOW = ['pending', 'processing', 'printing', 'ready', 'completed']
 
-const STATUS_LABELS = {
-  pending: 'Pending',
-  processing: 'Processing',
-  printing: 'Printing',
-  ready: 'Ready',
-  completed: 'Completed',
-  cancelled: 'Cancelled',
-}
 
-const CONCERN_TYPES = [
-  'General Inquiry',
-  'Order Follow-up',
-  'Cancel Order Request',
-  'Change Layout Request',
-  'Change Delivery / Pickup Request',
-  'Billing Concern',
-  'Other',
-]
 
 const COLORS = {
   green: '#13A150',
@@ -206,7 +190,7 @@ function generateReceiptPDF(order, items, fulfillment) {
   }
 
   drawInfoBox(margin, y, 'Order ID', order.id, [14, 147, 210])
-  drawInfoBox(margin + boxW + 8, y, 'Status', STATUS_LABELS[order.status] || order.status || '—', [7, 160, 78])
+  drawInfoBox(margin + boxW + 8, y, 'Status', ORDER_STATUSES[order.status]?.label || order.status || '—', [7, 160, 78])
 
   y += boxH + 5
   drawInfoBox(margin, y, 'Customer Name', order.customer_name || '—', [204, 27, 110])
@@ -498,6 +482,7 @@ function MessagePanel({ orderId, customerName }) {
 
 // ─── Main Page ─────────────────────────────────────────────────────────────
 export default function TrackOrderPage() {
+  usePageTitle('Track Order')
   const [orderId, setOrderId] = useState('')
   const [customerName, setCustomerName] = useState('')
   const [loading, setLoading] = useState(false)
@@ -515,7 +500,7 @@ export default function TrackOrderPage() {
 
   const currentIndex = useMemo(() => {
     if (!order?.status) return -1
-    return STATUS_FLOW.indexOf(order.status)
+    return statusToFlowIndex(order.status)
   }, [order?.status])
 
   const fulfillment = useMemo(() => getFulfillmentInfo(items), [items])
@@ -693,7 +678,7 @@ export default function TrackOrderPage() {
                         color: order.status === 'completed' ? COLORS.green : order.status === 'processing' ? COLORS.amber : order.status === 'printing' ? COLORS.violet : COLORS.cyan,
                         border: '1px solid rgba(255,255,255,0.08)',
                       }}>
-                        {STATUS_LABELS[order.status] || order.status}
+                        {ORDER_STATUSES[order.status]?.label || order.status}
                       </div>
 
                       <button
@@ -757,7 +742,7 @@ export default function TrackOrderPage() {
                               <div className="w-9 h-9 rounded-full flex items-center justify-center mx-auto border transition-all duration-500" style={{ background: active ? color : '#081225', borderColor: active ? color : 'rgba(255,255,255,0.12)', color: active ? '#FFFFFF' : '#94a3b8' }}>
                                 {active ? <CheckCircle size={14} /> : <Circle size={12} />}
                               </div>
-                              <p className="text-xs text-white mt-3 font-medium">{STATUS_LABELS[status]}</p>
+                              <p className="text-xs text-white mt-3 font-medium">{ORDER_STATUSES[status]?.label || status}</p>
                               <p className="text-[10px] text-ivory-300/35 mt-1 min-h-[28px]">{time ? formatDateTime(time) : '—'}</p>
                             </div>
                           )
