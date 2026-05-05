@@ -1,9 +1,11 @@
+import usePageTitle from '../hooks/usePageTitle'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { Eye, EyeOff, Lock, Mail, Printer, User, Shield, ChevronRight } from 'lucide-react'
 
 export default function LoginPage() {
+  usePageTitle('Staff Login')
   const { login, loading, error } = useAuth()
   const navigate = useNavigate()
   const [identifier, setIdentifier] = useState('')
@@ -28,8 +30,8 @@ export default function LoginPage() {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center px-4"
-      style={{ background: 'var(--ink-950)' }}
+      className="min-h-[calc(100vh-64px)] flex items-center justify-center px-4 py-12"
+      style={{ background: 'var(--surface-page)' }}
     >
       {/* Grid background */}
       <div

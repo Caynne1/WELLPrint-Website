@@ -116,7 +116,7 @@ serve(async (req) => {
           ${order.notes ? `<p style="margin-top: 16px; padding: 12px; background: #f3f4f6; border-radius: 8px; font-size: 13px; color: #374151;"><strong>Notes:</strong> ${order.notes}</p>` : ''}
 
           <p style="margin-top: 20px;">
-            <a href="https://wellprint.com.ph/dashboard/orders/${orderId}"
+            <a href="https://wellprint.vercel.app/dashboard/orders/${orderId}"
                style="background: #002C5F; color: #fff; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-size: 14px; font-weight: 600;">
               View in Dashboard
             </a>

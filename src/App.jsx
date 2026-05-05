@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate, useParams } from 'react-router-dom'
 import { useAuth } from './context/AuthContext'
 import { DashboardThemeProvider } from './context/DashboardThemeContext'
 import { NotificationProvider } from './context/NotificationContext'
@@ -20,6 +20,10 @@ const CartPage          = lazy(() => import('./pages/CartPage'))
 const TrackOrderPage    = lazy(() => import('./pages/TrackOrderPage'))
 const LoginPage         = lazy(() => import('./pages/LoginPage'))
 const PlaceholderPage   = lazy(() => import('./pages/PlaceholderPage'))
+const FAQPage           = lazy(() => import('./pages/FAQPage'))
+const FileSpecsPage     = lazy(() => import('./pages/FileSpecsPage'))
+const PrivacyPage       = lazy(() => import('./pages/PrivacyPage'))
+const TermsPage         = lazy(() => import('./pages/TermsPage'))
 
 // Dashboard pages (heavier — kept out of public bundle)
 const AdminDashboardPage  = lazy(() => import('./pages/dashboard/AdminDashboardPage'))
@@ -113,6 +117,12 @@ function DashboardPage({ children }) {
   )
 }
 
+// ─── Legacy redirect helper (preserves :id param) ─────────────
+function AdminOrderIdRedirect() {
+  const { id } = useParams()
+  return <Navigate to={`/dashboard/orders/${id}`} replace />
+}
+
 // ─── App ───────────────────────────────────────────────────────
 export default function App() {
   return (
@@ -131,12 +141,15 @@ export default function App() {
 
       {/* Placeholder pages */}
       <Route path="/checkout" element={<PublicPage><PlaceholderPage title="Checkout" phase="Phase 3" /></PublicPage>} />
-      <Route path="/track" element={<PublicPage><PlaceholderPage title="Track Your Order" phase="Phase 3" /></PublicPage>} />
-      <Route path="/faq" element={<PublicPage><PlaceholderPage title="FAQs" phase="Phase 5" /></PublicPage>} />
-      <Route path="/file-specs" element={<PublicPage><PlaceholderPage title="File Specifications" phase="Phase 5" /></PublicPage>} />
+      {/* /track → canonical /track-order */}
+      <Route path="/track" element={<Navigate to="/track-order" replace />} />
+      <Route path="/faq" element={<PublicPage><FAQPage /></PublicPage>} />
+      <Route path="/file-specs" element={<PublicPage><FileSpecsPage /></PublicPage>} />
+      <Route path="/privacy" element={<PublicPage><PrivacyPage /></PublicPage>} />
+      <Route path="/terms" element={<PublicPage><TermsPage /></PublicPage>} />
 
       {/* Auth */}
-      <Route path="/login" element={<GuestOnly><Suspense fallback={<PageLoader />}><LoginPage /></Suspense></GuestOnly>} />
+      <Route path="/login" element={<GuestOnly><PublicPage><LoginPage /></PublicPage></GuestOnly>} />
 
       {/* Dashboard entry */}
       <Route path="/dashboard" element={<RequireAuth><DashboardPage><DashboardRedirect /></DashboardPage></RequireAuth>} />
@@ -158,7 +171,7 @@ export default function App() {
       <Route path="/admin" element={<Navigate to="/dashboard" replace />} />
       <Route path="/admin/dashboard" element={<Navigate to="/dashboard" replace />} />
       <Route path="/admin/orders" element={<Navigate to="/dashboard/orders" replace />} />
-      <Route path="/admin/orders/:id" element={<Navigate to="/dashboard/orders/:id" replace />} />
+      <Route path="/admin/orders/:id" element={<AdminOrderIdRedirect />} />
       <Route path="/admin/products" element={<Navigate to="/dashboard/products" replace />} />
       <Route path="/admin/analytics" element={<Navigate to="/dashboard/analytics" replace />} />
       <Route path="/admin/staff" element={<Navigate to="/dashboard/staff" replace />} />

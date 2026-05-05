@@ -1,3 +1,4 @@
+import usePageTitle from '../hooks/usePageTitle'
 import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import PageHero from '../components/ui/PageHero'
@@ -225,6 +226,7 @@ function SectionLabel({ children, light = false, color }) {
 // ═══════════════════════════════════════════════════════════════
 
 export default function AboutPage() {
+  usePageTitle('About Us')
   const storyRef = useScrollReveal()
   const chairRef = useScrollReveal()
 

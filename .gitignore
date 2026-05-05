@@ -28,3 +28,11 @@ Thumbs.db
 
 # Vercel
 .vercel/
+
+# Manus IDE artifacts
+vite.config.ts
+.manus-logs/
+
+# Dev notes
+ideas.md
+patches/

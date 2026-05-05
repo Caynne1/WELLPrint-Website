@@ -9,7 +9,7 @@ import {
   LayoutDashboard,
   ChevronDown,
   User,
-  Search,
+  PackageSearch,
   Sun,
   Moon,
 } from 'lucide-react'
@@ -23,6 +23,7 @@ const NAV_LINKS = [
   { label: 'Services', href: '/services' },
   { label: 'Products', href: '/products' },
   { label: 'Contact', href: '/contact' },
+  { label: 'Track Order', href: '/track-order' },
 ]
 
 const COLORS = {
@@ -35,7 +36,6 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
-  const [searchQuery, setSearchQuery] = useState('')
   const { pathname } = useLocation()
   const navigate = useNavigate()
   const { totalItems } = useCart()
@@ -67,18 +67,6 @@ export default function Navbar() {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  const handleSearchSubmit = (e) => {
-    e.preventDefault()
-    const trimmed = searchQuery.trim()
-
-    if (!trimmed) {
-      navigate('/products')
-      return
-    }
-
-    navigate(`/products?search=${encodeURIComponent(trimmed)}`)
-  }
-
   const transparentHeroMode = isHome && !scrolled
 
   const headerClass = clsx(
@@ -106,16 +94,12 @@ export default function Navbar() {
 
   const desktopTextColor = isDark ? '#f0f4ff' : '#0d1f3c'
   const mutedTextColor = isDark ? 'rgba(240,244,255,0.65)' : '#5a7a9a'
-  const searchBg = isDark ? 'rgba(17,34,64,0.90)' : 'rgba(255,255,255,0.96)'
-  const searchBorder = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(13,31,60,0.10)'
-  const searchText = isDark ? '#f0f4ff' : '#0d1f3c'
-  const searchPlaceholder = isDark ? 'rgba(168,190,217,0.50)' : '#8aabcc'
 
   return (
     <>
       <header className={headerClass} style={headerStyle}>
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-4 min-w-0 flex-1">
+          <div className="flex items-center gap-4 min-w-0">
             <Link to="/" className="flex items-center group shrink-0" aria-label="WELLPrint Home">
               <img
                 src={isDark ? '/logos/horizontal/main-dark.svg' : '/logos/horizontal/main-light.svg'}
@@ -123,31 +107,6 @@ export default function Navbar() {
                 className="h-9 w-auto object-contain transition-transform duration-300 group-hover:scale-[1.02]"
               />
             </Link>
-
-            <form
-              onSubmit={handleSearchSubmit}
-              className="hidden lg:flex items-center flex-1 max-w-md"
-            >
-              <div className="relative w-full">
-                <Search
-                  size={16}
-                  className="absolute left-4 top-1/2 -translate-y-1/2"
-                  style={{ color: searchPlaceholder }}
-                />
-                <input
-                  type="text"
-                  placeholder="Search products"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full h-11 rounded-full pl-11 pr-4 text-sm shadow-sm transition-all duration-300 focus:outline-none"
-                  style={{
-                    border: `1px solid ${searchBorder}`,
-                    background: searchBg,
-                    color: searchText,
-                  }}
-                />
-              </div>
-            </form>
           </div>
 
           <ul className="hidden md:flex items-center gap-1">
@@ -349,28 +308,7 @@ export default function Navbar() {
           </div>
         </nav>
 
-        <div className="lg:hidden max-w-7xl mx-auto px-4 sm:px-6 pt-3 pb-1">
-          <form onSubmit={handleSearchSubmit} className="relative">
-            <Search
-              size={16}
-              className="absolute left-4 top-1/2 -translate-y-1/2"
-              style={{ color: searchPlaceholder }}
-            />
-            <input
-              type="text"
-              placeholder="Search products"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-11 rounded-full pl-11 pr-4 text-sm transition-all duration-300 focus:outline-none"
-              style={{
-                border: `1px solid ${searchBorder}`,
-                background: searchBg,
-                color: searchText,
-              }}
-            />
-          </form>
-        </div>
-      </header>
+        </header>
 
       <div
         className={clsx(

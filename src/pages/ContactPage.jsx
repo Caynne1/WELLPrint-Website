@@ -1,6 +1,8 @@
+import usePageTitle from '../hooks/usePageTitle'
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useTheme } from '../context/ThemeContext'
+import { CONCERN_TYPES } from '../utils/constants'
 import {
   Mail,
   Phone,
@@ -12,18 +14,9 @@ import {
   FileText,
 } from 'lucide-react'
 
-const concernOptions = [
-  'General Inquiry',
-  'Request Quote',
-  'Order Follow-up',
-  'Cancel Order Request',
-  'Change Layout Request',
-  'Change Delivery / Pickup Request',
-  'Billing Concern',
-  'Other',
-]
 
 export default function ContactPage() {
+  usePageTitle('Contact')
   const { theme } = useTheme()
   const isDark = theme === 'dark'
 
@@ -58,6 +51,8 @@ export default function ContactPage() {
     order_id: '',
     message: '',
   })
+  const [lastSubmit, setLastSubmit] = useState(0)
+  const [honeypot, setHoneypot] = useState('')
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
@@ -78,6 +73,16 @@ export default function ContactPage() {
 
   async function handleSubmit(e) {
     e.preventDefault()
+    // Honeypot: bots fill hidden fields, humans don't
+    if (honeypot) return
+
+    // Cooldown: prevent rapid re-submissions (30 seconds)
+    const now = Date.now()
+    if (now - lastSubmit < 30_000) {
+      setError('Please wait a moment before submitting again.')
+      return
+    }
+
     const errs = validate()
     setFieldErrors(errs)
     setError('')
@@ -100,6 +105,7 @@ export default function ContactPage() {
       return
     }
     setSuccess(true)
+    setLastSubmit(Date.now())
     setLoading(false)
     setForm({ full_name: '', email: '', phone: '', concern_type: '', order_id: '', message: '' })
     setFieldErrors({})
@@ -326,7 +332,7 @@ export default function ContactPage() {
                       <option value="" style={{ background: isDark ? '#081225' : '#ffffff', color: inputColor }}>
                         Select concern type
                       </option>
-                      {concernOptions.map((option) => (
+                      {CONCERN_TYPES.map((option) => (
                         <option
                           key={option}
                           value={option}
@@ -419,8 +425,19 @@ export default function ContactPage() {
                   </div>
                 )}
 
+                {/* Honeypot — hidden from real users, bots fill this */}
+                <div style={{ display: 'none' }} aria-hidden="true">
+                  <input
+                    type="text"
+                    name="website"
+                    value={honeypot}
+                    onChange={(e) => setHoneypot(e.target.value)}
+                    tabIndex={-1}
+                    autoComplete="off"
+                  />
+                </div>
+
                 <button
-                  type="submit"
                   disabled={loading}
                   className="btn-press w-full flex items-center justify-center gap-2 text-sm py-3.5 disabled:opacity-60 disabled:cursor-not-allowed"
                 >

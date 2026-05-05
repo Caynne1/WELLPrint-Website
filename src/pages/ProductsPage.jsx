@@ -1,3 +1,4 @@
+import usePageTitle from '../hooks/usePageTitle'
 import { useState, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import PageHero from '../components/ui/PageHero'
@@ -505,6 +506,7 @@ function ImagePreviewModal({ product, isDark, onClose }) {
 
 /* ─── Page ─────────────────────────────────────────────────────────────────── */
 export default function ProductsPage() {
+  usePageTitle('Products')
   const { theme } = useTheme()
   const isDark = theme === 'dark'
 
