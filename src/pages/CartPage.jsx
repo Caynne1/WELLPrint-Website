@@ -442,13 +442,13 @@ function CheckoutModal({ open, onClose, cart, totalPrice, onSuccess }) {
                 <Field label="Email Address" required error={errors.email}>
                   <div className="relative">
                     <Mail size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-ivory-300/25 pointer-events-none" />
-                    <input type="email" placeholder="juan@company.com" value={form.email} onChange={set('email')} className={inputClass + ' pl-9'} style={errors.email ? { borderColor: 'var(--wp-magenta)' } : {}} />
+                    <input type="email" placeholder="your email address" value={form.email} onChange={set('email')} className={inputClass + ' pl-9'} style={errors.email ? { borderColor: 'var(--wp-magenta)' } : {}} />
                   </div>
                 </Field>
                 <Field label="Phone / Viber / WhatsApp" required error={errors.phone}>
                   <div className="relative">
                     <Phone size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-ivory-300/25 pointer-events-none" />
-                    <input type="tel" placeholder="+63 9XX XXX XXXX" value={form.phone} onChange={set('phone')} className={inputClass + ' pl-9'} style={errors.phone ? { borderColor: 'var(--wp-magenta)' } : {}} />
+                    <input type="tel" placeholder="09205785304" value={form.phone} onChange={set('phone')} className={inputClass + ' pl-9'} style={errors.phone ? { borderColor: 'var(--wp-magenta)' } : {}} />
                   </div>
                 </Field>
               </div>
@@ -667,13 +667,13 @@ export default function CartPage() {
                   {/* Contact */}
                   <div className="rounded-[18px] border p-4 space-y-3" style={{ background: cardBg, borderColor: cardBorder, boxShadow: cardShadow }}>
                     <div className="font-body text-[10px] tracking-widest uppercase mb-1" style={{ color: mutedText }}>Need help? Contact us</div>
-                    <a href="tel:+6328XXXXXXXX" className="flex items-center gap-3 text-xs hover:text-wp-green transition-colors" style={{ color: subText }}>
-                      <Phone size={13} style={{ color: 'var(--wp-green)' }} /> +63 (2) 8XXX-XXXX
+                    <a href="tel:09205785304" className="flex items-center gap-3 text-xs hover:text-wp-green transition-colors" style={{ color: subText }}>
+                      <Phone size={13} style={{ color: 'var(--wp-green)' }} /> 09205785304
                     </a>
-                    <a href="mailto:hello@wellprint.com.ph" className="flex items-center gap-3 text-xs hover:text-wp-cyan transition-colors" style={{ color: subText }}>
-                      <Mail size={13} style={{ color: 'var(--wp-cyan)' }} /> hello@wellprint.com.ph
+                    <a href="mailto:wellprint.6972@gmail.com" className="flex items-center gap-3 text-xs hover:text-wp-cyan transition-colors" style={{ color: subText }}>
+                      <Mail size={13} style={{ color: 'var(--wp-cyan)' }} /> wellprint.6972@gmail.com
                     </a>
-                    <p className="text-[10px] font-body" style={{ color: faintText }}>Mon–Fri 8AM–6PM · Sat 9AM–1PM</p>
+                    <p className="text-[10px] font-body" style={{ color: faintText }}>Mon–Fri 8AM–6PM · Sat 9AM–6PM</p>
                   </div>
 
                   <button

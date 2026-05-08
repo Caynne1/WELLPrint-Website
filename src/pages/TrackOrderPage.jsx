@@ -352,16 +352,16 @@ function MessagePanel({ orderId, customerName }) {
 
   if (sent) {
     return (
-      <div className="rounded-[28px] border p-8 text-center" style={{ background: '#0b1730', borderColor: 'rgba(255,255,255,0.08)' }}>
+      <div className="rounded-[28px] border p-8 text-center" style={{ background: 'var(--surface-card)', borderColor: 'var(--border-subtle)', boxShadow: '0 20px 50px rgba(0,0,0,0.10)' }}>
         <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: 'rgba(19,161,80,0.12)', border: '1px solid rgba(19,161,80,0.25)' }}>
           <CheckCircle size={28} style={{ color: COLORS.green }} />
         </div>
-        <h3 className="text-white text-xl font-bold mb-2" style={{ fontFamily: "'Lora', serif" }}>Message Sent!</h3>
-        <p className="text-ivory-300/45 text-sm">Our team will get back to you shortly. Reference your Order ID <span className="text-white font-semibold">{orderId}</span> in any follow-up.</p>
+        <h3 className="text-ivory-50 text-xl font-bold mb-2" style={{ fontFamily: "'Lora', serif" }}>Message Sent!</h3>
+        <p className="text-ivory-300/60 text-sm">Our team will get back to you shortly. Reference your Order ID <span className="text-ivory-50 font-semibold">{orderId}</span> in any follow-up.</p>
         <button
           onClick={() => { setSent(false); setMessage(''); setConcernType(''); setMsgError('') }}
-          className="mt-5 text-sm px-5 py-2 rounded-full border"
-          style={{ borderColor: 'rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.55)' }}
+          className="mt-5 text-sm px-5 py-2 rounded-full border transition-all hover:scale-[1.02]"
+          style={{ borderColor: 'var(--border-medium)', color: 'var(--text-muted)' }}
         >
           Send Another Message
         </button>
@@ -370,95 +370,95 @@ function MessagePanel({ orderId, customerName }) {
   }
 
   return (
-    <div className="rounded-[28px] border p-6" style={{ background: '#0b1730', borderColor: 'rgba(255,255,255,0.08)', boxShadow: '0 20px 50px rgba(0,0,0,0.22)' }}>
+    <div className="rounded-[28px] border p-6" style={{ background: 'var(--surface-card)', borderColor: 'var(--border-subtle)', boxShadow: '0 20px 50px rgba(0,0,0,0.10)' }}>
       <div className="flex items-center gap-3 mb-6">
         <div className="w-11 h-11 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(19,161,80,0.10)', border: '1px solid rgba(19,161,80,0.20)' }}>
           <MessageSquare size={17} style={{ color: COLORS.green }} />
         </div>
         <div>
-          <h2 className="text-white text-lg font-semibold">Message Admin</h2>
-          <p className="text-ivory-300/35 text-xs">Send a message directly to our team about this order</p>
+          <h2 className="text-ivory-50 text-lg font-semibold">Message Admin</h2>
+          <p className="text-ivory-300/55 text-xs">Send a message directly to our team about this order</p>
         </div>
       </div>
 
       <form onSubmit={handleSendMessage} className="space-y-4">
         <div className="grid sm:grid-cols-2 gap-4">
           <div>
-            <label className="block font-body text-[10px] tracking-widest uppercase text-ivory-300/40 mb-2">Full Name <span className="text-red-400">*</span></label>
+            <label className="block font-body text-[10px] tracking-widest uppercase mb-2" style={{ color: 'var(--text-muted)' }}>Full Name <span className="text-red-500">*</span></label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Your name"
-              className="w-full rounded-[18px] border px-4 py-3 text-sm text-white outline-none"
-              style={{ background: '#081225', borderColor: 'rgba(255,255,255,0.10)' }}
+              className="w-full rounded-[18px] border px-4 py-3 text-sm outline-none"
+              style={{ background: 'var(--surface-raised)', borderColor: 'var(--border-medium)', color: 'var(--text-primary)' }}
             />
           </div>
           <div>
-            <label className="block font-body text-[10px] tracking-widest uppercase text-ivory-300/40 mb-2">Email <span className="text-red-400">*</span></label>
+            <label className="block font-body text-[10px] tracking-widest uppercase mb-2" style={{ color: 'var(--text-muted)' }}>Email <span className="text-red-500">*</span></label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="your@email.com"
-              className="w-full rounded-[18px] border px-4 py-3 text-sm text-white outline-none"
-              style={{ background: '#081225', borderColor: 'rgba(255,255,255,0.10)' }}
+              className="w-full rounded-[18px] border px-4 py-3 text-sm outline-none"
+              style={{ background: 'var(--surface-raised)', borderColor: 'var(--border-medium)', color: 'var(--text-primary)' }}
             />
           </div>
         </div>
 
         <div className="grid sm:grid-cols-2 gap-4">
           <div>
-            <label className="block font-body text-[10px] tracking-widest uppercase text-ivory-300/40 mb-2">Phone (optional)</label>
+            <label className="block font-body text-[10px] tracking-widest uppercase mb-2" style={{ color: 'var(--text-muted)' }}>Phone (optional)</label>
             <input
               type="text"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               placeholder="+63 9XX XXX XXXX"
-              className="w-full rounded-[18px] border px-4 py-3 text-sm text-white outline-none"
-              style={{ background: '#081225', borderColor: 'rgba(255,255,255,0.10)' }}
+              className="w-full rounded-[18px] border px-4 py-3 text-sm outline-none"
+              style={{ background: 'var(--surface-raised)', borderColor: 'var(--border-medium)', color: 'var(--text-primary)' }}
             />
           </div>
           <div>
-            <label className="block font-body text-[10px] tracking-widest uppercase text-ivory-300/40 mb-2">Concern Type <span className="text-red-400">*</span></label>
+            <label className="block font-body text-[10px] tracking-widest uppercase mb-2" style={{ color: 'var(--text-muted)' }}>Concern Type <span className="text-red-500">*</span></label>
             <div className="relative">
               <select
                 value={concernType}
                 onChange={(e) => setConcernType(e.target.value)}
                 className="w-full rounded-[18px] border px-4 py-3 text-sm outline-none appearance-none"
-                style={{ background: '#081225', borderColor: 'rgba(255,255,255,0.10)', color: concernType ? '#fff' : 'rgba(255,255,255,0.35)' }}
+                style={{ background: 'var(--surface-raised)', borderColor: 'var(--border-medium)', color: concernType ? 'var(--text-primary)' : 'var(--text-faint)' }}
               >
                 <option value="" disabled>Select type...</option>
                 {CONCERN_TYPES.map((t) => (
-                  <option key={t} value={t} style={{ background: '#081225', color: '#fff' }}>{t}</option>
+                  <option key={t} value={t} style={{ background: 'var(--surface-raised)', color: 'var(--text-primary)' }}>{t}</option>
                 ))}
               </select>
-              <ChevronDown size={14} className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: 'rgba(255,255,255,0.30)' }} />
+              <ChevronDown size={14} className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: 'var(--text-faint)' }} />
             </div>
           </div>
         </div>
 
         <div>
-          <label className="block font-body text-[10px] tracking-widest uppercase text-ivory-300/40 mb-2">Message <span className="text-red-400">*</span></label>
+          <label className="block font-body text-[10px] tracking-widest uppercase mb-2" style={{ color: 'var(--text-muted)' }}>Message <span className="text-red-500">*</span></label>
           <textarea
             rows={4}
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             placeholder="Describe your concern or inquiry in detail..."
-            className="w-full rounded-[18px] border px-4 py-3 text-sm text-white outline-none resize-none"
-            style={{ background: '#081225', borderColor: 'rgba(255,255,255,0.10)' }}
+            className="w-full rounded-[18px] border px-4 py-3 text-sm outline-none resize-none"
+            style={{ background: 'var(--surface-raised)', borderColor: 'var(--border-medium)', color: 'var(--text-primary)' }}
           />
         </div>
 
         {orderId && (
           <div className="rounded-[14px] border px-4 py-3 flex items-center gap-2" style={{ background: 'rgba(25,147,210,0.06)', borderColor: 'rgba(25,147,210,0.18)' }}>
             <FileText size={13} style={{ color: COLORS.cyan }} />
-            <span className="text-xs text-ivory-300/55">This message will be linked to Order ID: <span className="text-white font-semibold">{orderId}</span></span>
+            <span className="text-xs text-ivory-300/70">This message will be linked to Order ID: <span className="text-ivory-50 font-semibold">{orderId}</span></span>
           </div>
         )}
 
         {msgError && (
-          <div className="flex items-start gap-2 rounded-[18px] px-4 py-3 text-sm" style={{ background: 'rgba(205,27,110,0.10)', border: '1px solid rgba(205,27,110,0.20)', color: '#f9a8d4' }}>
+          <div className="flex items-start gap-2 rounded-[18px] px-4 py-3 text-sm" style={{ background: 'rgba(205,27,110,0.08)', border: '1px solid rgba(205,27,110,0.20)', color: 'var(--wp-magenta)' }}>
             <AlertCircle size={15} className="shrink-0 mt-0.5" />
             <span>{msgError}</span>
           </div>
@@ -545,11 +545,11 @@ export default function TrackOrderPage() {
             <div className="h-px w-8 bg-wp-green" />
           </div>
 
-          <h1 className="text-white text-[clamp(2rem,4vw,3.5rem)] font-bold leading-none mb-3" style={{ fontFamily: "'Lora', serif" }}>
+          <h1 className="text-ivory-50 text-[clamp(2rem,4vw,3.5rem)] font-bold leading-none mb-3" style={{ fontFamily: "'Lora', serif" }}>
             Track Your <span style={{ color: 'var(--wp-green)' }}>Order</span>
           </h1>
 
-          <p className="text-ivory-300/45 text-sm max-w-2xl mx-auto leading-relaxed">
+          <p className="text-ivory-300/60 text-sm max-w-2xl mx-auto leading-relaxed">
             Enter your Order ID and customer name to check the latest status of your print order.
           </p>
         </div>
@@ -557,44 +557,44 @@ export default function TrackOrderPage() {
         <div className="grid lg:grid-cols-12 gap-8">
           {/* Left: Search + Message Toggle */}
           <div className="lg:col-span-4 space-y-5">
-            <div className="rounded-[28px] border p-6" style={{ background: '#0b1730', borderColor: 'rgba(255,255,255,0.08)', boxShadow: '0 20px 50px rgba(0,0,0,0.22)' }}>
+            <div className="rounded-[28px] border p-6" style={{ background: 'var(--surface-card)', borderColor: 'var(--border-subtle)', boxShadow: '0 20px 50px rgba(0,0,0,0.10)' }}>
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-11 h-11 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(25,147,210,0.12)', border: '1px solid rgba(25,147,210,0.20)' }}>
                   <Search size={17} style={{ color: 'var(--wp-cyan)' }} />
                 </div>
                 <div>
-                  <h2 className="text-white text-lg font-semibold">Find Order</h2>
-                  <p className="text-ivory-300/35 text-xs">Use the details from your order confirmation</p>
+                  <h2 className="text-ivory-50 text-lg font-semibold">Find Order</h2>
+                  <p className="text-ivory-300/55 text-xs">Use the details from your order confirmation</p>
                 </div>
               </div>
 
               <form onSubmit={handleTrackOrder} className="space-y-5">
                 <div>
-                  <label className="block font-body text-[10px] tracking-widest uppercase text-ivory-300/40 mb-2">Order ID</label>
+                  <label className="block font-body text-[10px] tracking-widest uppercase mb-2" style={{ color: 'var(--text-muted)' }}>Order ID</label>
                   <input
                     type="text"
                     placeholder="ORD-12345678"
                     value={orderId}
                     onChange={(e) => setOrderId(e.target.value.toUpperCase())}
-                    className="w-full rounded-[18px] border px-4 py-3 text-sm text-white outline-none"
-                    style={{ background: '#081225', borderColor: 'rgba(255,255,255,0.10)' }}
+                    className="w-full rounded-[18px] border px-4 py-3 text-sm outline-none"
+                    style={{ background: 'var(--surface-raised)', borderColor: 'var(--border-medium)', color: 'var(--text-primary)' }}
                   />
                 </div>
 
                 <div>
-                  <label className="block font-body text-[10px] tracking-widest uppercase text-ivory-300/40 mb-2">Customer Name</label>
+                  <label className="block font-body text-[10px] tracking-widest uppercase mb-2" style={{ color: 'var(--text-muted)' }}>Customer Name</label>
                   <input
                     type="text"
                     placeholder="Enter full name"
                     value={customerName}
                     onChange={(e) => setCustomerName(e.target.value)}
-                    className="w-full rounded-[18px] border px-4 py-3 text-sm text-white outline-none"
-                    style={{ background: '#081225', borderColor: 'rgba(255,255,255,0.10)' }}
+                    className="w-full rounded-[18px] border px-4 py-3 text-sm outline-none"
+                    style={{ background: 'var(--surface-raised)', borderColor: 'var(--border-medium)', color: 'var(--text-primary)' }}
                   />
                 </div>
 
                 {error && (
-                  <div className="flex items-start gap-2 rounded-[18px] px-4 py-3 text-sm" style={{ background: 'rgba(205,27,110,0.10)', border: '1px solid rgba(205,27,110,0.20)', color: '#f9a8d4' }}>
+                  <div className="flex items-start gap-2 rounded-[18px] px-4 py-3 text-sm" style={{ background: 'rgba(205,27,110,0.08)', border: '1px solid rgba(205,27,110,0.20)', color: 'var(--wp-magenta)' }}>
                     <AlertCircle size={15} className="shrink-0 mt-0.5" />
                     <span>{error}</span>
                   </div>
@@ -605,8 +605,8 @@ export default function TrackOrderPage() {
                 </button>
               </form>
 
-              <div className="mt-6 rounded-[18px] border p-4" style={{ background: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.08)' }}>
-                <p className="text-ivory-300/45 text-xs leading-relaxed">Your Order ID is shown after checkout. Please enter the same name used when placing the order.</p>
+              <div className="mt-6 rounded-[18px] border p-4" style={{ background: 'var(--surface-raised)', borderColor: 'var(--border-subtle)' }}>
+                <p className="text-ivory-300/60 text-xs leading-relaxed">Your Order ID is shown after checkout. Please enter the same name used when placing the order.</p>
               </div>
             </div>
 
@@ -615,9 +615,9 @@ export default function TrackOrderPage() {
               onClick={() => setShowMessagePanel((v) => !v)}
               className="w-full flex items-center justify-center gap-2 rounded-[20px] border py-4 text-sm font-semibold transition-all"
               style={{
-                background: showMessagePanel ? 'rgba(19,161,80,0.10)' : 'rgba(255,255,255,0.03)',
-                borderColor: showMessagePanel ? 'rgba(19,161,80,0.25)' : 'rgba(255,255,255,0.10)',
-                color: showMessagePanel ? COLORS.green : 'rgba(255,255,255,0.60)',
+                background: showMessagePanel ? 'rgba(19,161,80,0.10)' : 'var(--surface-raised)',
+                borderColor: showMessagePanel ? 'rgba(19,161,80,0.25)' : 'var(--border-medium)',
+                color: showMessagePanel ? COLORS.green : 'var(--text-secondary)',
               }}
             >
               <MessageSquare size={15} />
@@ -635,12 +635,12 @@ export default function TrackOrderPage() {
             )}
 
             {!searched && !showMessagePanel && (
-              <div className="rounded-[28px] border p-10 text-center" style={{ background: '#0b1730', borderColor: 'rgba(255,255,255,0.08)', boxShadow: '0 20px 50px rgba(0,0,0,0.22)' }}>
+              <div className="rounded-[28px] border p-10 text-center" style={{ background: 'var(--surface-card)', borderColor: 'var(--border-subtle)', boxShadow: '0 20px 50px rgba(0,0,0,0.10)' }}>
                 <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-5" style={{ background: 'rgba(25,147,210,0.10)', border: '1px solid rgba(25,147,210,0.18)' }}>
                   <Package size={28} style={{ color: 'var(--wp-cyan)' }} />
                 </div>
-                <h3 className="text-white text-2xl font-bold mb-3" style={{ fontFamily: "'Lora', serif" }}>Your order status will appear here</h3>
-                <p className="text-ivory-300/40 text-sm max-w-md mx-auto leading-relaxed">Once you search for your order, you'll see the current status, timeline, and order summary.</p>
+                <h3 className="text-ivory-50 text-2xl font-bold mb-3" style={{ fontFamily: "'Lora', serif" }}>Your order status will appear here</h3>
+                <p className="text-ivory-300/60 text-sm max-w-md mx-auto leading-relaxed">Once you search for your order, you'll see the current status, timeline, and order summary.</p>
               </div>
             )}
 
@@ -650,7 +650,7 @@ export default function TrackOrderPage() {
                   <div className="rounded-[28px] border p-6 flex items-center gap-4" style={{
                     background: highlight.color === 'green' ? 'rgba(22,163,74,0.10)' : highlight.color === 'cyan' ? 'rgba(25,147,210,0.10)' : 'rgba(245,158,11,0.10)',
                     borderColor: highlight.color === 'green' ? 'rgba(22,163,74,0.25)' : highlight.color === 'cyan' ? 'rgba(25,147,210,0.25)' : 'rgba(245,158,11,0.25)',
-                    boxShadow: '0 20px 50px rgba(0,0,0,0.22)',
+                    boxShadow: '0 20px 50px rgba(0,0,0,0.08)',
                   }}>
                     <div className="w-14 h-14 rounded-full flex items-center justify-center shrink-0" style={{
                       background: highlight.color === 'green' ? 'rgba(22,163,74,0.18)' : highlight.color === 'cyan' ? 'rgba(25,147,210,0.18)' : 'rgba(245,158,11,0.18)',
@@ -659,24 +659,24 @@ export default function TrackOrderPage() {
                       <highlight.icon size={26} style={{ color: highlight.color === 'green' ? COLORS.green : highlight.color === 'cyan' ? COLORS.cyan : COLORS.amber }} />
                     </div>
                     <div>
-                      <h3 className="text-white text-lg font-semibold">{highlight.title}</h3>
-                      <p className="text-ivory-300/45 text-sm mt-1">{highlight.description}</p>
+                      <h3 className="text-ivory-50 text-lg font-semibold">{highlight.title}</h3>
+                      <p className="text-ivory-300/60 text-sm mt-1">{highlight.description}</p>
                     </div>
                   </div>
                 )}
 
-                <div className="rounded-[28px] border p-6" style={{ background: '#0b1730', borderColor: 'rgba(255,255,255,0.08)', boxShadow: '0 20px 50px rgba(0,0,0,0.22)' }}>
+                <div className="rounded-[28px] border p-6" style={{ background: 'var(--surface-card)', borderColor: 'var(--border-subtle)', boxShadow: '0 20px 50px rgba(0,0,0,0.10)' }}>
                   <div className="flex items-start justify-between gap-4 flex-wrap mb-6">
                     <div>
-                      <div className="text-[10px] tracking-[0.25em] uppercase text-ivory-300/35 mb-2">Order Found</div>
-                      <h2 className="text-white text-2xl font-bold" style={{ fontFamily: "'Lora', serif" }}>{order.id}</h2>
+                      <div className="text-[10px] tracking-[0.25em] uppercase mb-2" style={{ color: 'var(--text-muted)' }}>Order Found</div>
+                      <h2 className="text-ivory-50 text-2xl font-bold" style={{ fontFamily: "'Lora', serif" }}>{order.id}</h2>
                     </div>
 
                     <div className="flex flex-wrap gap-3">
                       <div className="px-4 py-2 rounded-full text-sm font-semibold" style={{
                         background: order.status === 'completed' ? 'rgba(22,163,74,0.12)' : order.status === 'processing' ? 'rgba(245,158,11,0.12)' : order.status === 'printing' ? 'rgba(139,92,246,0.12)' : 'rgba(25,147,210,0.12)',
                         color: order.status === 'completed' ? COLORS.green : order.status === 'processing' ? COLORS.amber : order.status === 'printing' ? COLORS.violet : COLORS.cyan,
-                        border: '1px solid rgba(255,255,255,0.08)',
+                        border: '1px solid var(--border-medium)',
                       }}>
                         {ORDER_STATUSES[order.status]?.label || order.status}
                       </div>
@@ -705,14 +705,14 @@ export default function TrackOrderPage() {
 
                   <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
                     {[
-                      { label: 'Customer', value: order.customer_name || '—', icon: <User size={14} className="text-ivory-300/40" /> },
+                      { label: 'Customer', value: order.customer_name || '—', icon: <User size={14} style={{ color: 'var(--text-muted)' }} /> },
                       { label: 'Placed On', value: formatDate(order.created_at), icon: null },
-                      { label: 'Fulfillment', value: fulfillment.label, icon: fulfillment.method === 'deliver' ? <Truck size={14} className="text-ivory-300/40" /> : <Store size={14} className="text-ivory-300/40" /> },
+                      { label: 'Fulfillment', value: fulfillment.label, icon: fulfillment.method === 'deliver' ? <Truck size={14} style={{ color: 'var(--text-muted)' }} /> : <Store size={14} style={{ color: 'var(--text-muted)' }} /> },
                       { label: 'Estimated Total', value: formatPeso(order.total_amount || order.estimated_total), icon: null, bold: true },
                     ].map((card, i) => (
-                      <div key={i} className="rounded-[18px] border p-4" style={{ background: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.08)' }}>
-                        <div className="text-ivory-300/35 text-xs mb-2">{card.label}</div>
-                        <div className={`text-white ${card.bold ? 'font-semibold' : 'font-medium'} flex items-center gap-2`}>
+                      <div key={i} className="rounded-[18px] border p-4" style={{ background: 'var(--surface-raised)', borderColor: 'var(--border-subtle)' }}>
+                        <div className="text-[11px] mb-2" style={{ color: 'var(--text-muted)' }}>{card.label}</div>
+                        <div className={`text-ivory-50 ${card.bold ? 'font-semibold' : 'font-medium'} flex items-center gap-2`}>
                           {card.icon}{card.value}
                         </div>
                       </div>
@@ -721,15 +721,15 @@ export default function TrackOrderPage() {
                 </div>
 
                 {/* Progress Timeline */}
-                <div className="rounded-[28px] border p-6" style={{ background: '#0b1730', borderColor: 'rgba(255,255,255,0.08)', boxShadow: '0 20px 50px rgba(0,0,0,0.22)' }}>
+                <div className="rounded-[28px] border p-6" style={{ background: 'var(--surface-card)', borderColor: 'var(--border-subtle)', boxShadow: '0 20px 50px rgba(0,0,0,0.10)' }}>
                   <div className="flex items-center gap-2 mb-6">
                     <Clock3 size={16} style={{ color: 'var(--wp-cyan)' }} />
-                    <span className="text-[10px] font-semibold tracking-[0.22em] uppercase text-ivory-300/35">Progress Timeline</span>
+                    <span className="text-[10px] font-semibold tracking-[0.22em] uppercase" style={{ color: 'var(--text-muted)' }}>Progress Timeline</span>
                   </div>
 
                   <div className="relative overflow-x-auto">
                     <div className="min-w-[700px] relative px-2 pt-1">
-                      <div className="absolute top-4 left-4 right-4 h-[3px] bg-white/10 rounded-full" />
+                      <div className="absolute top-4 left-4 right-4 h-[3px] rounded-full" style={{ background: 'var(--border-medium)' }} />
                       <div className="absolute top-4 left-4 h-[3px] rounded-full transition-all duration-700" style={{ background: COLORS.green, width: `${currentIndex <= 0 ? 0 : (currentIndex / (STATUS_FLOW.length - 1)) * 100}%` }} />
 
                       <div className="grid grid-cols-5 gap-4 relative z-10">
@@ -739,11 +739,11 @@ export default function TrackOrderPage() {
                           const time = order.status_timestamps?.[status]
                           return (
                             <div key={status} className="text-center">
-                              <div className="w-9 h-9 rounded-full flex items-center justify-center mx-auto border transition-all duration-500" style={{ background: active ? color : '#081225', borderColor: active ? color : 'rgba(255,255,255,0.12)', color: active ? '#FFFFFF' : '#94a3b8' }}>
+                              <div className="w-9 h-9 rounded-full flex items-center justify-center mx-auto border transition-all duration-500" style={{ background: active ? color : 'var(--surface-sunken)', borderColor: active ? color : 'var(--border-medium)', color: active ? '#FFFFFF' : 'var(--text-muted)' }}>
                                 {active ? <CheckCircle size={14} /> : <Circle size={12} />}
                               </div>
-                              <p className="text-xs text-white mt-3 font-medium">{ORDER_STATUSES[status]?.label || status}</p>
-                              <p className="text-[10px] text-ivory-300/35 mt-1 min-h-[28px]">{time ? formatDateTime(time) : '—'}</p>
+                              <p className="text-xs text-ivory-50 mt-3 font-medium">{ORDER_STATUSES[status]?.label || status}</p>
+                              <p className="text-[10px] mt-1 min-h-[28px]" style={{ color: 'var(--text-faint)' }}>{time ? formatDateTime(time) : '—'}</p>
                             </div>
                           )
                         })}
@@ -753,26 +753,26 @@ export default function TrackOrderPage() {
                 </div>
 
                 {/* Order Items */}
-                <div className="rounded-[28px] border p-6" style={{ background: '#0b1730', borderColor: 'rgba(255,255,255,0.08)', boxShadow: '0 20px 50px rgba(0,0,0,0.22)' }}>
+                <div className="rounded-[28px] border p-6" style={{ background: 'var(--surface-card)', borderColor: 'var(--border-subtle)', boxShadow: '0 20px 50px rgba(0,0,0,0.10)' }}>
                   <div className="flex items-center gap-2 mb-6">
                     <Receipt size={16} style={{ color: 'var(--wp-cyan)' }} />
-                    <span className="text-[10px] font-semibold tracking-[0.22em] uppercase text-ivory-300/35">Order Items</span>
+                    <span className="text-[10px] font-semibold tracking-[0.22em] uppercase" style={{ color: 'var(--text-muted)' }}>Order Items</span>
                   </div>
 
                   {items.length === 0 ? (
-                    <p className="text-ivory-300/35 text-sm">No order items available.</p>
+                    <p className="text-sm" style={{ color: 'var(--text-muted)' }}>No order items available.</p>
                   ) : (
                     <div className="space-y-3">
                       {items.map((item, index) => (
-                        <div key={index} className="rounded-[20px] border p-4" style={{ background: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.08)' }}>
+                        <div key={index} className="rounded-[20px] border p-4" style={{ background: 'var(--surface-raised)', borderColor: 'var(--border-subtle)' }}>
                           <div className="flex items-start justify-between gap-4 flex-wrap">
                             <div>
-                              <p className="text-white font-medium">{item.name || item.product_name || `Item ${index + 1}`}</p>
-                              <p className="text-ivory-300/35 text-sm mt-1">Qty: {item.qty || item.quantity || 1}</p>
+                              <p className="text-ivory-50 font-medium">{item.name || item.product_name || `Item ${index + 1}`}</p>
+                              <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>Qty: {item.qty || item.quantity || 1}</p>
                             </div>
                             <div className="text-right">
-                              <p className="text-white font-semibold">{formatPeso(item.total || item.subtotal || item.price || (item.unit_price || 0) * (item.qty || 1))}</p>
-                              <p className="text-ivory-300/30 text-xs mt-1">{item.unit_price ? `${formatPeso(item.unit_price)} / unit` : ''}</p>
+                              <p className="text-ivory-50 font-semibold">{formatPeso(item.total || item.subtotal || item.price || (item.unit_price || 0) * (item.qty || 1))}</p>
+                              <p className="text-xs mt-1" style={{ color: 'var(--text-faint)' }}>{item.unit_price ? `${formatPeso(item.unit_price)} / unit` : ''}</p>
                             </div>
                           </div>
 
