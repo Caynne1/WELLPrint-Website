@@ -1,5 +1,5 @@
 import usePageTitle from '../hooks/usePageTitle'
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
 import { useTheme } from '../context/ThemeContext'
@@ -29,6 +29,7 @@ import {
   User,
   Building2,
   Upload,
+  FileImage,
 } from 'lucide-react'
 
 function formatPHP(amount) {
@@ -286,6 +287,9 @@ const inputClass = `w-full bg-ink-900 border border-white/[0.10] rounded-sm px-4
   placeholder-ivory-300/25 outline-none transition-all duration-200
   focus:border-wp-green/60 focus:bg-ink-800 focus:ring-1 focus:ring-wp-green/20`
 
+const MAX_FILES = 5
+const MAX_FILE_SIZE = 20 * 1024 * 1024 // 20 MB
+
 const ORDER_TYPES = [
   'New Print Order',
   'Request a Quote',
@@ -314,15 +318,42 @@ async function uploadDesignFile(file) {
 }
 
 function CheckoutModal({ open, onClose, cart, totalPrice, onSuccess }) {
-  const [form, setForm] = useState({ name: '', company: '', email: '', phone: '', orderType: '', notes: '', file: null })
+  const [form, setForm] = useState({ name: '', company: '', email: '', phone: '', orderType: '', notes: '' })
   const [errors, setErrors] = useState({})
   const [status, setStatus] = useState('idle')
   const [submitError, setSubmitError] = useState(null)
   const [placedOrderId, setPlacedOrderId] = useState(null)
+  const [designFiles, setDesignFiles] = useState([])
+  const [filesError, setFilesError] = useState('')
+  const fileInputRef = useRef(null)
 
   if (!open) return null
 
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }))
+
+  function handleFilesChange(e) {
+    const incoming = Array.from(e.target.files || [])
+    const combined = [...designFiles, ...incoming]
+    if (combined.length > MAX_FILES) {
+      setFilesError(`You can attach up to ${MAX_FILES} files.`)
+      if (fileInputRef.current) fileInputRef.current.value = ''
+      return
+    }
+    const oversized = combined.find(f => f.size > MAX_FILE_SIZE)
+    if (oversized) {
+      setFilesError(`"${oversized.name}" exceeds the 20 MB limit.`)
+      if (fileInputRef.current) fileInputRef.current.value = ''
+      return
+    }
+    setDesignFiles(combined)
+    setFilesError('')
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
+
+  function removeFile(index) {
+    setDesignFiles(prev => prev.filter((_, i) => i !== index))
+    setFilesError('')
+  }
 
   function validate() {
     const e = {}
@@ -348,11 +379,22 @@ function CheckoutModal({ open, onClose, cart, totalPrice, onSuccess }) {
         design_file_name: item.designFileName ?? null, layout_request: !!item.layoutRequest,
         delivery_method: item.deliveryMethod ?? 'pickup', delivery_fee: item.deliveryFee ?? 0,
       }))
-      let uploadSourceFile = form.file || cart.find((i) => i.designFile instanceof File)?.designFile || null
       let uploadedFileUrl = null, uploadedFileName = null
-      if (uploadSourceFile) {
-        const uploaded = await uploadDesignFile(uploadSourceFile)
-        uploadedFileUrl = uploaded.url; uploadedFileName = uploaded.fileName
+      // Combine checkout-attached files + cart design files
+      const allFiles = [
+        ...designFiles,
+        ...cart.filter(i => i.designFile instanceof File).map(i => i.designFile),
+      ]
+      if (allFiles.length > 0) {
+        const uploadedUrls = []
+        const uploadedNames = []
+        for (const file of allFiles) {
+          const { url, fileName } = await uploadDesignFile(file)
+          if (url) uploadedUrls.push(url)
+          if (fileName) uploadedNames.push(fileName)
+        }
+        uploadedFileUrl = uploadedUrls.join(', ') || null
+        uploadedFileName = uploadedNames.join(', ') || null
       } else {
         uploadedFileName = cart.find((i) => i.designFileName)?.designFileName || null
       }
@@ -461,15 +503,76 @@ function CheckoutModal({ open, onClose, cart, totalPrice, onSuccess }) {
               <Field label="Additional Notes (optional)">
                 <textarea rows={4} placeholder="Deadline, special instructions, preferred delivery method, etc." value={form.notes} onChange={set('notes')} className={inputClass + ' resize-none'} />
               </Field>
-              <Field label="Attach Reference File (optional)">
-                <label className={`${inputClass} flex items-center gap-3 cursor-pointer`} style={{ paddingTop: '0.65rem', paddingBottom: '0.65rem' }}>
-                  <span className="text-ivory-300/30 shrink-0 text-xs font-body truncate max-w-[180px]">{form.file ? form.file.name : 'No file chosen'}</span>
-                  <span className="ml-auto shrink-0 btn-press-outline" style={{ fontSize: '10px', padding: '4px 10px' }}>
-                    <Upload size={12} className="inline mr-1" /> Browse
-                  </span>
-                  <input type="file" className="hidden" accept=".pdf,.ai,.eps,.jpg,.jpeg,.png,.tiff,.zip" onChange={(e) => setForm((f) => ({ ...f, file: e.target.files[0] || null }))} />
-                </label>
-                <p className="text-[10px] text-ivory-300/25 font-body mt-1.5">Accepted: PDF, AI, EPS, JPG, PNG, TIFF, ZIP · Max 20MB</p>
+              <Field label="Attach Reference Files (optional)">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span
+                      className="text-[10px] font-body tabular-nums"
+                      style={{ color: designFiles.length >= MAX_FILES ? 'var(--wp-magenta)' : 'rgba(216,216,216,0.35)' }}
+                    >
+                      {designFiles.length}/{MAX_FILES} files
+                    </span>
+                  </div>
+                  {designFiles.length < MAX_FILES && (
+                    <label
+                      className={`${inputClass} flex items-center gap-3 cursor-pointer`}
+                      style={{ paddingTop: '0.65rem', paddingBottom: '0.65rem', borderColor: filesError ? 'var(--wp-magenta)' : undefined }}
+                    >
+                      <Upload size={13} className="text-ivory-300/30 shrink-0" />
+                      <span className="text-ivory-300/30 text-xs font-body">
+                        {designFiles.length === 0 ? 'No files chosen' : 'Add more files…'}
+                      </span>
+                      <span className="ml-auto shrink-0 btn-press-outline" style={{ fontSize: '10px', padding: '4px 10px' }}>
+                        Browse
+                      </span>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        className="hidden"
+                        accept=".pdf,.ai,.eps,.jpg,.jpeg,.png,.tiff,.zip"
+                        multiple
+                        onChange={handleFilesChange}
+                      />
+                    </label>
+                  )}
+                  {designFiles.length > 0 && (
+                    <div className="mt-2 space-y-1.5">
+                      {designFiles.map((file, i) => (
+                        <div
+                          key={i}
+                          className="flex items-center gap-2 px-3 py-2 rounded-sm border text-xs"
+                          style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.08)' }}
+                        >
+                          <FileImage size={12} className="text-ivory-300/40 shrink-0" />
+                          <span className="text-ivory-300/60 truncate flex-1">{file.name}</span>
+                          <span className="text-ivory-300/30 shrink-0 font-body">
+                            {file.size < 1024
+                              ? `${file.size} B`
+                              : file.size < 1024 * 1024
+                              ? `${(file.size / 1024).toFixed(1)} KB`
+                              : `${(file.size / 1024 / 1024).toFixed(1)} MB`}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => removeFile(i)}
+                            className="shrink-0 text-ivory-300/30 hover:text-red-400 transition-colors ml-1"
+                            aria-label="Remove file"
+                          >
+                            <X size={13} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {filesError && (
+                    <p className="mt-1.5 text-xs flex items-center gap-1" style={{ color: 'var(--wp-magenta)' }}>
+                      <AlertCircle size={11} /> {filesError}
+                    </p>
+                  )}
+                  <p className="text-[10px] text-ivory-300/25 font-body mt-1.5">
+                    Accepted: PDF, AI, EPS, JPG, PNG, TIFF, ZIP · Max 20 MB each · Up to {MAX_FILES} files
+                  </p>
+                </div>
               </Field>
               <div className="bg-ink-800 border border-white/[0.07] rounded-sm p-4">
                 <div className="font-body text-[10px] tracking-widest uppercase text-ivory-300/30 mb-3">Cart snapshot</div>

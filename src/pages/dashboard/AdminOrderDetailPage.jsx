@@ -266,6 +266,19 @@ export default function AdminOrderDetailPage() {
     }
   }, [items])
 
+  // Parse multiple file URLs and names (stored as comma-separated strings)
+  const designFiles = useMemo(() => {
+    if (!order?.design_file_url) return []
+    const urls = order.design_file_url.split(',').map(u => u.trim()).filter(Boolean)
+    const names = order.design_file_name
+      ? order.design_file_name.split(',').map(n => n.trim()).filter(Boolean)
+      : []
+    return urls.map((url, i) => ({
+      url,
+      name: names[i] || `File ${i + 1}`,
+    }))
+  }, [order?.design_file_url, order?.design_file_name])
+
   const panelBg = isLight ? '#FFFFFF' : 'rgba(9, 25, 53, 0.92)'
   const panelBorder = isLight ? 'rgba(15,23,42,0.08)' : 'rgba(255,255,255,0.06)'
   const panelShadow = isLight
@@ -693,36 +706,25 @@ export default function AdminOrderDetailPage() {
                       </div>
                     )}
 
-                    {order.design_file_url && (
-                      <div className="mt-4 flex flex-wrap gap-3">
-                        <a
-                          href={order.design_file_url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-[14px] text-sm font-semibold border transition-all"
-                          style={{
-                            background: 'rgba(25,147,210,0.08)',
-                            color: COLORS.cyan,
-                            borderColor: 'rgba(25,147,210,0.16)',
-                          }}
-                        >
-                          <ExternalLink size={14} />
-                          View File
-                        </a>
-
-                        <a
-                          href={order.design_file_url}
-                          download={item.design_file_name || designInfo.fileName || 'customer-file'}
-                          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-[14px] text-sm font-semibold border transition-all"
-                          style={{
-                            background: 'rgba(22,163,74,0.08)',
-                            color: COLORS.green,
-                            borderColor: 'rgba(22,163,74,0.16)',
-                          }}
-                        >
-                          <Download size={14} />
-                          Download File
-                        </a>
+                    {designFiles.length > 0 && (
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        {designFiles.map((file, fi) => (
+                          <a
+                            key={fi}
+                            href={file.url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-2 px-3 py-2 rounded-[14px] text-xs font-semibold border transition-all"
+                            style={{
+                              background: 'rgba(25,147,210,0.08)',
+                              color: COLORS.cyan,
+                              borderColor: 'rgba(25,147,210,0.16)',
+                            }}
+                          >
+                            <ExternalLink size={12} />
+                            {designFiles.length > 1 ? `File ${fi + 1}` : 'View File'}
+                          </a>
+                        ))}
                       </div>
                     )}
                   </div>
@@ -736,7 +738,7 @@ export default function AdminOrderDetailPage() {
           <SectionCard
             title="Design Submission"
             icon={ImageIcon}
-            subtitle="Customer-uploaded or referenced design file"
+            subtitle="Customer-uploaded or referenced design files"
             isLight={isLight}
           >
             <div className="space-y-4">
@@ -755,123 +757,130 @@ export default function AdminOrderDetailPage() {
                 </div>
 
                 <div>
-                  <p className="mb-1" style={{ color: muted }}>Reference File Name</p>
-                  <p className="font-medium break-all" style={{ color: heading }}>
-                    {designInfo.fileName || '—'}
+                  <p className="mb-1" style={{ color: muted }}>Files Attached</p>
+                  <p className="font-medium" style={{ color: heading }}>
+                    {designFiles.length > 0 ? `${designFiles.length} file${designFiles.length > 1 ? 's' : ''}` : '—'}
                   </p>
                 </div>
               </div>
 
-              {!order.design_file_url ? (
+              {designFiles.length === 0 ? (
                 <div
                   className="rounded-[18px] border p-4 text-sm"
-                  style={{
-                    borderColor: softBorder,
-                    background: softBg,
-                  }}
+                  style={{ borderColor: softBorder, background: softBg }}
                 >
                   <p style={{ color: subText }}>No uploaded file URL saved for this order yet.</p>
                 </div>
               ) : (
-                <div
-                  className="rounded-[18px] border p-4"
-                  style={{
-                    borderColor: softBorder,
-                    background: softBg,
-                  }}
-                >
-                  <div className="flex items-center gap-2 mb-3">
-                    <LinkIcon size={14} style={{ color: muted }} />
-                    <span className="text-sm font-medium" style={{ color: heading }}>
-                      Uploaded Design File
-                    </span>
-                  </div>
-
-                  {isImageFile(order.design_file_url) ? (
-                    <div className="space-y-4">
-                      <div
-                        className="rounded-[16px] overflow-hidden border"
-                        style={{
-                          borderColor: softBorder,
-                          background: isLight ? '#ffffff' : 'rgba(255,255,255,0.02)',
-                        }}
-                      >
-                        <img
-                          src={order.design_file_url}
-                          alt="Customer design"
-                          className="w-full max-h-[360px] object-contain"
-                        />
+                <div className="space-y-3">
+                  {designFiles.map((file, i) => (
+                    <div
+                      key={i}
+                      className="rounded-[18px] border p-4"
+                      style={{ borderColor: softBorder, background: softBg }}
+                    >
+                      <div className="flex items-center gap-2 mb-3">
+                        <LinkIcon size={14} style={{ color: muted }} />
+                        <span className="text-sm font-medium truncate flex-1" style={{ color: heading }}>
+                          {file.name}
+                        </span>
+                        {designFiles.length > 1 && (
+                          <span
+                            className="text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0"
+                            style={{
+                              background: 'rgba(25,147,210,0.10)',
+                              color: COLORS.cyan,
+                              border: '1px solid rgba(25,147,210,0.18)',
+                            }}
+                          >
+                            {i + 1} / {designFiles.length}
+                          </span>
+                        )}
                       </div>
 
-                      <div className="flex flex-wrap gap-3">
-                        <a
-                          href={order.design_file_url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-[14px] text-sm font-semibold border transition-all"
-                          style={{
-                            background: 'rgba(25,147,210,0.08)',
-                            color: COLORS.cyan,
-                            borderColor: 'rgba(25,147,210,0.16)',
-                          }}
-                        >
-                          <ExternalLink size={14} />
-                          View Full Image
-                        </a>
-
-                        <a
-                          href={order.design_file_url}
-                          download={designInfo.fileName || 'customer-design'}
-                          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-[14px] text-sm font-semibold border transition-all"
-                          style={{
-                            background: 'rgba(22,163,74,0.08)',
-                            color: COLORS.green,
-                            borderColor: 'rgba(22,163,74,0.16)',
-                          }}
-                        >
-                          <Download size={14} />
-                          Download File
-                        </a>
-                      </div>
+                      {isImageFile(file.url) ? (
+                        <div className="space-y-3">
+                          <div
+                            className="rounded-[16px] overflow-hidden border"
+                            style={{
+                              borderColor: softBorder,
+                              background: isLight ? '#ffffff' : 'rgba(255,255,255,0.02)',
+                            }}
+                          >
+                            <img
+                              src={file.url}
+                              alt={file.name}
+                              className="w-full max-h-[300px] object-contain"
+                            />
+                          </div>
+                          <div className="flex flex-wrap gap-3">
+                            <a
+                              href={file.url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-[14px] text-sm font-semibold border transition-all"
+                              style={{
+                                background: 'rgba(25,147,210,0.08)',
+                                color: COLORS.cyan,
+                                borderColor: 'rgba(25,147,210,0.16)',
+                              }}
+                            >
+                              <ExternalLink size={14} />
+                              View Full Image
+                            </a>
+                            <a
+                              href={file.url}
+                              download={file.name}
+                              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-[14px] text-sm font-semibold border transition-all"
+                              style={{
+                                background: 'rgba(22,163,74,0.08)',
+                                color: COLORS.green,
+                                borderColor: 'rgba(22,163,74,0.16)',
+                              }}
+                            >
+                              <Download size={14} />
+                              Download
+                            </a>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="space-y-3">
+                          <p className="text-xs break-all" style={{ color: muted }}>
+                            {file.url}
+                          </p>
+                          <div className="flex flex-wrap gap-3">
+                            <a
+                              href={file.url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-[14px] text-sm font-semibold border transition-all"
+                              style={{
+                                background: 'rgba(25,147,210,0.08)',
+                                color: COLORS.cyan,
+                                borderColor: 'rgba(25,147,210,0.16)',
+                              }}
+                            >
+                              <ExternalLink size={14} />
+                              View File
+                            </a>
+                            <a
+                              href={file.url}
+                              download={file.name}
+                              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-[14px] text-sm font-semibold border transition-all"
+                              style={{
+                                background: 'rgba(22,163,74,0.08)',
+                                color: COLORS.green,
+                                borderColor: 'rgba(22,163,74,0.16)',
+                              }}
+                            >
+                              <Download size={14} />
+                              Download
+                            </a>
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  ) : (
-                    <div className="space-y-3">
-                      <p className="text-sm break-all" style={{ color: subText }}>
-                        {order.design_file_url}
-                      </p>
-
-                      <div className="flex flex-wrap gap-3">
-                        <a
-                          href={order.design_file_url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-[14px] text-sm font-semibold border transition-all"
-                          style={{
-                            background: 'rgba(25,147,210,0.08)',
-                            color: COLORS.cyan,
-                            borderColor: 'rgba(25,147,210,0.16)',
-                          }}
-                        >
-                          <ExternalLink size={14} />
-                          View File
-                        </a>
-
-                        <a
-                          href={order.design_file_url}
-                          download={designInfo.fileName || 'customer-file'}
-                          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-[14px] text-sm font-semibold border transition-all"
-                          style={{
-                            background: 'rgba(22,163,74,0.08)',
-                            color: COLORS.green,
-                            borderColor: 'rgba(22,163,74,0.16)',
-                          }}
-                        >
-                          <Download size={14} />
-                          Download File
-                        </a>
-                      </div>
-                    </div>
-                  )}
+                  ))}
                 </div>
               )}
             </div>
